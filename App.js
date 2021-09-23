@@ -1,21 +1,32 @@
-import { StatusBar } from 'expo-status-bar';
+import { 
+  useFonts, 
+  TitilliumWeb_400Regular,
+  TitilliumWeb_400Regular_Italic, 
+  TitilliumWeb_600SemiBold
+} from '@expo-google-fonts/titillium-web';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator } from 'react-native';
+import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
+import { NavigationContainer } from "@react-navigation/native";
+import AppStack from "./pages/stacks/AppStack";
+
+console.disableYellowBox = true;  
 
 export default function App() {
+  let [fontsLoaded] = useFonts({
+    TitilliumWeb_400Regular,
+    TitilliumWeb_400Regular_Italic, 
+    TitilliumWeb_600SemiBold
+  });
+  if (!fontsLoaded) {
+    return <ActivityIndicator />;
+  }
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <AppStack />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
