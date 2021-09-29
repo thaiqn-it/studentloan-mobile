@@ -21,8 +21,10 @@
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-paper": "^4.9.2",
+    "react-native-progress-circle": "^2.1.0",
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^3.7.2",
+    "react-native-snap-carousel": "^3.9.1",
     "react-native-web": "~0.13.12"
   },
   "devDependencies": {
