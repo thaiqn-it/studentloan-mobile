@@ -1,9 +1,9 @@
 import { 
   useFonts, 
-  TitilliumWeb_400Regular,
-  TitilliumWeb_400Regular_Italic, 
-  TitilliumWeb_600SemiBold
-} from '@expo-google-fonts/titillium-web';
+  Roboto_400Regular,
+  Roboto_400Regular_Italic, 
+  Roboto_700Bold
+} from '@expo-google-fonts/roboto';
 import React from 'react';
 import { ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
@@ -14,9 +14,9 @@ console.disableYellowBox = true;
 
 export default function App() {
   let [fontsLoaded] = useFonts({
-    TitilliumWeb_400Regular,
-    TitilliumWeb_400Regular_Italic, 
-    TitilliumWeb_600SemiBold
+    Roboto_400Regular,
+    Roboto_400Regular_Italic, 
+    Roboto_700Bold
   });
   if (!fontsLoaded) {
     return <ActivityIndicator />;

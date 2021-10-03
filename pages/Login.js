@@ -5,21 +5,30 @@ import {
     View,
     ImageBackground,
     KeyboardAvoidingView,
+    TouchableOpacity,
 } from 'react-native'
 import { Icon } from 'react-native-elements/dist/icons/Icon'
 import { Button,Input } from "react-native-elements";
+import { useNavigation } from "@react-navigation/native";
 import {
     FULL_HEIGHT,
     FULL_WIDTH,
     PRIMARY_COLOR,
     PRIMARY_FONT,
-    PRIMARY_FONT_BOLD
+    PRIMARY_FONT_BOLD,
+    PRIMARY_FONT_ITALIC
 } from "../constants/styles";
 
 export default function Login() {
+    const navigation = useNavigation()
     const [email, setEmail] = useState("");
     const [password,setPassword] = useState("")
     const [showPassword,setShowPassword] = useState(false)
+
+    const loginHandler = (navigation) => {
+        navigation.navigate("HomeTab")
+    }
+
     return (
         <View style={styles.container}>
             <ImageBackground source={{uri : 'https://wallpaperaccess.com/full/1155050.jpg'}}
@@ -37,13 +46,17 @@ export default function Login() {
             <View style={styles.bottomView}>
                 <View style={{ padding : 40 }}>
                     <Text style={{...styles.text, fontSize : 35}}>Welcome</Text>
-                    <Text style={{ fontSize : 15,fontFamily : PRIMARY_FONT }}>
-                        Don't have an account ?
-                        <Text style={{ color : 'red' , fontStyle : 'italic',fontFamily : PRIMARY_FONT }}>
-                            {' '}
-                            Register now
+                    <View style={{ flexDirection : 'row', alignItems : 'center',fontSize : 15 }}>
+                        <Text style={{ fontFamily : PRIMARY_FONT }}>
+                            Don't have an account ?                  
                         </Text>
-                    </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                            <Text style={{ color : 'red' , fontFamily : PRIMARY_FONT_ITALIC }}>
+                                {' '}
+                                Register now
+                            </Text>
+                        </TouchableOpacity>                                     
+                    </View>
                     <KeyboardAvoidingView
                         style={{
                             marginTop: 20,
@@ -71,46 +84,53 @@ export default function Login() {
                                 },
                             }}
                         />
-                        <Text style={{...styles.text,
-                                        color:'gray',
-                                        paddingBottom : 20,
-                                        fontSize : 15,
-                                        alignSelf : 'flex-end'
-                            }}>
-                            Forgot password
-                        </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Forgot')}>
+                            <Text style={{...styles.text,
+                                            color:'gray',
+                                            paddingBottom : 20,
+                                            fontSize : 15,
+                                            alignSelf : 'flex-end'
+                                }}>
+                                Forgot password
+                            </Text>
+                        </TouchableOpacity>
                         <Button
                             title={"Login"}
                             buttonStyle={styles.btnLogin}
                             titleStyle={{
                                 fontFamily: PRIMARY_FONT,
                             }}
+                            onPress={() => loginHandler(navigation)}
                         />
                         <Text
                             h4
                             style={{
                                 textAlign: "center",
-                                marginVertical: 10,
+                                marginVertical: 5,
                                 fontFamily: PRIMARY_FONT,
                             }}
                             >
                             ----- Or -----
                         </Text>                      
                         <View style={styles.socialLoginBtn}>
-                            <Icon
-                                style={{ padding : 10 }}
-                                type = "entypo"
-                                name = "facebook-with-circle"
-                                color = "#3b5998"
-                                size = {50}
-                            />    
-                            <Icon
-                                style={{ padding : 10 }}
-                                type = "font-awesome-5"
-                                name = "google-plus"
-                                color = "#DD4D3F"
-                                size = {50}
-                            />               
+                            <TouchableOpacity>
+                                <Icon
+                                    style={{ padding : 10 }}
+                                    type = "entypo"
+                                    name = "facebook-with-circle"
+                                    color = "#3b5998"
+                                    size = {50}
+                                />   
+                            </TouchableOpacity>                                   
+                            <TouchableOpacity>
+                                <Icon
+                                    style={{ padding : 10 }}
+                                    type = "font-awesome-5"
+                                    name = "google-plus"
+                                    color = "#DD4D3F"
+                                    size = {50}
+                                />
+                            </TouchableOpacity>                                          
                         </View>                   
                     </KeyboardAvoidingView>
                 </View>            

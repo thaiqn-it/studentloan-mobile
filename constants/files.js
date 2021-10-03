@@ -1,0 +1,1 @@
+export const LOCK_LOTTIE = require('../assets/14119-lock-loop.json');

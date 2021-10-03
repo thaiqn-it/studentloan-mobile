@@ -10,6 +10,6 @@ export const SLIDER_WIDTH = Dimensions.get('window').width + 80
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7)
 
 export const PRIMARY_COLOR = "#00BFA6";
-export const PRIMARY_FONT = "TitilliumWeb_400Regular";
-export const PRIMARY_FONT_BOLD = "TitilliumWeb_600SemiBold";
-export const PRIMARY_FONT_ITALIC = "TitilliumWeb_400Regular_Italic";
+export const PRIMARY_FONT = "Roboto_400Regular";
+export const PRIMARY_FONT_BOLD = "Roboto_700Bold";
+export const PRIMARY_FONT_ITALIC = "Roboto_400Regular_Italic";
