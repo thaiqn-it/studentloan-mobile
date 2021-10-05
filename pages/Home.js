@@ -47,7 +47,8 @@ export default function Home({ navigation }) {
       sesmester: "8",
       major: "Software Engineering",
       money: "25.000.000 VNĐ",
-      description: "Đạt full 1500locs môn lab web",
+      status: "active",
+      experiedDay: "03/10/2021",
       processStatus: 80,
     },
   ]);
@@ -119,7 +120,7 @@ export default function Home({ navigation }) {
               style={{
                 borderBottomColor: "#00b359",
                 borderBottomWidth: 1,
-                marginTop: 20,
+                marginTop: 10,
               }}
             />
           </View>
@@ -129,22 +130,47 @@ export default function Home({ navigation }) {
               flexDirection: "row",
             }}
           >
-            <Text
-              style={{
-                fontSize: 20,
-                marginTop:"auto",
-                marginBottom:"auto"
-              }}
-            >
-              {item.money}
-            </Text>
+            <View>
+              <Text
+                style={{
+                  fontSize: 20,
+                  marginTop: "auto",
+                  marginBottom: "auto",
+                }}
+              >
+                {item.money}
+              </Text>
+
+              <View style={{
+                flexDirection:"row",
+              }}>
+                <Icon
+                containerStyle={{
+                  marginBottom:"auto",
+                  marginTop:"auto",
+                }}
+                  name="clock"
+                  type="font-awesome-5"
+                  color="#00b359"
+                  size={15}
+                />
+
+                <Text
+                style={{
+                  marginBottom:3,
+                  marginStart:5,
+                  fontSize:15,
+                }}>{item.experiedDay}</Text>
+              </View>
+            </View>
 
             <View
-            style={{
-              marginTop:10,
-              marginLeft:20,
-              marginBottom:10,
-            }}>
+              style={{
+                marginTop: 10,
+                marginLeft: 20,
+                marginBottom: 10,
+              }}
+            >
               <ProgressCircle
                 containerStyle={{}}
                 percent={item.processStatus}
@@ -161,17 +187,19 @@ export default function Home({ navigation }) {
         </View>
 
         <View
-        style={{
-          alignItems:"center",
-          justifyContent:"center",
-          marginStart:"auto",
-          marginEnd:"auto",
-        }}>
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            marginStart: "auto",
+            marginEnd: "auto",
+          }}
+        >
           <Icon
             name="angle-right"
             type="font-awesome-5"
             color="#00b359"
             size={68}
+            onPress={() => navigation.navigate("DetailPost", item)}
           />
         </View>
       </View>
