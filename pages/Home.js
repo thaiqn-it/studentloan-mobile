@@ -1,21 +1,47 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, SafeAreaView } from "react-native";
-import SearchBar from "react-native-elements/dist/searchbar/SearchBar-ios";
-import Carousel from "react-native-snap-carousel";
+import { StyleSheet, Text, View, SafeAreaView, FlatList } from "react-native";
 import ProgressCircle from "react-native-progress-circle";
+import { SearchBar, Avatar } from "react-native-elements";
+import { Icon } from "react-native-elements/dist/icons/Icon";
 
-export default function Home() {
+export default function Home({ navigation }) {
+  const [nameMajor, setNamemajor] = useState([
+    {
+      key: 1,
+      label: "Software Engineer",
+    },
+    {
+      key: 2,
+      label: "Internet of Things",
+    },
+    {
+      key: 3,
+      label: "Internet of Things",
+    },
+    {
+      key: 4,
+      label: "Internet of Things",
+    },
+    {
+      key: 5,
+      label: "Internet of Things",
+    },
+  ]);
+
   const [dataItems, setDataItems] = useState([
     {
+      id: 1,
       name: "Nguyễn Trường Phi",
       school: "FPT University",
       sesmester: "8",
       major: "Software Engineering",
       money: "25.000.000 VNĐ",
-      description: "Đạt full 1500locs môn lab web",
+      status: "active",
+      experiedDay: "09/11/2021",
       processStatus: 100,
     },
     {
+      id: 2,
       name: "Trần Long",
       school: "FPT University",
       sesmester: "8",
@@ -27,117 +53,158 @@ export default function Home() {
   ]);
   const [searchValue, setSearchValue] = useState("");
 
+  function _renderItem({ item }) {
+    return (
+      <View
+        style={{
+          borderRadius: 20,
+          backgroundColor: "#ffffff",
+          marginTop: 20,
+          marginStart: 10,
+          marginEnd: 10,
+          flexDirection: "row",
+        }}
+      >
+        <Avatar
+          rounded
+          containerStyle={{
+            marginStart: 10,
+            marginBottom: "auto",
+            marginTop: "auto",
+          }}
+          size="large"
+          source={{
+            uri: "https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80",
+          }}
+        />
+
+        <View
+          style={{
+            marginBottom: "auto",
+            marginTop: "auto",
+            marginLeft: 10,
+          }}
+        >
+          <View>
+            <Text
+              style={{
+                marginStart: 5,
+              }}
+            >
+              - Name: {item.name}
+            </Text>
+            <Text
+              style={{
+                marginStart: 5,
+              }}
+            >
+              - School: {item.school}
+            </Text>
+            <Text
+              style={{
+                marginStart: 5,
+              }}
+            >
+              - Ses: {item.sesmester}
+            </Text>
+            <Text
+              style={{
+                marginStart: 5,
+              }}
+            >
+              - Major: {item.major}
+            </Text>
+
+            <View
+              style={{
+                borderBottomColor: "#00b359",
+                borderBottomWidth: 1,
+                marginTop: 20,
+              }}
+            />
+          </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                marginTop:"auto",
+                marginBottom:"auto"
+              }}
+            >
+              {item.money}
+            </Text>
+
+            <View
+            style={{
+              marginTop:10,
+              marginLeft:20,
+              marginBottom:10,
+            }}>
+              <ProgressCircle
+                containerStyle={{}}
+                percent={item.processStatus}
+                radius={25}
+                borderWidth={5}
+                color="#00b359"
+                shadowColor="#999"
+                bgColor="#fff"
+              >
+                <Text>{item.processStatus}%</Text>
+              </ProgressCircle>
+            </View>
+          </View>
+        </View>
+
+        <View
+        style={{
+          alignItems:"center",
+          justifyContent:"center",
+          marginStart:"auto",
+          marginEnd:"auto",
+        }}>
+          <Icon
+            name="angle-right"
+            type="font-awesome-5"
+            color="#00b359"
+            size={68}
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 50 }}>
-      <Text style={styles.header}>Explore</Text>
+    <SafeAreaView style={{ paddingTop: 50 }}>
+      <View
+        style={{
+          flexDirection: "row",
+        }}
+      >
+        <Text style={styles.header}>Explore</Text>
+      </View>
       <SearchBar
         platform="android"
+        containerStyle={{
+          marginTop: 10,
+          marginEnd: 10,
+          marginStart: 10,
+          borderRadius: 200,
+        }}
         placeholder="Type here to search"
         onChangeText={setSearchValue}
         value={searchValue}
       />
-      <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }}>
-        <Carousel
-          data={dataItems}
-          sliderWidth={350}
-          itemWidth={350}
-          itemHeight={500}
-          renderItem={_renderItem}
-          onSnapToItem={(index) => this.setState({ activeIndex: index })}
-        />
-      </View>
+      <FlatList
+        data={dataItems}
+        renderItem={_renderItem}
+        keyExtractor={(item) => item.id}
+      />
     </SafeAreaView>
-  );
-}
-
-function _renderItem({ item, index }) {
-  return (
-    <View
-      style={{
-        backgroundColor: "rgba(41, 163, 41,0.5)",
-        borderRadius: 20,
-        height: 250,
-        marginLeft: 20,
-        marginTop: 10,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 25,
-          marginLeft: 10,
-          marginTop: 5,
-        }}
-      >
-        {item.name}
-      </Text>
-
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-        }}
-      >
-        <Text
-          style={{
-            marginTop: 5,
-            marginLeft: 10,
-          }}
-        >
-          School: {item.school}
-        </Text>
-
-        <Text
-          style={{
-            marginTop: 5,
-            marginLeft: 10,
-          }}
-        >
-          Major: {item.major}
-        </Text>
-        <Text
-          style={{
-            marginTop: 5,
-            marginLeft: 10,
-          }}
-        >
-          Ses: {item.sesmester}
-        </Text>
-      </View>
-
-      <View
-        style={{
-          borderRadius: 20,
-          flex: 1,
-          marginTop: 10,
-          backgroundColor: "rgb(230, 255, 230)",
-          flexDirection: "row",
-          flexWrap: "wrap",
-        }}
-      >
-        <Text
-          style={{
-            marginLeft: 10,
-            fontSize: 30,
-            marginRight: 20,
-          }}
-        >
-          {item.money}
-        </Text>
-
-        <ProgressCircle
-          percent={70}
-          radius={30}
-          borderWidth={8}
-          color="#3399FF"
-          shadowColor="#999"
-          bgColor="#fff"
-        >
-          <Text style={{ fontSize: 17 }}>{"30%"}</Text>
-        </ProgressCircle>
-
-        <Text></Text>
-      </View>
-    </View>
   );
 }
 
@@ -146,6 +213,9 @@ const styles = StyleSheet.create({
     fontSize: 50,
     marginLeft: 10,
     marginTop: 20,
-    fontStyle: "normal",
+  },
+  button: {
+    backgroundColor: "#FFFF",
+    borderRadius: 10,
   },
 });

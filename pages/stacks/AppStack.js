@@ -3,6 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Login from "../Login";
 import Home from "../Home";
 import TabNavigator from "../navigations/TabNavigator";
+import DetailPost from "../DetailPost";
 
 const Stack = createStackNavigator();
 
@@ -19,6 +20,13 @@ export default function AppStack() {
       <Stack.Screen
         name={"HomeTab"}
         component={TabNavigator}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name={"DetailPost"}
+        component={DetailPost}
         options={{
           headerShown: false,
         }}
