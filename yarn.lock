@@ -4964,6 +4964,11 @@ react-native-safe-area-context@3.2.0:
   resolved "https://registry.npmjs.org/react-native-safe-area-context/-/react-native-safe-area-context-3.2.0.tgz"
   integrity sha512-k2Nty4PwSnrg9HwrYeeE+EYqViYJoOFwEy9LxL5RIRfoqxAq/uQXNGwpUg2/u4gnKpBbEPa9eRh15KKMe/VHkA==
 
+react-native-sectioned-multi-select@^0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/react-native-sectioned-multi-select/-/react-native-sectioned-multi-select-0.8.1.tgz#5ec8e4fe4136c36dc5df1222b288896760e43c86"
+  integrity sha512-iH/5PHBo64yFhKzjd+6sCG0aEvgDnUwpn3I7R0ohcGo/+gJdw47mYmJMTwJTmR9JqBFXHx+2bkQi4ij2ghfqRQ==
+
 react-native-size-matters@^0.3.1:
   version "0.3.1"
   resolved "https://registry.npmjs.org/react-native-size-matters/-/react-native-size-matters-0.3.1.tgz"

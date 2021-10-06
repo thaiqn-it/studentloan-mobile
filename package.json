@@ -24,6 +24,7 @@
     "react-native-gesture-handler": "^1.10.3",
     "react-native-paper": "^4.9.2",
     "react-native-progress-circle": "^2.1.0",
+    "react-native-sectioned-multi-select": "^0.8.1",
     "react-native-snap-carousel": "^3.9.1",
     "react-native-web": "~0.13.12"
   },
