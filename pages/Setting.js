@@ -10,50 +10,13 @@ import {
     Avatar, 
     ListItem 
 } from "react-native-elements";
-import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_FONT } from '../constants/styles'
+import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from '../constants/styles'
 import { Feather } from '@expo/vector-icons'
 import { Icon } from 'react-native-elements';
 import { useCollapsibleHeader } from 'react-navigation-collapsible';
+import { useNavigation } from "@react-navigation/native";
+
 const OPTIONS = [
-    {
-        option: "Profile",
-        icon: "account-circle",
-        screen: "Profile",
-        type : "material",
-        color: "orange",
-        size : 22
-    },{
-        option: "Profile",
-        icon: "account-circle",
-        screen: "Profile",
-        type : "material",
-        color: "orange",
-        size : 22
-    },
-    {
-        option: "Profile",
-        icon: "account-circle",
-        screen: "Profile",
-        type : "material",
-        color: "orange",
-        size : 22
-    },
-    {
-        option: "Profile",
-        icon: "account-circle",
-        screen: "Profile",
-        type : "material",
-        color: "orange",
-        size : 22
-    },
-    {
-        option: "Profile",
-        icon: "account-circle",
-        screen: "Profile",
-        type : "material",
-        color: "orange",
-        size : 22
-    },
     {
         option: "Profile",
         icon: "account-circle",
@@ -95,16 +58,17 @@ const OPTIONS = [
     },
   ];
 
-const optionHadleClick = (item) => {
-    item.option === "Logout" ? logout() : navigation.navigate(item.screen);
-};
-
-const logout = async () => {
-    
-};
-
-
 export default function Setting() {
+    const navigation = useNavigation()
+  
+    const optionHadleClick = (item) => {
+        item.option === "Logout" ? logout() : navigation.navigate(item.screen);
+    };
+
+    const logout = async () => {
+        
+    };
+
     const {
         onScroll /* Event handler */,
         containerPaddingTop /* number */,
@@ -124,9 +88,13 @@ export default function Setting() {
           }
       );
     return (
-        <Animated.ScrollView style={{ backgroundColor : 'white'}} onScroll={onScroll}
-        contentContainerStyle={{ paddingTop: containerPaddingTop }}
-        scrollIndicatorInsets={{ top: scrollIndicatorInsetTop }}>
+        <Animated.ScrollView 
+            style={{ backgroundColor : PRIMARY_COLOR_WHITE}} 
+            onScroll={onScroll}
+            onScrollBeginDrag={onScroll}
+            onScrollEndDrag={onScroll}
+            contentContainerStyle={{ paddingTop: containerPaddingTop }}
+            scrollIndicatorInsets={{ top: scrollIndicatorInsetTop }}>
             <ImageBackground source={{uri : 'https://wallpaperaccess.com/full/1155050.jpg'}}
                             style={[styles.topContainer,{ height : FULL_HEIGHT / 3.5}]}>
             <View style={{ flexDirection: "row", padding : 15 }}>           

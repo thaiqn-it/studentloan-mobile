@@ -13,15 +13,24 @@ import {
     createCollapsibleStack,
     // disableExpoTranslucentStatusBar,
 } from 'react-navigation-collapsible';
+import Profile from '../Profile';
+import Onboarding from '../Onboarding';
 
 const Stack = createStackNavigator();
 
 export default function AppStack() {
     return (
-        <Stack.Navigator initialRouteName={"Login"}>
+        <Stack.Navigator initialRouteName={"Onboarding"}>
             <Stack.Screen
                 name={"Login"}
                 component={Login}
+                options={{
+                    headerShown: false,
+                }}
+            /> 
+            <Stack.Screen
+                name={"Onboarding"}
+                component={Onboarding}
                 options={{
                     headerShown: false,
                 }}
@@ -64,6 +73,13 @@ export default function AppStack() {
             <Stack.Screen
                 name={"Setting"}
                 component={Setting}
+                options={{
+                    headerShown: true,
+                }}
+            />
+            <Stack.Screen
+                name={"Profile"}
+                component={Profile}
                 options={{
                     headerShown: true,
                 }}
