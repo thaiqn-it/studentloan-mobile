@@ -17,10 +17,9 @@ import {
 } from "../constants/styles";
 import { Icon } from 'react-native-elements/dist/icons/Icon'
 import { Button,Input } from "react-native-elements";
-import { useNavigation } from "@react-navigation/native";
+import AppLoading from '../components/AppLoading';
 
-export default function Register() {
-    const navigation = useNavigation()
+export default function Register({ navigation, route }) {
     const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -28,7 +27,45 @@ export default function Register() {
     const [confirmPassword,setConfirmPassword] = useState("")
     const [showPassword,setShowPassword] = useState(false)
     const [showConfirmPassword,setShowConfirmPassword] = useState(false)
+    const [isEmailDisabled,setIsEmailDisabled] = useState(false);
+    const [isLoading,setIsLoading] = useState(false)
 
+    useEffect(() => {
+        if (route.params !== undefined) {
+            const userFb = route.params.userFb
+            setEmail(userFb.email)
+            setIsEmailDisabled(true)
+            setFirstName(userFb.first_name)
+            setLastName(userFb.last_name)
+        }
+    }, [])
+
+    const btnRegisterHandler = () => {
+        setIsLoading(true)
+        const user = {
+            email,
+            password,
+            firstName,
+            lastName,  
+        }
+        if (route.params === undefined) {
+            navigation.navigate("RegisterPhone", {
+                user
+            })
+        } else if (route.params.gg_access_token !== undefined)  {
+            navigation.navigate("RegisterPhone", {
+                gg_access_token : route.params.gg_access_token,
+                user
+            })
+        } else {
+            navigation.navigate("RegisterPhone", {
+                fb_access_token : route.params.fb_access_token,
+                user
+            })
+        }
+        setIsLoading(false)    
+    }
+    
     return (
         <ScrollView style={styles.container}>
             <ImageBackground source={{uri : 'https://wallpaperaccess.com/full/1155050.jpg'}}
@@ -43,21 +80,37 @@ export default function Register() {
                     <Text style={styles.appName}>Student Loan</Text>
                 </View>               
             </ImageBackground>
+            <AppLoading isLoading={isLoading}/>
             <View style={styles.bottomView}>
                 <View style={{ padding : 40 }}>
-                    <Text style={{...styles.text, fontSize : 35}}>Register</Text>
+                    <Text style={{ color : PRIMARY_COLOR, fontFamily : PRIMARY_FONT, fontSize : 35}}>Register</Text>
                     <KeyboardAvoidingView
                         style={{
                             marginTop: 20,
                         }}
                     >
                         <Input
+                            disabled={isEmailDisabled}
                             style={ styles.text }
                             placeholder={"Email"}
                             inputContainerStyle={styles.inputContainer}
                             onChangeText={setEmail}
                             value={email}
                             />
+                        <Input
+                            style={ styles.text }
+                            placeholder={"First Name"}
+                            inputContainerStyle={styles.inputContainer}
+                            onChangeText={setFirstName}
+                            value={firstName}
+                            />
+                        <Input
+                            style={ styles.text }
+                            placeholder={"Last Name"}
+                            inputContainerStyle={styles.inputContainer}
+                            onChangeText={setLastName}
+                            value={lastName}
+                        />
                         <Input
                             style={ styles.text }
                             secureTextEntry={!showPassword}
@@ -88,21 +141,9 @@ export default function Register() {
                                 },
                             }}
                         />
-                         <Input
-                            style={ styles.text }
-                            placeholder={"First Name"}
-                            inputContainerStyle={styles.inputContainer}
-                            onChangeText={setFirstName}
-                            value={firstName}
-                            />
-                        <Input
-                            style={ styles.text }
-                            placeholder={"Last Name"}
-                            inputContainerStyle={styles.inputContainer}
-                            onChangeText={setLastName}
-                            value={lastName}
-                        />
+                        
                         <Button
+                            onPress={btnRegisterHandler}
                             title={"Register"}
                             buttonStyle={styles.btnRegister}
                             titleStyle={{
@@ -151,12 +192,11 @@ const styles = StyleSheet.create({
         borderTopEndRadius : 50,
     },
     text : {
-        color : '#00BFA6',
         fontFamily : PRIMARY_FONT
     },
     btnRegister : {
         marginTop : 10,
-        width : 200,
+        width : FULL_WIDTH / 1.5,
         borderRadius : 25,
         alignSelf : 'center',
         padding: 15,

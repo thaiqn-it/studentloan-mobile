@@ -1,4 +1,4 @@
-import React,{ useState } from 'react'
+import React,{ useState,useEffect } from 'react'
 import { 
     StyleSheet, 
     Text,
@@ -6,6 +6,7 @@ import {
     ImageBackground,
     KeyboardAvoidingView,
     TouchableOpacity,
+    Alert
 } from 'react-native'
 import { Icon } from 'react-native-elements/dist/icons/Icon'
 import { Button,Input } from "react-native-elements";
@@ -18,15 +19,99 @@ import {
     PRIMARY_FONT_BOLD,
     PRIMARY_FONT_ITALIC
 } from "../constants/styles";
+import { userApi } from '../apis/user';
+import * as SecureStore from "expo-secure-store";
+import { JWT_TOKEN_KEY, resetJWTToken } from '../constants';
+import { loadToken } from '../apis';
+import * as Facebook from "expo-facebook";
+import * as Google from 'expo-google-app-auth';
+import AppLoading from '../components/AppLoading';
 
 export default function Login() {
     const navigation = useNavigation()
     const [email, setEmail] = useState("");
     const [password,setPassword] = useState("")
     const [showPassword,setShowPassword] = useState(false)
+    const [isLoading,setIsLoading] = useState(false)
 
-    const loginHandler = (navigation) => {
-        navigation.navigate("HomeTab")
+    useEffect(() => {
+        resetJWTToken().then(async (token) => {
+          if (token) {
+            await loadToken();
+            //navigation.navigate("HomeTab");
+          }
+        });
+      }, []);
+
+    const loginHandler = async (navigation) => {
+        try {
+            const res = await userApi.login(email, password);
+            await SecureStore.setItemAsync(JWT_TOKEN_KEY, res.data.token);
+            await loadToken();
+
+            navigation.navigate("HomeTab");
+          } catch (err) {
+            Alert.alert("Login Status", "Wrong email or password");
+          }
+    }
+
+    const loginByFb = async () => {
+        try {
+          await Facebook.initializeAsync({
+            appId: "294847198832563",
+          });
+          const { token,type } = await Facebook.logInWithReadPermissionsAsync({
+            permissions: ['public_profile', 'email'],
+          });
+          if (type === 'success') {
+            const res = await userApi.loginByFb({
+                access_token: token,
+            });
+            if (res.data.isNew) {
+                navigation.navigate("Register", {
+                    fb_access_token : token,
+                    userFb : res.data.user
+                });
+            } else {
+                await SecureStore.setItemAsync(JWT_TOKEN_KEY, res.data.token);
+                await loadToken();
+                navigation.navigate("HomeTab");
+            } 
+          }            
+        } catch ({ message }) {
+            setIsLoading(false)
+            Alert.alert("Login Status", `Fail to login with Facebook`);
+        }
+      };
+
+    const loginByGoogle = async () => {
+        const config = {
+            androidClientId: `159839076180-emidldpf136iq47aivk0huhvf689c6m5.apps.googleusercontent.com`,
+        };
+        try {
+            setIsLoading(true)
+            const { accessToken,type  } = await Google.logInAsync(config);
+            if( type === 'success' ) {
+                const res = await userApi.loginByGoogle({
+                    access_token: accessToken,
+                });
+                if (res.data.isNew) {
+                    navigation.navigate("Register", {
+                        gg_access_token : accessToken,
+                        userFb : res.data.user
+                    });
+                } else {
+                    await SecureStore.setItemAsync(JWT_TOKEN_KEY, res.data.token);
+                    await loadToken();
+                    navigation.navigate("HomeTab");
+                } 
+            }         
+            setIsLoading(false)
+        } catch (error) {
+            setIsLoading(false)
+            Alert.alert("Login Status", `Fail to login with Google`);
+        }
+          
     }
 
     return (
@@ -43,6 +128,7 @@ export default function Login() {
                     <Text style={styles.appName}>Student Loan</Text>
                 </View>               
             </ImageBackground>   
+            <AppLoading isLoading={isLoading}/>
             <View style={styles.bottomView}>
                 <View style={{ padding : 40 }}>
                     <Text style={{...styles.text, fontSize : 35}}>Welcome</Text>
@@ -63,14 +149,12 @@ export default function Login() {
                         }}
                     >
                         <Input
-                            style={ styles.text }
                             placeholder={"Email"}
                             inputContainerStyle={styles.inputContainer}
                             onChangeText={setEmail}
                             value={email}
                             />
                         <Input
-                            style={ styles.text }
                             secureTextEntry={!showPassword}
                             inputContainerStyle={styles.inputContainer}
                             placeholder={"Password"}
@@ -113,16 +197,16 @@ export default function Login() {
                             ----- Or -----
                         </Text>                      
                         <View style={styles.socialLoginBtn}>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={loginByFb}>
                                 <Icon
                                     style={{ padding : 10 }}
                                     type = "entypo"
                                     name = "facebook-with-circle"
                                     color = "#3b5998"
-                                    size = {50}
+                                    size = {52}
                                 />   
                             </TouchableOpacity>                                   
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={loginByGoogle}>
                                 <Icon
                                     style={{ padding : 10 }}
                                     type = "font-awesome-5"
@@ -170,7 +254,7 @@ const styles = StyleSheet.create({
         borderBottomColor: PRIMARY_COLOR,      
     },
     btnLogin : {
-        width : 200,
+        width : FULL_WIDTH / 1.5,
         borderRadius : 25,
         alignSelf : 'center',
         padding: 15,

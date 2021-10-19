@@ -11,13 +11,38 @@ import { useNavigation } from "@react-navigation/native";
 import LottieView from 'lottie-react-native';
 import { LOCK_LOTTIE } from '../constants/files'
 
-const nextBtnHandler = (navigation) => {
-    navigation.navigate("Verification")
-}
-
 export default function ForgotPassword() {
     const navigation = useNavigation()
     const [email, setEmail] = useState("");
+
+    //test
+    const recaptchaVerifier = React.useRef(null);
+    const [phoneNumber, setPhoneNumber] = React.useState();
+    const [verificationId, setVerificationId] = React.useState();
+    const [verificationCode, setVerificationCode] = React.useState();
+
+    const nextBtnHandler = async (navigation) => {
+        navigation.navigate("Verification")
+        // const phoneProvider = new firebase.auth.PhoneAuthProvider();
+        // const verificationId = await phoneProvider.verifyPhoneNumber(
+        //     phoneNumber,
+        //     recaptchaVerifier.current
+        // );
+        // setVerificationId(verificationId);
+        // console.log("Verification code has been sent to your phone");
+        // const credential = firebase.auth.PhoneAuthProvider.credential(
+        //     verificationId,
+        //     "213123"
+        //   );
+
+
+        //let userData = await auth().currentUser.linkWithCredential(credential);
+        // await firebase.auth().signInWithCredential(credential).then(type => {
+        //     console.log(type);
+        // });
+       
+    }
+
     return (
         <View style={styles.container}>
              <ImageBackground source={{uri : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvKJYJtr8OJ0CvRLcGMybGThLQQsyWIugmRA&usqp=CAU'}}
@@ -38,9 +63,10 @@ export default function ForgotPassword() {
                     containerStyle={{width : 350}}
                     placeholder={"Email"}
                     inputContainerStyle={styles.inputContainer}
-                    onChangeText={setEmail}
-                    value={email}
+                    onChangeText={setPhoneNumber}
+                    value={phoneNumber}
                 />
+
                 <Button
                     title={"Next"}
                     buttonStyle={styles.btnNext}

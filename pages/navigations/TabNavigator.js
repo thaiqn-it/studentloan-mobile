@@ -1,4 +1,4 @@
-import React, { useRef,useEffect } from "react";
+import React, { useRef,useEffect,useContext } from "react";
 import { View,StyleSheet, TouchableOpacity } from 'react-native'
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from "../../constants/styles";
@@ -7,6 +7,7 @@ import * as Animatable from 'react-native-animatable';
 
 import Home from "../Home"
 import Setting from "../Setting";
+import { AppContext } from "../../contexts/App";
 
 const TabbarArr = [
     { route: 'Home', label: 'Home', type: 'antdesign', icon: 'home',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: Home },
@@ -91,6 +92,19 @@ const BtnIcon = (props) => {
 }
 
 const TabNavigator = () => {
+    const { setUser,getUser } = useContext(AppContext)
+
+    useEffect(() => {
+        async function loadUser () {
+          const data = await getUser()
+          setUser({
+            type : 'LOAD',
+            data : data,
+          })
+        }   
+        loadUser()
+      }, [])
+
     return (
         <Tab.Navigator            
             initialRouteName={"Home"} 

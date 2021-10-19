@@ -1,20 +1,20 @@
-import React from 'react'
+import React, { useContext,useEffect,useState } from 'react'
 import { 
     StyleSheet, 
     Text, 
     View,
-    ImageBackground,
     Animated,
 } from 'react-native'
 import { 
     Avatar, 
     ListItem 
 } from "react-native-elements";
-import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from '../constants/styles'
+import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from '../constants/styles'
 import { Feather } from '@expo/vector-icons'
 import { Icon } from 'react-native-elements';
 import { useCollapsibleHeader } from 'react-navigation-collapsible';
 import { useNavigation } from "@react-navigation/native";
+import { AppContext } from '../contexts/App';
 
 const OPTIONS = [
     {
@@ -58,9 +58,12 @@ const OPTIONS = [
     },
   ];
 
-export default function Setting() {
-    const navigation = useNavigation()
-  
+export default function Setting({navigation}) {
+    const { user, setUser, getUser } = useContext(AppContext);
+    const [ name, setName ] = useState(null);
+    const [ email, setEmail ] = useState(null);
+    const [ phone, setPhone ] = useState(null);
+    const [ address,setAddress ] = useState(null)
     const optionHadleClick = (item) => {
         item.option === "Logout" ? logout() : navigation.navigate(item.screen);
     };
@@ -69,6 +72,23 @@ export default function Setting() {
         
     };
 
+    const loadUser = () => {
+        async function load() {
+          const data = await getUser();
+          setUser({
+            type: "LOAD",
+            data: data,
+          });
+        }
+        load();
+      };
+      
+      useEffect(() => {
+        setName(user.Student.firstName + " " + user.Student.lastName)
+        setPhone(user.phoneNumber)
+        setEmail(user.email)
+      }, []);
+
     const {
         onScroll /* Event handler */,
         containerPaddingTop /* number */,
@@ -76,7 +96,7 @@ export default function Setting() {
       } = useCollapsibleHeader(
           {
             navigationOptions: {
-                headerStyle: { backgroundColor: 'green', height: 80 } /* Optional */,
+                headerStyle: { backgroundColor: PRIMARY_COLOR, height: 80 } /* Optional */,
 
               },
               config: {
@@ -89,47 +109,45 @@ export default function Setting() {
       );
     return (
         <Animated.ScrollView 
-            style={{ backgroundColor : PRIMARY_COLOR_WHITE}} 
+            style={{ backgroundColor : PRIMARY_COLOR_WHITE }} 
             onScroll={onScroll}
             onScrollBeginDrag={onScroll}
             onScrollEndDrag={onScroll}
             contentContainerStyle={{ paddingTop: containerPaddingTop }}
             scrollIndicatorInsets={{ top: scrollIndicatorInsetTop }}>
-            <ImageBackground source={{uri : 'https://wallpaperaccess.com/full/1155050.jpg'}}
-                            style={[styles.topContainer,{ height : FULL_HEIGHT / 3.5}]}>
-            <View style={{ flexDirection: "row", padding : 15 }}>           
+            <View style={[styles.topContainer,{ height : FULL_HEIGHT / 3.5}]}>
+                <View style={{ flexDirection: "row", padding : 5 }}>           
                     <Avatar
                         rounded
-                        size={80}
+                        size={90}
                         source={{
                             uri: "https://i.pinimg.com/originals/51/f6/fb/51f6fb256629fc755b8870c801092942.png",
                         }}
-                        containerStyle={{ borderWidth : 2, borderColor : 'white' }}
                     />     
                     <View>
-                        <Text style={styles.lbName}>Thai</Text>
+                        <Text style={styles.lbName}>{name}</Text>
                         <Text
-                            style={{ color : 'white', marginLeft: 20, marginTop: 5 }}
+                             style={{ color : PRIMARY_COLOR_BLACK, marginLeft: 20, marginTop: 5, marginRight : 70 }}
                             >
                             Quận 9 , TP Ho Chi Minh
                         </Text>
                     </View>
                 </View>     
-                <View >
+                <View>
                     <View style={{ flexDirection: "row", padding : 10, alignItems:'center' }}>
-                        <Feather name="phone" size={24} color="white" />
-                        <Text style={{ marginLeft : 20, color : 'white'}}>
-                            +84934223132
+                        <Feather name="phone" size={24} color="black" />
+                        <Text style={{ marginLeft : 20, color : 'black'}}>
+                            {phone}
                         </Text>
                     </View>
                     <View style={{ flexDirection: "row", padding : 10, alignItems:'center' }}>
-                        <Feather name="mail" size={24} color="white" />
-                        <Text style={{ marginLeft : 20, color : 'white'}}>
-                            thai_0923123@gmail.com
+                        <Feather name="mail" size={24} color="black" />
+                        <Text style={{ marginLeft : 20, color : 'black'}}>
+                            {email}
                         </Text>
                     </View>                  
-                </View>       
-            </ImageBackground> 
+                </View> 
+            </View>      
             <View style={styles.bottomContainer}>
                 {OPTIONS.map((item, i) => (
                     <ListItem
@@ -173,16 +191,20 @@ export default function Setting() {
 
 const styles = StyleSheet.create({
     topContainer: {
-        backgroundColor: "white",
+        margin : 15,
+        backgroundColor: '#F2F5FA',
         justifyContent: "center",
-        paddingLeft: 30,
+        padding : 20,
+        elevation : 5,
+        borderRadius : 15,
     },
     lbName: {
         fontWeight: "bold",
         fontSize: 20,
         marginLeft: 20,
         fontFamily : PRIMARY_FONT,
-        color : 'white',
+        color : PRIMARY_COLOR_BLACK,
+        marginRight : 70
     },
     bottomContainer: {
         backgroundColor: "white",
