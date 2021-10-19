@@ -15,6 +15,7 @@ import {
 } from 'react-navigation-collapsible';
 import Profile from '../Profile';
 import Onboarding from '../Onboarding';
+import RegisterPhone from '../RegisterPhone';
 
 const Stack = createStackNavigator();
 
@@ -80,6 +81,13 @@ export default function AppStack() {
             <Stack.Screen
                 name={"Profile"}
                 component={Profile}
+                options={{
+                    headerShown: true,
+                }}
+            />
+            <Stack.Screen
+                name={"RegisterPhone"}
+                component={RegisterPhone}
                 options={{
                     headerShown: true,
                 }}

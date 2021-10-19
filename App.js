@@ -9,6 +9,7 @@ import { ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
 import { NavigationContainer } from "@react-navigation/native";
 import AppStack from "./pages/stacks/AppStack";
+import AppProvider from './contexts/App';
 
 console.disableYellowBox = true;  
 
@@ -22,11 +23,13 @@ export default function App() {
     return <ActivityIndicator />;
   }
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <AppStack />
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <AppProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <AppStack />
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </AppProvider>
   );
 }
 
