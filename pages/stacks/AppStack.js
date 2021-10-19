@@ -4,12 +4,13 @@ import Login from "../Login";
 import Home from "../Home";
 import TabNavigator from "../navigations/TabNavigator";
 import DetailPost from "../DetailPost";
+import BackSelection from "../BackSelection";
 
 const Stack = createStackNavigator();
 
 export default function AppStack() {
   return (
-    <Stack.Navigator initialRouteName={"Home"}>
+    <Stack.Navigator initialRouteName={"DetailPost"}>
       <Stack.Screen
         name={"Login"}
         component={Login}
@@ -34,6 +35,13 @@ export default function AppStack() {
       <Stack.Screen
         name={"Home"}
         component={Home}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name={"BackSelection"}
+        component={BackSelection}
         options={{
           headerShown: false,
         }}
