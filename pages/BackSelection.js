@@ -14,7 +14,8 @@ import {
 } from "../constants/styles";
 import { Icon } from "react-native-elements/dist/icons/Icon";
 
-export default function BackSelection() {
+export default function BackSelection({route, navigation}) {
+  const {id} = route.params;
   const [money, setMoney] = useState(400000);
   const [limit, setLimit] = useState([
     {
@@ -200,14 +201,14 @@ export default function BackSelection() {
         >
           <TouchableOpacity
             style={styles.buttonCancel}
-            onPress={() => console.log("test")}
+            onPress={() => navigation.goBack(null)}
           >
             <Text style={styles.buttonText}>Cancel</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.buttonTopUp}
-            onPress={() => console.log("test")}
+            onPress={() => navigation.navigate('Home')}
           >
             <Text style={styles.buttonTextTopUp}>Press to top up!</Text>
           </TouchableOpacity>

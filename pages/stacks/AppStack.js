@@ -10,7 +10,7 @@ const Stack = createStackNavigator();
 
 export default function AppStack() {
   return (
-    <Stack.Navigator initialRouteName={"BackSelection"}>
+    <Stack.Navigator initialRouteName={"Home"}>
       <Stack.Screen
         name={"Login"}
         component={Login}

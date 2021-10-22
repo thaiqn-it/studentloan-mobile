@@ -22,8 +22,8 @@ import Carousel from "react-native-anchor-carousel";
 const { width: windowWidth } = Dimensions.get("window");
 const ITEM_WIDTH = 0.7 * windowWidth;
 const SEPARATOR_WIDTH = 10;
-export default function DetailPost({ route }) {
-  // const {id} = route.params;
+export default function DetailPost({ route, navigation }) {
+  const {id} = route.params;
 
   const viewProfileStudent = () => {
     console.log("Nguyễn Trường Phi");
@@ -64,7 +64,7 @@ export default function DetailPost({ route }) {
   ]);
 
   async function clickViewButton() {
-    console.log("Test button");
+    
   }
 
   function renderItem({ item, index }) {
@@ -632,7 +632,7 @@ export default function DetailPost({ route }) {
         }}
       >
 
-        <TouchableOpacity style={styles.buttonBack} onPress={clickViewButton}>
+        <TouchableOpacity style={styles.buttonBack} onPress={() => navigation.navigate('BackSelection', id)}>
           <Text style={styles.buttonTextBack}>Back this post!</Text>
         </TouchableOpacity>
       </View>
