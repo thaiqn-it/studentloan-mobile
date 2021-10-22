@@ -189,6 +189,12 @@ export default function BackSelection({route, navigation}) {
       >
         <FlatList
           data={limit}
+          contentContainerStyle={{
+            marginLeft:10,
+            marginRight:10,
+            marginTop:20,
+            marginBottom:20,
+          }}
           numColumns={3}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
@@ -226,7 +232,7 @@ const styles = StyleSheet.create({
   },
   box: {
     elevation:5,
-    margin: 12,
+    margin: 10,
     height:100,
     width:50,
     borderRadius: 10,
