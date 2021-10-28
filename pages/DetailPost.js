@@ -648,6 +648,7 @@ export default function DetailPost({ navigation,route }) {
       <Button
         style={[styles.btnInvest,{opacity}]}
         color={PRIMARY_COLOR}
+        onPress={() => navigation.navigate("BackSelection")}
           >Invest</Button> 
       </Animated.View>
     </View>

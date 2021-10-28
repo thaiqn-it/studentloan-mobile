@@ -15,7 +15,7 @@ import {
 import { Icon } from "react-native-elements/dist/icons/Icon";
 
 export default function BackSelection({route, navigation}) {
-  const {id} = route.params;
+
   const [money, setMoney] = useState(400000);
   const [limit, setLimit] = useState([
     {
