@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import Login from '../Login';
 import TabNavigator from '../navigations/TabNavigator';
@@ -7,8 +7,9 @@ import ForgotPassword from '../ForgotPassword';
 import Verification from '../Verification';
 import ChangePassword from '../ChangePassword';
 import Setting from '../Setting';
-
-
+import Home from "../Home";
+import DetailPost from "../DetailPost";
+import BackSelection from "../BackSelection";
 import {
     createCollapsibleStack,
     // disableExpoTranslucentStatusBar,
@@ -16,6 +17,7 @@ import {
 import Profile from '../Profile';
 import Onboarding from '../Onboarding';
 import RegisterPhone from '../RegisterPhone';
+import Invest from '../Invest';
 
 const Stack = createStackNavigator();
 
@@ -75,25 +77,52 @@ export default function AppStack() {
                 name={"Setting"}
                 component={Setting}
                 options={{
-                    headerShown: true,
+                    headerShown: false,
                 }}
             />
             <Stack.Screen
                 name={"Profile"}
                 component={Profile}
                 options={{
-                    headerShown: true,
+                    headerShown: false,
                 }}
             />
             <Stack.Screen
                 name={"RegisterPhone"}
                 component={RegisterPhone}
                 options={{
-                    headerShown: true,
+                    headerShown: false,
                 }}
+            />
+            <Stack.Screen
+              name={"Home"}
+              component={Home}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name={"DetailPost"}
+              component={DetailPost}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name={"BackSelection"}
+              component={BackSelection}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name={"Invest"}
+              component={Invest}
+              options={{
+                headerShown: false,
+              }}
             />
                 
         </Stack.Navigator>
     )
 }
-

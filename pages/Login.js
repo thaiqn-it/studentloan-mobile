@@ -45,9 +45,9 @@ export default function Login() {
 
     const loginHandler = async (navigation) => {
         try {
-            const res = await userApi.login(email, password);
-            await SecureStore.setItemAsync(JWT_TOKEN_KEY, res.data.token);
-            await loadToken();
+            // const res = await userApi.login(email, password);
+            // await SecureStore.setItemAsync(JWT_TOKEN_KEY, res.data.token);
+            // await loadToken();
 
             navigation.navigate("HomeTab");
           } catch (err) {
