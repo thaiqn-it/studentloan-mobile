@@ -8,10 +8,11 @@ import * as Animatable from 'react-native-animatable';
 import Home from "../Home"
 import Setting from "../Setting";
 import { AppContext } from "../../contexts/App";
+import Invest from "../Invest";
 
 const TabbarArr = [
     { route: 'Home', label: 'Home', type: 'antdesign', icon: 'home',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: Home },
-    { route: 'Loan', label: 'Search', type: 'material', icon: 'search',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: Home },
+    { route: 'Invest', label: 'Invest', type: 'material', icon: 'search',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: Invest },
     { route: 'Wallet', label: 'Wallet', type: 'antdesign', icon: 'wallet',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: Home },
     { route: 'Setting', label: 'Setting', type: 'feather', icon: 'settings',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: Setting },
   ];
@@ -110,6 +111,7 @@ const TabNavigator = () => {
             initialRouteName={"Home"} 
             screenOptions={{             
                 tabBarShowLabel: false,
+                headerShown : false
             }}
             >   
             {TabbarArr.map((item,index) => {

@@ -13,7 +13,6 @@ import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, P
 import { Feather } from '@expo/vector-icons'
 import { Icon } from 'react-native-elements';
 import { useCollapsibleHeader } from 'react-navigation-collapsible';
-import { useNavigation } from "@react-navigation/native";
 import { AppContext } from '../contexts/App';
 
 const OPTIONS = [

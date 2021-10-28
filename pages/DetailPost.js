@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState,useRef,useEffect } from "react";
 import {
   StyleSheet,
   Text,
   View,
-  ScrollView,
+  Animated,
   Image,
   Dimensions,
   Pressable,
@@ -13,90 +13,80 @@ import {
   PRIMARY_COLOR,
   PRIMARY_COLOR_WHITE,
   PRIMARY_COLOR_BLACK,
+  FULL_HEIGHT,
+  FULL_WIDTH
 } from "../constants/styles";
 import { Avatar } from "react-native-elements";
 import { Icon } from "react-native-elements/dist/icons/Icon";
-import { LinearProgress } from "react-native-elements";
-import Carousel from "react-native-anchor-carousel";
+import Carousel from 'react-native-snap-carousel';
+import HeaderBar from '../components/HeaderBar';
+import * as Progress from 'react-native-progress';
+import { Button } from 'react-native-paper';
 
 const { width: windowWidth } = Dimensions.get("window");
-const ITEM_WIDTH = 0.7 * windowWidth;
-const SEPARATOR_WIDTH = 10;
-export default function DetailPost({ route }) {
+const SLIDER_WIDTH = Dimensions.get('window').width;
+const ITEM_WIDTH = Math.round(SLIDER_WIDTH - 30 * 0.9);
+const ITEM_HEIGHT = Math.round(ITEM_WIDTH * 3 / 4);
+
+export default function DetailPost({ navigation,route }) {
   // const {id} = route.params;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const carouselRef = useRef(null);
 
-  const viewProfileStudent = () => {
-    console.log("Nguyễn Trường Phi");
-  };
+  const CONTAINER_HEIGHT = 50; 
+  const offsetAnim = useRef(new Animated.Value(0)).current;
+  const clampedScroll = Animated.diffClamp(
+      Animated.add(
+        scrollY.interpolate({
+          inputRange : [0, 1],
+          outputRange : [0 ,1],
+          extrapolateLeft : 'clamp',
+        }),
+        offsetAnim,
+      ),
+      0,
+      CONTAINER_HEIGHT
+    )
 
-  const [dataArchieve, setDataArchieve] = useState([
-    {
-      id: "item2",
-      image: "https://i.imgur.com/N3nQ9CS.jpg",
-      title: "màu 1",
-    },
-    {
-      id: "item3",
-      image: "https://i.imgur.com/AzdYlDM.jpg",
-      title: "màu 2",
-    },
-    {
-      id: "item1",
-      image: "https://i.imgur.com/s7GgEa8.jpg",
-      title: "màu 3",
-    },
-    {
-      id: "item6",
-      image: "https://i.imgur.com/1O1Kd6T.jpg",
-      title: "màu 4",
-    },
-    {
-      id: "item4",
-      image: "https://i.imgur.com/eNuhvpN.jpg",
-      title: "màu 5",
-    },
+    var _clampScrollValue = 0;
+    var _offsetValue = 0;
+    var _scrollValue = 0
 
-    {
-      id: "item5",
-      image: "https://i.imgur.com/jEiBmma.jpg",
-      title: "màu 6",
-    },
-  ]);
+    useEffect(() => {
+      scrollY.addListener(({value}) => {
+        const diff = value - _scrollValue;
+        _scrollValue = value;
+        _clampScrollValue = Math.min(
+          Math.max(_clampScrollValue * diff, 0),
+          CONTAINER_HEIGHT
+        )
+      });
+      offsetAnim.addListener(({value}) => {
+        _offsetValue = value
+      })
+    }, [])
 
-  async function clickViewButton() {
-    console.log("Test button");
-  }
+  const opacity = clampedScroll.interpolate({
+    inputRange : [0, CONTAINER_HEIGHT - 20, CONTAINER_HEIGHT],
+    outputRange : [1, 0.01 ,0],
+    extrapolate : 'clamp'
+  })  
 
-  function renderItem({ item, index }) {
-    const { image, title } = item;
-    return (
-      <Pressable activeOpacity={1} style={styles.item}>
-        <Image source={{ uri: image }} style={styles.image} />
-        <View style={styles.lowerContainer}>
-          <View style={styles.lowerLeft}>
-            <Text style={styles.titleText} numberOfLines={2}>
-              {title}
-            </Text>
-          </View>
-          <TouchableOpacity style={styles.button} onPress={clickViewButton}>
-            <Text style={styles.buttonText}>View</Text>
-          </TouchableOpacity>
-        </View>
-      </Pressable>
-    );
-  }
+  const bottomTranslate = clampedScroll.interpolate({
+    inputRange : [0, CONTAINER_HEIGHT],
+    outputRange : [0, CONTAINER_HEIGHT * 2],
+    extrapolate : 'clamp'
+  })
 
-  return (
-    <ScrollView
-      style={{
-        backgroundColor: PRIMARY_COLOR,
-        flex: 1,
-      }}
-    >
+  const StudentInformationBox = () => {
+    return(
       <View
         style={{
           backgroundColor: PRIMARY_COLOR_WHITE,
-          borderRadius: 8,
+          borderRadius: 10,
+          margin : 15,
+          elevation : 5,
+          marginTop : FULL_HEIGHT / 8,
         }}
       >
         <View
@@ -120,7 +110,7 @@ export default function DetailPost({ route }) {
             <Text
               style={{
                 marginTop: 20,
-                fontSize: 22,
+                fontSize: 18,
                 color: "#6A6A6A",
               }}
             >
@@ -130,7 +120,7 @@ export default function DetailPost({ route }) {
             {/* name student */}
             <Text
               style={{
-                fontSize: 25,
+                fontSize: 23,
                 fontWeight: "bold",
               }}
             >
@@ -142,42 +132,13 @@ export default function DetailPost({ route }) {
         <Text
           style={{
             marginStart: 10,
-            marginTop: 20,
-            fontSize: 25,
+            marginTop: 10,
+            fontSize: 18,
             color: "#6A6A6A",
           }}
         >
           The tuition fee for the 8th term
         </Text>
-
-        <View
-          style={{
-            marginStart: 10,
-            flexDirection: "row",
-          }}
-        >
-          <Text
-            style={{
-              fontWeight: "bold",
-              fontSize: 20,
-              marginTop: 20,
-            }}
-          >
-            Read more about me
-          </Text>
-          <Icon
-            onPress={viewProfileStudent}
-            containerStyle={{
-              marginTop: 25,
-              marginStart: 10,
-            }}
-            name="arrow-right"
-            type="font-awesome-5"
-            color={PRIMARY_COLOR_BLACK}
-            size={20}
-          />
-        </View>
-
         <View
           style={{
             marginTop: 20,
@@ -235,72 +196,33 @@ export default function DetailPost({ route }) {
           </View>
         </View>
 
-        {/* processStatus */}
-        <View
-          style={{
-            marginTop: 30,
-            marginStart: 10,
-            marginEnd: 10,
-          }}
-        >
-          <LinearProgress
-            variant="determinate"
-            value={0.8}
-            color={PRIMARY_COLOR}
-          />
-        </View>
+        <View style={{ padding : 15, flexDirection : 'row'}}>
+              <View>
+                <Text style={{  fontSize : 15  }}>2.000.000đ</Text>
+                <Text style={{ opacity : 0.5,fontSize : 14 }}>Available for investment</Text>           
+              </View>
+              <View style={{  alignItems : 'flex-end', flex : 1, fontSize : 13 }}>
+                <Text style={{  fontSize : 15  }}>22.000.000đ</Text>
+                <Text style={{ opacity : 0.5,fontSize : 14 }}>Full amount</Text>  
+              </View>
+          </View>
+          <Progress.Bar progress={0.8} width={FULL_WIDTH / 1.2} style={{ alignSelf : 'center', margin : 5, marginBottom : 25 }} color={PRIMARY_COLOR} />         
 
         <View
           style={{
             flexDirection: "row",
             flexWrap: "wrap",
-            marginTop: 30,
             justifyContent: "center",
-            marginBottom: 30,
+            marginBottom: 20,
           }}
-        >
-          {/* money */}
-          <View
-            style={{
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-              }}
-            >
-              18.550.000 VNĐ
-            </Text>
-            <Text>/ 25.000.000 VNĐ</Text>
-          </View>
-
-          {/* backers */}
-          <View
-            style={{
-              alignItems: "center",
-              marginStart: 10,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-              }}
-            >
-              4
-            </Text>
-            <Text>Backers</Text>
-          </View>
-
+        >     
           {/* expired date */}
           <View
             style={{
               alignItems: "center",
-              marginStart: 10,
             }}
-          >
+          > 
+            <Text>This loan will be expired in</Text>
             <Text
               style={{
                 fontSize: 20,
@@ -309,165 +231,168 @@ export default function DetailPost({ route }) {
             >
               October 31, 2021
             </Text>
-            <Text>this article expires</Text>
+           
           </View>
         </View>
+      </View>
+    )
+  }
+
+  const LoanInformationBox = () => {
+    return (
+      <View
+      style={{
+        marginTop: 10,
+        borderRadius: 10,
+        margin : 15,
+        backgroundColor: PRIMARY_COLOR_WHITE,
+        elevation : 5
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          marginStart: 25,
+          marginTop: 20,
+        }}
+      >
+        <Icon
+          name="comment-dollar"
+          type="font-awesome-5"
+          color={PRIMARY_COLOR_BLACK}
+          size={25}
+        />
+        <Text
+          style={{
+            marginTop: "auto",
+            marginStart: 10,
+            fontSize: 18,
+          }}
+        >
+          What you get!
+        </Text>
       </View>
 
       <View
         style={{
-          marginTop: 10,
-          borderRadius: 8,
-          backgroundColor: PRIMARY_COLOR_WHITE,
+          alignItems: "center",
         }}
       >
-        <View
+        <Text
           style={{
-            flexDirection: "row",
-            marginStart: 25,
+            fontSize: 15,
             marginTop: 20,
           }}
         >
-          <Icon
-            name="comment-dollar"
-            type="font-awesome-5"
-            color={PRIMARY_COLOR_BLACK}
-            size={30}
-          />
-          <Text
-            style={{
-              marginTop: "auto",
-              marginStart: 10,
-              fontSize: 20,
-            }}
-          >
-            What you get!
-          </Text>
-        </View>
+          While students are still studying:
+        </Text>
+
+        <Text
+          style={{
+            marginTop: 10,
+            fontSize: 18,
+            fontWeight: "bold",
+            color: PRIMARY_COLOR,
+          }}
+        >
+          100.000 VNĐ/ month
+        </Text>
+
+        <Text
+          style={{
+            fontSize: 15,
+            marginTop: 18,
+          }}
+        >
+          After students graduate
+        </Text>
+        <Text
+          style={{
+            fontSize: 15,
+          }}
+        >
+          you will have interest rate:
+        </Text>
 
         <View
           style={{
-            alignItems: "center",
+            flexDirection: "row",
           }}
         >
           <Text
             style={{
-              fontSize: 15,
-              marginTop: 20,
-            }}
-          >
-            While students are still studying:
-          </Text>
-
-          <Text
-            style={{
-              marginTop: 10,
-              fontSize: 25,
+              fontSize: 18,
               fontWeight: "bold",
               color: PRIMARY_COLOR,
             }}
           >
-            100.000 VNĐ/ month
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 15,
-              marginTop: 20,
-            }}
-          >
-            After students graduate
-          </Text>
-          <Text
-            style={{
-              fontSize: 15,
-            }}
-          >
-            you will have interest rate:
-          </Text>
-
-          <View
-            style={{
-              flexDirection: "row",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 35,
-                fontWeight: "bold",
-                color: PRIMARY_COLOR,
-              }}
-            >
-              3
-            </Text>
-            <Text
-              style={{
-                marginTop: 17,
-                fontSize: 20,
-                fontWeight: "bold",
-                color: PRIMARY_COLOR,
-              }}
-            >
-              %/month
-            </Text>
-          </View>
-
-          <Text
-            style={{
-              fontSize: 15,
-              marginTop: 20,
-            }}
-          >
-            This student is expected to graduate on:
-          </Text>
-
-          {/* ExpectedGraduationDay */}
-          <Text
-            style={{
-              marginTop: 10,
-              fontSize: 25,
-              fontWeight: "bold",
-              color: PRIMARY_COLOR,
-            }}
-          >
-            December 31, 2025
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 15,
-              marginTop: 20,
-            }}
-          >
-            This student undertakes to pay off
-          </Text>
-          <Text
-            style={{
-              fontSize: 15,
-            }}
-          >
-            the following debt after:
-          </Text>
-
-          <Text
-            style={{
-              marginTop: 10,
-              fontSize: 25,
-              marginBottom: 40,
-              fontWeight: "bold",
-              color: PRIMARY_COLOR,
-            }}
-          >
-            December 31, 2029
+            3%/ month
           </Text>
         </View>
-      </View>
 
+        <Text
+          style={{
+            fontSize: 15,
+            marginTop: 20,
+          }}
+        >
+          This student is expected to graduate on:
+        </Text>
+
+        {/* ExpectedGraduationDay */}
+        <Text
+          style={{
+            marginTop: 10,
+            fontSize: 18,
+            fontWeight: "bold",
+            color: PRIMARY_COLOR,
+          }}
+        >
+          December 31, 2025
+        </Text>
+
+        <Text
+          style={{
+            fontSize: 15,
+            marginTop: 20,
+          }}
+        >
+          This student undertakes to pay off
+        </Text>
+        <Text
+          style={{
+            fontSize: 15,
+          }}
+        >
+          the following debt after:
+        </Text>
+
+        <Text
+          style={{
+            marginTop: 10,
+            fontSize: 18,
+            marginBottom: 40,
+            fontWeight: "bold",
+            color: PRIMARY_COLOR,
+          }}
+        >
+          December 31, 2029
+        </Text>
+      </View>
+    </View>
+    )
+  }
+
+  const DescriptionBox = () => {
+    return (
+      
       <View
         style={{
           marginTop: 10,
-          borderRadius: 8,
+          borderRadius: 10,
+          margin : 15,
           backgroundColor: PRIMARY_COLOR_WHITE,
+          elevation : 5
         }}
       >
         <View
@@ -481,13 +406,13 @@ export default function DetailPost({ route }) {
             name="question-circle"
             type="font-awesome-5"
             color={PRIMARY_COLOR_BLACK}
-            size={30}
+            size={25}
           />
           <Text
             style={{
               marginTop: "auto",
               marginStart: 10,
-              fontSize: 20,
+              fontSize: 18,
             }}
           >
             Why do I create this post?
@@ -533,11 +458,18 @@ export default function DetailPost({ route }) {
         </Text>
       </View>
 
+    )
+  }
+
+  const AchievementsBox = () => {
+    return (
       <View
         style={{
           marginTop: 10,
+          borderRadius: 10,
+          margin : 15,
           backgroundColor: PRIMARY_COLOR_WHITE,
-          borderRadius: 8,
+          elevation : 5
         }}
       >
         <View
@@ -551,92 +483,174 @@ export default function DetailPost({ route }) {
             name="star-half-alt"
             type="font-awesome-5"
             color={PRIMARY_COLOR_BLACK}
-            size={30}
+            size={23}
           />
           <Text
             style={{
               marginStart: 10,
-              fontSize: 20,
+              fontSize: 18,
             }}
           >
             My achievements
           </Text>
-        </View>
-
-        <View style={styles.container}>
+        </View>    
+        <View>
           <Carousel
-            keyExtractor={(item) => item?.id}
-            style={styles.carousel}
+            layout={'tinder'}
+            ref={carouselRef}
             data={dataArchieve}
             renderItem={renderItem}
-            itemWidth={ITEM_WIDTH}
-            separatorWidth={SEPARATOR_WIDTH}
-            inActiveScale={1}
-            inActiveOpacity={1}
-            containerWidth={windowWidth}
+            sliderWidth={ITEM_WIDTH}
+            itemWidth={ITEM_WIDTH - 30}
           />
         </View>
+        
+  
       </View>
+    )
+  }
 
+  const DemandNoteBox = () => {
+    return (   
       <View
         style={{
           marginTop: 10,
+          borderRadius: 10,
+          margin : 15,
           backgroundColor: PRIMARY_COLOR_WHITE,
-          borderRadius: 8,
+          elevation : 5,
+          marginBottom : FULL_HEIGHT / 14
         }}
       >
         <View
           style={{
             flexDirection: "row",
             marginStart: 25,
+            margin : 15,
             marginTop: 20,
+            alignItems : 'center'
           }}
         >
           <Icon
             name="file-alt"
             type="font-awesome-5"
             color={PRIMARY_COLOR_BLACK}
-            size={30}
+            size={23}
           />
           <Text
             style={{
               marginStart: 10,
-              fontSize: 20,
+              fontSize: 18,
             }}
           >
             My demand notes
           </Text>
-        </View>
-
-        <View style={styles.container}>
+        </View>    
           <Carousel
-            keyExtractor={(item) => item?.id}
-            style={styles.carousel}
+            layout={'tinder'}
+            ref={carouselRef}
             data={dataArchieve}
             renderItem={renderItem}
-            itemWidth={ITEM_WIDTH}
-            separatorWidth={SEPARATOR_WIDTH}
-            inActiveScale={1}
-            inActiveOpacity={1}
-            containerWidth={windowWidth}
+            sliderWidth={ITEM_WIDTH}
+            itemWidth={ITEM_WIDTH - 30}
           />
-        </View>
       </View>
+    )
+  }
 
-      <View
+  const ScrollBox = () => {
+    return(
+      <Animated.ScrollView
+        onScroll={Animated.event(
+          [{ nativeEvent : { contentOffset : { y : scrollY }}}],
+          { useNativeDriver : true }
+        )}
         style={{
-          borderTopLeftRadius: 8,
-          borderTopRightRadius: 8,
-          marginTop: 10,
-          backgroundColor: PRIMARY_COLOR_WHITE,
+          backgroundColor: '#F2F5FA',
         }}
-      >
+      > 
 
-        <TouchableOpacity style={styles.buttonBack} onPress={clickViewButton}>
-          <Text style={styles.buttonTextBack}>Back this post!</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      <StudentInformationBox />
+      <LoanInformationBox />
+      <DescriptionBox />
+      <AchievementsBox />
+      <DemandNoteBox />
+    </Animated.ScrollView>
+    )
+  }
+
+  const viewProfileStudent = () => {
+    console.log("Nguyễn Trường Phi");
+  };
+
+  const [dataArchieve, setDataArchieve] = useState([
+    {
+      id: "item2",
+      image: "https://i.imgur.com/N3nQ9CS.jpg",
+      title: "màu 1",
+    },
+    {
+      id: "item3",
+      image: "https://i.imgur.com/AzdYlDM.jpg",
+      title: "màu 2",
+    },
+    {
+      id: "item1",
+      image: "https://i.imgur.com/s7GgEa8.jpg",
+      title: "màu 3",
+    },
+    {
+      id: "item6",
+      image: "https://i.imgur.com/1O1Kd6T.jpg",
+      title: "màu 4",
+    },
+    {
+      id: "item4",
+      image: "https://i.imgur.com/eNuhvpN.jpg",
+      title: "màu 5",
+    },
+
+    {
+      id: "item5",
+      image: "https://i.imgur.com/jEiBmma.jpg",
+      title: "màu 6",
+    },
+  ]);
+
+  async function clickViewButton() {
+    console.log("Test button");
+  }
+
+  function renderItem({ item, index }) {
+    const { image, title } = item;
+    return (
+      <Pressable activeOpacity={1} style={styles.item}>
+        <Image source={{ uri: image }} style={styles.image} />
+        <View style={styles.lowerContainer}>
+          <Text style={styles.titleText} numberOfLines={2}>
+            {title}
+          </Text>
+        </View>
+      </Pressable>
+    );
+  }
+
+  return (
+    <View>
+      <HeaderBar 
+        scrollY={scrollY} 
+        navigation={navigation} 
+      />
+      <ScrollBox />
+      <Animated.View
+        style={[styles.btnContainer, { transform : [{ translateY : bottomTranslate }]}]}
+      >    
+      <Button
+        style={[styles.btnInvest,{opacity}]}
+        color={PRIMARY_COLOR}
+          >Invest</Button> 
+      </Animated.View>
+    </View>
   );
 }
 
@@ -644,22 +658,14 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
     alignItems: "flex-start",
-    height: "auto",
     borderRadius: 8,
     borderTopWidth: 20,
     borderBottomWidth: 20,
     borderColor: PRIMARY_COLOR_WHITE,
   },
-  carousel: {
-    paddingLeft:10,
-    width: windowWidth,
-    height: ITEM_WIDTH + 100,
-    flexGrow: 0,
-  },
   item: {
     backgroundColor: "white",
-    height: "98%",
-    borderRadius: 5,
+    borderRadius: 10,
     borderColor: "#EAECEE",
     shadowColor: "#000",
     shadowOffset: {
@@ -668,20 +674,19 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.18,
     shadowRadius: 1.0,
-    elevation: 1,
+    elevation: 2,
+    marginVertical : 15
   },
   image: {
-    width: "100%",
     aspectRatio: 1,
     backgroundColor: "#EBEBEB",
+    borderTopRightRadius : 10, 
+    borderTopLeftRadius : 10
   },
   lowerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 12,
-  },
-  lowerLeft: {
-    width: "50%",
   },
   titleText: {
     fontSize: 16,
@@ -689,43 +694,22 @@ const styles = StyleSheet.create({
     color: "black",
     marginTop: 4,
   },
-
-  button: {
-    width: "40%",
-    flexDirection: "row",
-    marginLeft: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 4,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    borderColor: PRIMARY_COLOR,
+  btnInvest : {
+    width : FULL_WIDTH / 1.4,
+    borderRadius : 5,
+    borderWidth : 1.2,
+    alignSelf : 'center',
+    borderColor : PRIMARY_COLOR,
   },
-  buttonBack: {
-    width: "50%",
-    flexDirection: "row",
-    marginLeft:"auto",
-    marginRight:"auto",
-    marginTop:20,
-    marginBottom:20,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    backgroundColor:PRIMARY_COLOR,
-    borderColor: PRIMARY_COLOR,
-  },
-  buttonText: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: PRIMARY_COLOR,
-  },
-  buttonTextBack: {
-    fontWeight: "bold",
-    fontSize: 24,
-    color: PRIMARY_COLOR_WHITE,
-  },
+  btnContainer : {
+    backgroundColor: "white",
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    padding: 10,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right : 0,
+    elevation : 10
+  }
 });

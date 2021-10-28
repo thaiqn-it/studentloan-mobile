@@ -17,6 +17,7 @@ import {
 import Profile from '../Profile';
 import Onboarding from '../Onboarding';
 import RegisterPhone from '../RegisterPhone';
+import Invest from '../Invest';
 
 const Stack = createStackNavigator();
 
@@ -76,21 +77,21 @@ export default function AppStack() {
                 name={"Setting"}
                 component={Setting}
                 options={{
-                    headerShown: true,
+                    headerShown: false,
                 }}
             />
             <Stack.Screen
                 name={"Profile"}
                 component={Profile}
                 options={{
-                    headerShown: true,
+                    headerShown: false,
                 }}
             />
             <Stack.Screen
                 name={"RegisterPhone"}
                 component={RegisterPhone}
                 options={{
-                    headerShown: true,
+                    headerShown: false,
                 }}
             />
             <Stack.Screen
@@ -110,6 +111,13 @@ export default function AppStack() {
             <Stack.Screen
               name={"BackSelection"}
               component={BackSelection}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name={"Invest"}
+              component={Invest}
               options={{
                 headerShown: false,
               }}
