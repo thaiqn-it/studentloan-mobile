@@ -33,6 +33,12 @@ export default function DetailPost({ navigation,route }) {
   const scrollY = useRef(new Animated.Value(0)).current;
   const carouselRef = useRef(null);
 
+  const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
+    const paddingToBottom = 50;
+    return layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - paddingToBottom;
+  };
+
   const CONTAINER_HEIGHT = 50; 
   const offsetAnim = useRef(new Animated.Value(0)).current;
   const clampedScroll = Animated.diffClamp(
@@ -84,7 +90,7 @@ export default function DetailPost({ navigation,route }) {
         style={{
           backgroundColor: PRIMARY_COLOR_WHITE,
           borderRadius: 10,
-          margin : 15,
+          margin : 10,
           elevation : 5,
           marginTop : FULL_HEIGHT / 8,
         }}
@@ -244,7 +250,7 @@ export default function DetailPost({ navigation,route }) {
       style={{
         marginTop: 10,
         borderRadius: 10,
-        margin : 15,
+        margin : 10,
         backgroundColor: PRIMARY_COLOR_WHITE,
         elevation : 5
       }}
@@ -384,13 +390,12 @@ export default function DetailPost({ navigation,route }) {
   }
 
   const DescriptionBox = () => {
-    return (
-      
+    return (  
       <View
         style={{
           marginTop: 10,
           borderRadius: 10,
-          margin : 15,
+          margin : 10,
           backgroundColor: PRIMARY_COLOR_WHITE,
           elevation : 5
         }}
@@ -467,7 +472,7 @@ export default function DetailPost({ navigation,route }) {
         style={{
           marginTop: 10,
           borderRadius: 10,
-          margin : 15,
+          margin :10,
           backgroundColor: PRIMARY_COLOR_WHITE,
           elevation : 5
         }}
@@ -519,7 +524,7 @@ export default function DetailPost({ navigation,route }) {
           margin : 15,
           backgroundColor: PRIMARY_COLOR_WHITE,
           elevation : 5,
-          marginBottom : FULL_HEIGHT / 14
+          marginBottom : FULL_HEIGHT / 10
         }}
       >
         <View
@@ -565,9 +570,33 @@ export default function DetailPost({ navigation,route }) {
           [{ nativeEvent : { contentOffset : { y : scrollY }}}],
           { useNativeDriver : true }
         )}
-        style={{
-          backgroundColor: '#F2F5FA',
-        }}
+        onMomentumScrollEnd={
+          ({nativeEvent}) => {
+            if (isCloseToBottom(nativeEvent)) {
+              const toValue = _scrollValue > CONTAINER_HEIGHT && _clampScrollValue > CONTAINER_HEIGHT / 2
+                ? _offsetValue + CONTAINER_HEIGHT : _offsetValue - CONTAINER_HEIGHT
+
+              Animated.timing(offsetAnim, {
+                toValue,
+                duration : 200,
+                useNativeDriver : true,
+              }).start()
+            }
+          }}
+
+        //  onMomentumScrollEnd={() => {
+        //   const toValue = _scrollValue > CONTAINER_HEIGHT && _clampScrollValue > CONTAINER_HEIGHT / 2
+        //   ? _offsetValue + CONTAINER_HEIGHT : _offsetValue - CONTAINER_HEIGHT
+
+        //   Animated.timing(offsetAnim, {
+        //     toValue,
+        //     duration : 200,
+        //     useNativeDriver : true,
+        //   }).start()
+        //  }} 
+        // style={{
+        //   backgroundColor: '#F2F5FA',
+        // }}
       > 
 
       <StudentInformationBox />
@@ -645,11 +674,11 @@ export default function DetailPost({ navigation,route }) {
       <Animated.View
         style={[styles.btnContainer, { transform : [{ translateY : bottomTranslate }]}]}
       >    
-      <Button
-        style={[styles.btnInvest,{opacity}]}
-        color={PRIMARY_COLOR}
-        onPress={() => navigation.navigate("BackSelection")}
-          >Invest</Button> 
+        <Button
+          style={[styles.btnInvest,{opacity}]}
+          color={PRIMARY_COLOR}
+          onPress={() => navigation.navigate("BackSelection")}
+            >Invest</Button> 
       </Animated.View>
     </View>
   );

@@ -10,14 +10,11 @@ import Setting from '../Setting';
 import Home from "../Home";
 import DetailPost from "../DetailPost";
 import BackSelection from "../BackSelection";
-import {
-    createCollapsibleStack,
-    // disableExpoTranslucentStatusBar,
-} from 'react-navigation-collapsible';
 import Profile from '../Profile';
 import Onboarding from '../Onboarding';
 import RegisterPhone from '../RegisterPhone';
 import Invest from '../Invest';
+import Verify from "../Verify";
 
 const Stack = createStackNavigator();
 
@@ -118,6 +115,13 @@ export default function AppStack() {
             <Stack.Screen
               name={"Invest"}
               component={Invest}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name={"Verify"}
+              component={Verify}
               options={{
                 headerShown: false,
               }}

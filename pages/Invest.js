@@ -12,6 +12,7 @@ import {
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import * as Animatable from 'react-native-animatable';
 import HeaderBar from '../components/HeaderBar';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function Invest({ navigation }) {
   const [items, setItems] = useState([
@@ -150,6 +151,30 @@ export default function Invest({ navigation }) {
       const [isEdit,setEdit]=useState(false)
       const scrollY = useRef(new Animated.Value(0)).current;
       const input_tranlate_x = useRef(null)
+      const listRef = useRef(null)
+
+      const offsetAnim = useRef(new Animated.Value(0)).current;
+      const clampedScroll = Animated.diffClamp(
+        Animated.add(
+          scrollY.interpolate({
+            inputRange : [0, 1],
+            outputRange : [0 ,1],
+            extrapolateLeft : 'clamp',
+          }),
+          offsetAnim,
+        ),
+        0,
+        10
+      )
+
+      const opacity = clampedScroll.interpolate({
+        inputRange: [0, 10],
+        outputRange: [0.9, 0],
+      })  
+
+      const ScrollToTop = () => {
+        listRef.current.scrollToOffset({ animated: true, offset: 0 });
+      }
 
       const onSearch = () => {
         input_tranlate_x.current.transitionTo({ zIndex : 200 ,scale : 1}, 1)
@@ -284,10 +309,16 @@ export default function Invest({ navigation }) {
         onScrollBeginDrag={() => input_tranlate_x.current.transitionTo({ scale : 0 },1)}
         data={filterdData}
         renderItem={_renderItem}
+        ref={listRef}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop : FULL_HEIGHT / 9 , paddingBottom : 10 }}
       />
+      <Animated.View style={[styles.toTopBotton,{opacity}]}>
+        <TouchableOpacity onPress={ScrollToTop}>
+          <MaterialIcons name="keyboard-arrow-up" size={40} color="black" />
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 }
@@ -320,7 +351,7 @@ const styles = StyleSheet.create({
     top : 0,
     left : 0,
     right : 0,
-    height : 50
+    height : 50,
   },
   input_box : {
     height : 50,
@@ -350,5 +381,16 @@ const styles = StyleSheet.create({
     borderRadius : 15,
     paddingHorizontal : 15,
     fontSize : 18
+  },
+  toTopBotton : {
+    position : 'absolute',
+    bottom : FULL_HEIGHT / 20,
+    right : 15,
+    height : 60,
+    width : 60,
+    borderRadius : 10,
+    backgroundColor : '#dadee3',
+    alignItems : 'center',
+    justifyContent : 'center',
   }
 });

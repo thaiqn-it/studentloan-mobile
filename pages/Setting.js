@@ -1,9 +1,9 @@
-import React, { useContext,useEffect,useState } from 'react'
+import React, { useContext,useEffect,useState,useRef } from 'react'
 import { 
     StyleSheet, 
     Text, 
     View,
-    Animated,
+    Animated
 } from 'react-native'
 import { 
     Avatar, 
@@ -12,14 +12,22 @@ import {
 import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from '../constants/styles'
 import { Feather } from '@expo/vector-icons'
 import { Icon } from 'react-native-elements';
-import { useCollapsibleHeader } from 'react-navigation-collapsible';
 import { AppContext } from '../contexts/App';
+import HeaderBar from '../components/HeaderBar';
 
 const OPTIONS = [
     {
         option: "Profile",
         icon: "account-circle",
         screen: "Profile",
+        type : "material",
+        color: PRIMARY_COLOR,
+        size : 22
+    },
+    {
+        option: "Verify",
+        icon: "verified",
+        screen: "Verify",
         type : "material",
         color: "orange",
         size : 22
@@ -63,6 +71,7 @@ export default function Setting({navigation}) {
     const [ email, setEmail ] = useState(null);
     const [ phone, setPhone ] = useState(null);
     const [ address,setAddress ] = useState(null)
+    const scrollY = useRef(new Animated.Value(0)).current;
     const optionHadleClick = (item) => {
         item.option === "Logout" ? logout() : navigation.navigate(item.screen);
     };
@@ -87,34 +96,11 @@ export default function Setting({navigation}) {
         setPhone(user.phoneNumber)
         setEmail(user.email)
       }, []);
-
-    const {
-        onScroll /* Event handler */,
-        containerPaddingTop /* number */,
-        scrollIndicatorInsetTop /* number */,
-      } = useCollapsibleHeader(
-          {
-            navigationOptions: {
-                headerStyle: { backgroundColor: PRIMARY_COLOR, height: 80 } /* Optional */,
-
-              },
-              config: {
-                collapsedColor: 'red' /* Optional */,
-                useNativeDriver: true /* Optional, default: true */,
-                elevation: 4 /* Optional */,
-                disableOpacity: true /* Optional, default: false */,
-              },
-          }
-      );
     return (
-        <Animated.ScrollView 
-            style={{ backgroundColor : PRIMARY_COLOR_WHITE }} 
-            onScroll={onScroll}
-            onScrollBeginDrag={onScroll}
-            onScrollEndDrag={onScroll}
-            contentContainerStyle={{ paddingTop: containerPaddingTop }}
-            scrollIndicatorInsets={{ top: scrollIndicatorInsetTop }}>
-            <View style={[styles.topContainer,{ height : FULL_HEIGHT / 3.5}]}>
+        <View 
+            style={{ backgroundColor : PRIMARY_COLOR_WHITE }}>
+            <HeaderBar scrollY={scrollY} navigation={navigation}/>
+            <View style={[styles.topContainer]}>
                 <View style={{ flexDirection: "row", padding : 5 }}>           
                     <Avatar
                         rounded
@@ -184,12 +170,13 @@ export default function Setting({navigation}) {
                     </ListItem>
                 ))}
             </View>
-        </Animated.ScrollView>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
     topContainer: {
+        marginTop : FULL_HEIGHT / 9,
         margin : 15,
         backgroundColor: '#F2F5FA',
         justifyContent: "center",
@@ -207,7 +194,6 @@ const styles = StyleSheet.create({
     },
     bottomContainer: {
         backgroundColor: "white",
-        marginTop: 10,
         height: "100%",
     },
 })

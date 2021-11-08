@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,12 +11,16 @@ import {
   PRIMARY_COLOR,
   PRIMARY_COLOR_WHITE,
   PRIMARY_COLOR_BLACK,
+  FULL_WIDTH,
 } from "../constants/styles";
 import { Icon } from "react-native-elements/dist/icons/Icon";
+import InputSpinner from "react-native-input-spinner";
+import { FontAwesome } from '@expo/vector-icons'; 
+import { Button } from 'react-native-paper';
 
 export default function BackSelection({route, navigation}) {
 
-  const [money, setMoney] = useState(400000);
+  const [money, setMoney] = useState(50000);
   const [limit, setLimit] = useState([
     {
       id: 1,
@@ -28,254 +32,217 @@ export default function BackSelection({route, navigation}) {
     },
     {
       id: 3,
-      limitMoney: 400000,
+      limitMoney: 500000,
     },
     {
       id: 4,
-      limitMoney: 800000,
-    },
-    {
-      id: 5,
-      limitMoney: 16000000,
-    },
-    {
-      id: 6,
-      limitMoney: 28000000,
+      limitMoney: 1000000,
     },
   ]);
+  const [isSelect,setSelect] = useState(null)
+  const [rate,setRate] = useState(3/100)
+  const [repayment,setRepayment] = useState(money+(money*rate))
 
   const setMoneyByPressBox = (item) => {
     setMoney(item.limitMoney);
   };
 
+  useEffect(() => {
+    setRepayment(money+(money*rate))
+  }, [money])
+
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.box}
-      onPress={() => setMoneyByPressBox(item)}
+      style={[isSelect === item.id ? styles.boxSelect : styles.boxUnselect]}
+      onPress={() => {
+        setMoneyByPressBox(item)
+        setSelect(item.id)
+      }}
     >
-      <Text style={styles.textBox}>{item.limitMoney}</Text>
+      <Text style={[isSelect === item.id ? styles.textBoxSelect : styles.textBoxUnselect]}>{item.limitMoney} $</Text>
     </TouchableOpacity>
   );
 
   return (
     <ScrollView
       style={{
-        backgroundColor: PRIMARY_COLOR,
-        padding:15,
+        backgroundColor: PRIMARY_COLOR_WHITE,
       }}
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          marginTop: 150,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => setMoney(money - 50000)}
-          style={{
-            marginStart:10,
-            marginTop:5,
-          }}
-        >
-          <Icon
-            name="minus"
-            containerStyle={{
-              backgroundColor: PRIMARY_COLOR_WHITE,
-              padding: 8,
-              borderColor: PRIMARY_COLOR,
-              borderRadius: 10,
-            }}
-            type="font-awesome-5"
-            color={PRIMARY_COLOR}
-            size={25}
-          />
-        </TouchableOpacity>
-
-        <View
-        style={{
-          marginLeft: "auto",
-          marginRight: "auto",
-          flexDirection:"row",
+    > 
+       <View style={{ marginTop : 50, marginLeft : 20}}>
+        <Text style={{
+          fontSize : 15,
+          color : '#a6a9ad'
         }}>
-          <Text
-            style={{
-
-              fontSize: 35,
-              color: PRIMARY_COLOR_WHITE,
-            }}
-          >
-            {money}
-          </Text>
-
-          <Text
-            style={{
-              fontSize: 35,
-              color: PRIMARY_COLOR_WHITE,
-              marginLeft: 7,
-            }}
-          >
-            VNĐ
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          onPress={() => setMoney(money + 50000)}
-          style={{
-            marginEnd:10,
-            marginTop:5,
-          }}
-        >
-          <Icon
-            name="plus"
-            containerStyle={{
-              backgroundColor: PRIMARY_COLOR_WHITE,
-              padding: 8,
-              borderColor: PRIMARY_COLOR,
-              borderRadius: 10,
-            }}
-            type="font-awesome-5"
-            color={PRIMARY_COLOR}
-            size={25}
-          />
-        </TouchableOpacity>
+          AMOUNT
+        </Text>
       </View>
-
       <View
         style={{
-          height: 1,
-          marginLeft: "auto",
-          marginRight: "auto",
-          marginTop: 15,
-          marginBottom: 10,
-          width: "60%",
-          backgroundColor: PRIMARY_COLOR_WHITE,
-        }}
-      />
-
-      <View
-        style={{
-          flexDirection: "row",
-          marginLeft: "auto",
-          marginRight: "auto",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop : 20
         }}
       >
+          <InputSpinner
+            skin={"clean"}
+            fontSize={18}
+            buttonFontSize={32}
+            width={350}
+            height={50}
+            children={<FontAwesome style={{ marginRight : 20 }} name="dollar" size={20} color="gray" />}
+            min={50000}
+            step={50000}
+            colorMax={"#f04048"}
+            colorMin={"#40c5f4"}
+            value={money}
+            onChange={(value) => {
+              setMoney(value)
+            }}
+          />
+      </View>
+      <View/>
+        <View
+          style={{
+            flexDirection: "row",
+            alignSelf : 'center',
+            alignItems : 'center',
+            marginTop : 10,
+          }}
+        >
         <Icon
           name="exclamation-circle"
           type="font-awesome-5"
           containerStyle={{
             marginRight: 5,
-            marginTop: 2,
           }}
-          color={PRIMARY_COLOR_WHITE}
-          size={13}
+          color={PRIMARY_COLOR}
+          size={17}
         />
         <Text
           style={{
-            fontSize: 13,
-            color: PRIMARY_COLOR_WHITE,
+            fontSize: 15,
+            color: PRIMARY_COLOR,
           }}
         >
-          Make sure you choose the right limit
+          Available amount : 7,405.98 $
+        </Text>
+      </View>
+      <View style={{ marginTop : 20, marginLeft : 20}}>
+        <Text style={{
+          fontSize : 15,
+          color : '#a6a9ad'
+        }}>
+          CHOOSE YOUR AMOUNT
         </Text>
       </View>
 
       <View
         style={{
           backgroundColor: PRIMARY_COLOR_WHITE,
-          marginTop: 50,
-          borderRadius: 20,
-          paddingTop: 30,
+          borderRadius: 10,
+          margin : 10,
+          elevation : 3,
+          padding : 10
         }}
       >
         <FlatList
           data={limit}
-          contentContainerStyle={{
-            marginLeft:10,
-            marginRight:10,
-            marginTop:20,
-            marginBottom:20,
-          }}
-          numColumns={3}
+          numColumns={2}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
         />
-
-        <View
-          style={{
-            flexDirection: "row",
-          }}
-        >
-          <TouchableOpacity
-            style={styles.buttonCancel}
-            onPress={() => navigation.goBack(null)}
-          >
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.buttonTopUp}
-            onPress={() => navigation.navigate('Home')}
-          >
-            <Text style={styles.buttonTextTopUp}>Press to top up!</Text>
-          </TouchableOpacity>
+      </View>
+      <View style={{ marginTop : 20, marginLeft : 20}}>
+        <Text style={{
+          fontSize : 15,
+          color : '#a6a9ad'
+        }}>
+          INVEST INFORMATION
+        </Text>
+      </View>
+      <View
+        style={{
+          backgroundColor: PRIMARY_COLOR_WHITE,
+          borderRadius: 10,
+          margin : 10,
+          elevation : 3,
+          padding : 20,
+          flexDirection : 'row'
+        }}
+      >
+        <View style={{ justifyContent : 'flex-start' }}>
+          <Text style={{ fontSize : 15 }}>Annual Interest Rate</Text>
+          <Text style={styles.loanInfoTxt}>Penalty Rate</Text>
+          <Text style={styles.loanInfoTxt}>Total Repayment</Text>
+          <Text style={styles.loanInfoTxt}>Repayment Date</Text>
+        </View>
+        <View style={{ alignItems : 'flex-end',flex : 1 }}>
+          <Text style={{ fontSize : 15 }}>{rate * 100}%</Text>
+          <Text style={styles.loanInfoTxt}>15%</Text>
+          <Text style={styles.loanInfoTxt}>{repayment} $</Text>
+          <Text style={styles.loanInfoTxt}>01/03/2022</Text>
         </View>
       </View>
-    </ScrollView>
-  );
+      <View
+        style={styles.btnContainer}
+      >    
+        <Button
+          style={styles.btnInvest}
+          color={PRIMARY_COLOR}
+
+            >Confirm</Button> 
+      </View>
+    </ScrollView> 
+  );  
 }
 
 const styles = StyleSheet.create({
-  textBox: {
-    fontSize: 17,
-    fontWeight: "bold",
+  textBoxUnselect: {
+    fontSize: 15,
+    color: '#babdc2',
+    fontWeight : 'bold'
+  },
+  textBoxSelect : {
+    fontSize: 15,
     color: PRIMARY_COLOR_WHITE,
   },
-  box: {
-    elevation:5,
+  boxUnselect : {
     margin: 10,
-    height:100,
+    height:60,
     width:50,
-    borderRadius: 10,
     flex: 1,
-    flexDirection: "row",
+    borderRadius : 5,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: PRIMARY_COLOR,
-  },
-  buttonCancel:{
-    width: "30%",
-    flexDirection: "row",
-    marginLeft:20,
-    marginTop: 40,
-    marginBottom: 30,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor:PRIMARY_COLOR,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    padding:10,
     backgroundColor: PRIMARY_COLOR_WHITE,
+    borderWidth : 1,
+    borderColor : '#babdc2'
   },
-    buttonText: {
-    fontWeight: "900",
-    fontSize: 20,
-    color: PRIMARY_COLOR_BLACK,
-  },
-  buttonTextTopUp: {
-    fontWeight: "bold",
-    fontSize: 20,
-    color: PRIMARY_COLOR_WHITE,
-  },
-  buttonTopUp:{
-    elevation:3,
-    width: "50%",
-    marginLeft:30,
-    padding:10,
-    marginTop: 40,
-    marginBottom: 30,
-    borderRadius: 8,
+  boxSelect : {
+    margin: 10,
+    height:60,
+    width:50,
+    flex: 1,
+    borderRadius : 5,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth : 1,
+    borderColor : '#babdc2',
     backgroundColor: PRIMARY_COLOR,
   },
+  loanInfoTxt : {
+    marginTop : 10,
+    fontSize : 15
+  },
+  btnInvest : {
+    width : FULL_WIDTH / 1.4,
+    borderRadius : 5,
+    borderWidth : 1.2,
+    alignSelf : 'center',
+    borderColor : PRIMARY_COLOR,
+  },
+  btnContainer : {
+    padding: 10,
+  }
 });
