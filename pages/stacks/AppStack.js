@@ -15,6 +15,7 @@ import Onboarding from '../Onboarding';
 import RegisterPhone from '../RegisterPhone';
 import Invest from '../Invest';
 import Verify from "../Verify";
+import InvestmentDetail from "../InvestmentDetail";
 
 const Stack = createStackNavigator();
 
@@ -122,6 +123,13 @@ export default function AppStack() {
             <Stack.Screen
               name={"Verify"}
               component={Verify}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name={"InvestmentDetail"}
+              component={InvestmentDetail}
               options={{
                 headerShown: false,
               }}

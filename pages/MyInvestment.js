@@ -5,7 +5,7 @@ import { Avatar } from 'react-native-elements';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import * as Progress from 'react-native-progress';
 
-export default function MyInvestment() {
+export default function MyInvestment({ navigation }) {
     const [items, setItems] = useState([
         // this is the parent or 'item'
         {
@@ -141,7 +141,7 @@ export default function MyInvestment() {
     function _renderItem({ item }) {
         return (
           <TouchableOpacity
-            onPress={() => navigation.navigate("DetailPost")}
+            onPress={() => navigation.navigate("InvestmentDetail")}
             style={styles.container}>
               <View style={{ flexDirection : 'row', padding : 15}}> 
                 <View style={{ flexDirection : 'row', alignContent : 'flex-start' }}>
