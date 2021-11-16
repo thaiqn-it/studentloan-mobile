@@ -1,12 +1,12 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import Login from '../Login';
-import TabNavigator from '../navigations/TabNavigator';
-import Register from '../Register';
-import ForgotPassword from '../ForgotPassword';
-import Verification from '../Verification';
-import ChangePassword from '../ChangePassword';
-import Setting from '../Setting';
+import Login from "../Login";
+import TabNavigator from "../navigations/TabNavigator";
+import Register from "../Register";
+import ForgotPassword from "../ForgotPassword";
+import Verification from "../Verification";
+import ChangePassword from "../ChangePassword";
+import Setting from "../Setting";
 import Home from "../Home";
 import DetailPost from "../DetailPost";
 import BackSelection from "../BackSelection";
@@ -16,6 +16,7 @@ import RegisterPhone from '../RegisterPhone';
 import Invest from '../Invest';
 import Verify from "../Verify";
 import InvestmentDetail from "../InvestmentDetail";
+import History from "../History";
 
 const Stack = createStackNavigator();
 
@@ -130,6 +131,13 @@ export default function AppStack() {
             <Stack.Screen
               name={"InvestmentDetail"}
               component={InvestmentDetail}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name={"History"}
+              component={History}
               options={{
                 headerShown: false,
               }}
