@@ -19,12 +19,14 @@ import Onboarding from "../Onboarding";
 import RegisterPhone from "../RegisterPhone";
 import Invest from "../Invest";
 import History from "../History";
+import FilterHistory from "../FilterHistory";
+import DetailTransaction from "../DetailTransaction";
 
 const Stack = createStackNavigator();
 
 export default function AppStack() {
   return (
-    <Stack.Navigator initialRouteName={"Wallet"}>
+    <Stack.Navigator initialRouteName={"History"}>
       <Stack.Screen
         name={"Login"}
         component={Login}
@@ -68,6 +70,13 @@ export default function AppStack() {
         }}
       />
       <Stack.Screen
+        name={"DetailTransaction"}
+        component={DetailTransaction}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name={"ChangePassword"}
         component={ChangePassword}
         options={{
@@ -105,6 +114,13 @@ export default function AppStack() {
       <Stack.Screen
         name={"DetailPost"}
         component={DetailPost}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name={"FilterHistory"}
+        component={FilterHistory}
         options={{
           headerShown: false,
         }}

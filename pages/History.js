@@ -13,11 +13,12 @@ import {
   PRIMARY_COLOR,
   PRIMARY_COLOR_WHITE,
   PRIMARY_COLOR_BLACK,
+  FULL_WIDTH,
 } from "../constants/styles";
 
 export default function Home({ route, navigation }) {
   //   const { id } = route.params;
-  const [isPress, setisPress] = useState(false)
+  const [isPress, setisPress] = useState(false);
   const [recMoney, setRecMoney] = useState();
   const [category, setcategory] = useState([
     {
@@ -129,10 +130,54 @@ export default function Home({ route, navigation }) {
     }
   };
 
+  const isRecieveMoney = (num, type) => {
+    if (type == "spent") {
+      return (
+        <NumberFormat
+          renderText={(text) => (
+            <Text
+              style={{
+                fontSize: 13,
+                color: PRIMARY_COLOR_WHITE,
+                marginStart: "auto",
+              }}
+            >
+              -{text}
+            </Text>
+          )}
+          value={num}
+          displayType={"text"}
+          thousandSeparator={true}
+          prefix={"$"}
+        />
+      );
+    } else {
+      return (
+        <NumberFormat
+          renderText={(text) => (
+            <Text
+              style={{
+                fontSize: 13,
+                color: PRIMARY_COLOR_WHITE,
+              }}
+            >
+              {text}
+            </Text>
+          )}
+          value={num}
+          displayType={"text"}
+          thousandSeparator={true}
+          prefix={"$"}
+        />
+      );
+    }
+  };
+
   function renderListTrans({ item }) {
     return (
       <View>
         <TouchableOpacity
+        onPress={()=>navigation.navigate('DetailTransaction')}
           style={{
             flexDirection: "row",
             padding: 10,
@@ -248,40 +293,65 @@ export default function Home({ route, navigation }) {
             <View
               style={{
                 padding: 5,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                width: FULL_WIDTH / 2.7,
               }}
             >
-              <View
-                style={{
-                  flexDirection: "row",
-                }}
-              >
-                <Icon
-                  name="long-arrow-alt-up"
-                  type="font-awesome-5"
-                  color={"#00ff00"}
+              <View>
+                <View
                   style={{
-                    margin: 2,
+                    flexDirection: "row",
                   }}
-                  size={13}
-                />
-                <Text style={styles.textRecSpe}>Recieve: 150000</Text>
-              </View>
+                >
+                  <View
+                    style={{
+                      height: "100%",
+                      borderColor: PRIMARY_COLOR_WHITE,
+                      borderWidth: 0.7,
+                      marginEnd:5,
+                    }}
+                  />
+                  <Icon
+                    name="long-arrow-alt-up"
+                    type="font-awesome-5"
+                    color={"#00ff00"}
+                    style={{
+                      margin: 2,
+                    }}
+                    size={13}
+                  />
+                  <Text style={styles.textRecSpe}>Recieve</Text>
+                </View>
 
-              <View
-                style={{
-                  flexDirection: "row",
-                }}
-              >
-                <Icon
-                  name="long-arrow-alt-down"
-                  type="font-awesome-5"
-                  color={"red"}
+                <View
                   style={{
-                    margin: 2,
+                    flexDirection: "row",
                   }}
-                  size={13}
-                />
-                <Text style={styles.textRecSpe}>Spent: 50000</Text>
+                >
+                  <View
+                    style={{
+                      height: "100%",
+                      borderColor: PRIMARY_COLOR_WHITE,
+                      borderWidth: 0.7,
+                      marginEnd:5,
+                    }}
+                  />
+                  <Icon
+                    name="long-arrow-alt-down"
+                    type="font-awesome-5"
+                    color={"red"}
+                    style={{
+                      margin: 2,
+                    }}
+                    size={13}
+                  />
+                  <Text style={styles.textRecSpe}>Spent</Text>
+                </View>
+              </View>
+              <View>
+                {isRecieveMoney(150000, "recieve")}
+                {isRecieveMoney(50000, "spent")}
               </View>
             </View>
           </View>
@@ -316,7 +386,7 @@ export default function Home({ route, navigation }) {
         <Text
           style={{
             fontSize: 15,
-            color: PRIMARY_COLOR_BLACK
+            color: PRIMARY_COLOR_BLACK,
           }}
         >
           {item.name}
@@ -361,6 +431,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   textRecSpe: {
+    marginStart: 3,
     fontSize: 13,
     color: PRIMARY_COLOR_WHITE,
   },
