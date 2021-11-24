@@ -19,6 +19,7 @@ import InvestmentDetail from "../InvestmentDetail";
 import History from "../History";
 import TransactionInfo from "../TransactionInfo";
 import DepositMoney from "../DepositMoney";
+import FilterHistory from "../FilterHistory";
 
 const Stack = createStackNavigator();
 
@@ -158,6 +159,13 @@ export default function AppStack() {
                 headerShown: false,
               }}
             />
+              <Stack.Screen
+                name={"FilterHistory"}
+                component={FilterHistory}
+                options={{
+                  headerShown: false,
+                }}
+              />
                 
         </Stack.Navigator>
     )
