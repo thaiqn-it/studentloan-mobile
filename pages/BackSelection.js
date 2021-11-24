@@ -93,8 +93,6 @@ export default function BackSelection({route, navigation}) {
             children={<FontAwesome style={{ marginRight : 20 }} name="dollar" size={20} color="gray" />}
             min={50000}
             step={50000}
-            colorMax={"#f04048"}
-            colorMin={"#40c5f4"}
             value={money}
             onChange={(value) => {
               setMoney(value)

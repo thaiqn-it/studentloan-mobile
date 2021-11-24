@@ -137,6 +137,7 @@ export default function Home({ route, navigation }) {
             flexDirection: "row",
             padding: 10,
           }}
+          onPress={() => navigation.navigate("TransactionInfo")}
         >
           <View
             style={{
@@ -153,7 +154,7 @@ export default function Home({ route, navigation }) {
               style={{
                 color: generateColor(),
                 fontWeight: "bold",
-                fontSize: 20,
+                fontSize: 17,
               }}
             >
               {item.shortcut}
@@ -164,12 +165,12 @@ export default function Home({ route, navigation }) {
             style={{
               marginBottom: "auto",
               marginTop: "auto",
-              marginStart: 20,
+              marginStart: 17,
             }}
           >
             <Text
               style={{
-                fontSize: 20,
+                fontSize: 17,
                 color: PRIMARY_COLOR_BLACK,
               }}
             >
@@ -262,7 +263,7 @@ export default function Home({ route, navigation }) {
                   style={{
                     margin: 2,
                   }}
-                  size={13}
+                  size={15}
                 />
                 <Text style={styles.textRecSpe}>Recieve: 150000</Text>
               </View>
@@ -279,7 +280,7 @@ export default function Home({ route, navigation }) {
                   style={{
                     margin: 2,
                   }}
-                  size={13}
+                  size={15}
                 />
                 <Text style={styles.textRecSpe}>Spent: 50000</Text>
               </View>
@@ -295,7 +296,7 @@ export default function Home({ route, navigation }) {
             elevation: 4,
           }}
           renderItem={renderListTrans}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
         />
       </View>
     );
@@ -305,9 +306,10 @@ export default function Home({ route, navigation }) {
     return (
       <TouchableOpacity
         style={{
-          borderRadius: 10,
+          borderRadius: 5,
           backgroundColor: PRIMARY_COLOR_WHITE,
           padding: 10,
+          paddingHorizontal : 20,
           justifyContent: "center",
           margin: 5,
           elevation: 2,
@@ -326,6 +328,7 @@ export default function Home({ route, navigation }) {
   }
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       style={{
         backgroundColor: PRIMARY_COLOR_WHITE,
       }}
@@ -334,9 +337,9 @@ export default function Home({ route, navigation }) {
         data={category}
         renderItem={renderListCategory}
         contentContainerStyle={{
-          marginTop: 10,
+          marginTop: 40,
         }}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         horizontal
       />
       <FlatList
@@ -345,9 +348,10 @@ export default function Home({ route, navigation }) {
           borderRadius: 10,
           backgroundColor: PRIMARY_COLOR_WHITE,
           elevation: 4,
+          marginTop : 10
         }}
         renderItem={renderListMonth}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
       />
     </ScrollView>
   );
@@ -361,7 +365,8 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   textRecSpe: {
-    fontSize: 13,
+    fontSize: 15,
+    marginHorizontal : 5,
     color: PRIMARY_COLOR_WHITE,
   },
 });

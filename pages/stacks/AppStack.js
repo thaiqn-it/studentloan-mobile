@@ -17,6 +17,8 @@ import Invest from '../Invest';
 import Verify from "../Verify";
 import InvestmentDetail from "../InvestmentDetail";
 import History from "../History";
+import TransactionInfo from "../TransactionInfo";
+import DepositMoney from "../DepositMoney";
 
 const Stack = createStackNavigator();
 
@@ -138,6 +140,20 @@ export default function AppStack() {
             <Stack.Screen
               name={"History"}
               component={History}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name={"TransactionInfo"}
+              component={TransactionInfo}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name={"DepositMoney"}
+              component={DepositMoney}
               options={{
                 headerShown: false,
               }}
