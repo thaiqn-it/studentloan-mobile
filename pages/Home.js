@@ -125,7 +125,7 @@ export default function Home({ route, navigation }) {
             data={uncompletedInfo}
             horizontal
             renderItem={renderUncompleteInfo}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.id.toString()}
           />
           <View style={styles.buttonInvest1}>
             <Text style={styles.textInvest1}>INVEST</Text>
@@ -372,7 +372,7 @@ export default function Home({ route, navigation }) {
             marginEnd: "auto",
           }}
           numColumns={2}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
         />
       </ScrollView>
     </View>
