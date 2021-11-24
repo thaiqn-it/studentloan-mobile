@@ -26,7 +26,7 @@ const Stack = createStackNavigator();
 
 export default function AppStack() {
   return (
-    <Stack.Navigator initialRouteName={"History"}>
+    <Stack.Navigator initialRouteName={"Login"}>
       <Stack.Screen
         name={"Login"}
         component={Login}
