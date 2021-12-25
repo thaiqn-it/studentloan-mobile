@@ -46,6 +46,7 @@
     "react-native-sectioned-multi-select": "^0.8.1",
     "react-native-snap-carousel": "^3.9.1",
     "react-native-svg": "^12.1.1",
+    "react-native-swiper": "^1.6.0",
     "react-native-web": "~0.9.0",
     "react-number-format": "^4.7.3"
   },

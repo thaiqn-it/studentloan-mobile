@@ -4,7 +4,7 @@ import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_CO
 import { Avatar } from 'react-native-elements';
 import { Calendar,Agenda } from 'react-native-calendars';
 import * as Animatable from 'react-native-animatable';
-import { FlatList } from 'react-native-gesture-handler';
+import { FlatList, ScrollView } from 'react-native-gesture-handler';
 
 export default function InvestmentDetail() {
     const portfolloView = useRef(null)
@@ -95,48 +95,52 @@ export default function InvestmentDetail() {
     }
 
     const CalendarView = () => {
-        const [items,setItems] = useState({})
+        // const [items,setItems] = useState({})
 
-        const timeToString = (time) => {
-            const date = new Date(time);
-            return date.toISOString().split('T')[0];
-          }
+        // const timeToString = (time) => {
+        //     const date = new Date(time);
+        //     return date.toISOString().split('T')[0];
+        //   }
           
-        const loadItems = (day) => {
-            setTimeout(() => {
-              for (let i = -15; i < 85; i++) {
-                const time = day.timestamp + i * 24 * 60 * 60 * 1000;       
-                const strTime = timeToString(time);
-                if (!items[strTime]) {
-                  items[strTime] = [];
-                  const numItems = Math.floor(Math.random() * 3 + 1);
-                  for (let j = 0; j < numItems; j++) {
-                    items[strTime].push({
-                      name: 'Item for ' + strTime + ' #' + j,
-                      height: Math.max(50, Math.floor(Math.random() * 150))
-                    });
-                  }
-                }
-              }
-              const newItems = {};
-              Object.keys(items).forEach(key => {
-                newItems[key] = items[key];
-              });
-              setItems(newItems);
-            }, 1000);
-          }
+        // const loadItems = (day) => {
+        //     setTimeout(() => {
+        //       for (let i = -15; i < 85; i++) {
+        //         const time = day.timestamp + i * 24 * 60 * 60 * 1000;       
+        //         const strTime = timeToString(time);
+        //         if (!items[strTime]) {
+        //           items[strTime] = [];
+        //           const numItems = Math.floor(Math.random() * 3 + 1);
+        //           for (let j = 0; j < numItems; j++) {
+        //             items[strTime].push({
+        //               name: 'Item for ' + strTime + ' #' + j,
+        //               height: Math.max(50, Math.floor(Math.random() * 150))
+        //             });
+        //           }
+        //         }
+        //       }
+        //       const newItems = {};
+        //       Object.keys(items).forEach(key => {
+        //         newItems[key] = items[key];
+        //       });
+        //       setItems(newItems);
+        //     }, 1000);
+        //   }
+
+        
+
         return(
-            <View style={{ flex : 1,marginTop : 10 }}>
-                  {/* <Calendar
-    
-                enableSwipeMonths={true}
-                />    */}
-                <Agenda
-                    items={items}
-                    initialNumToRender={2}             
-                    loadItemsForMonth={loadItems}
-                    selected={'2021-11-19'}
-                />                    
+            <View style={{ marginTop : 10, backgroundColor : PRIMARY_COLOR_WHITE, elevation : 2, marginLeft : 20, borderLeftWidth : 4, borderLeftColor : PRIMARY_COLOR }}>       
+                <View style={{ flexDirection : 'row' }}>
+                    <View style={{ alignItems : 'center', justifyContent : 'center',flex : 2, paddingVertical : 10 }}>
+                        <Text style={{ fontSize : 20 }}>09</Text>
+                        <Text style={{ fontSize : 16, opacity : 0.6 }}>Fri</Text>
+                    </View>
+                    <View style={{ height : 45, width : 2, backgroundColor : '#dadee3', alignSelf : 'center'}}/>
+                    <View style={{ alignItems : 'center', justifyContent : 'center',flex : 8 }}>
+                        <Text style={{ fontSize : 20, color : PRIMARY_COLOR }}>500.000$</Text>
+                        <Text>Tiền lãi : 20.000$</Text>
+                    </View>
+                </View>
             </View>
         )
     }
@@ -273,7 +277,7 @@ export default function InvestmentDetail() {
                     calendarText.current.transitionTo({ opacity : 1, scale : 1.1})
                     reportText.current.transitionTo({ opacity : 0.4, scale : 1 })
                 }}>
-                    <Animatable.Text ref={calendarText} style={{ fontSize : 15, marginLeft : 20,color : PRIMARY_COLOR_BLACK,fontWeight : 'bold',opacity : 0.4 }}>Calendar</Animatable.Text>
+                    <Animatable.Text ref={calendarText} style={{ fontSize : 15, marginLeft : 20,color : PRIMARY_COLOR_BLACK,fontWeight : 'bold',opacity : 0.4 }}>Schedule</Animatable.Text>
                 </Pressable>
                 <Pressable onPress={() => {
                     portfolloView.current.transitionTo({ translateX : -(FULL_WIDTH) })

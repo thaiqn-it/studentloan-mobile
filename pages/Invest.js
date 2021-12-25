@@ -172,6 +172,11 @@ export default function Invest({ navigation }) {
         outputRange: [0.9, 0],
       })  
 
+      const zIndex = clampedScroll.interpolate({
+        inputRange: [0, 10],
+        outputRange: [100, -10],
+      })  
+
       const ScrollToTop = () => {
         listRef.current.scrollToOffset({ animated: true, offset: 0 });
       }
@@ -265,7 +270,7 @@ export default function Invest({ navigation }) {
               name="search"
               type={"fontawesome"}
               size={30}
-              color="black"
+              color="white"
             />
           </TouchableOpacity>
         }/>
@@ -276,7 +281,7 @@ export default function Invest({ navigation }) {
           onPress={onBack}
           style={styles.back_icon_box}
           underlayColor="#ccd0d5">
-            <Icon name="chevron-left" size={30} color={PRIMARY_COLOR_BLACK}/>
+            <Icon name="chevron-left" size={35} color={PRIMARY_COLOR_WHITE}/>
         </TouchableHighlight>
         <TextInput 
           placeholder="Search"
@@ -314,7 +319,7 @@ export default function Invest({ navigation }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop : FULL_HEIGHT / 9 , paddingBottom : 10 }}
       />
-      <Animated.View style={[styles.toTopBotton,{opacity}]}>
+      <Animated.View style={[styles.toTopBotton,{opacity},{zIndex}]}>
         <TouchableOpacity onPress={ScrollToTop}>
           <MaterialIcons name="keyboard-arrow-up" size={40} color="black" />
         </TouchableOpacity>
@@ -360,10 +365,10 @@ const styles = StyleSheet.create({
     position : 'absolute',
     top : 0,
     left : 0,
-    backgroundColor : PRIMARY_COLOR_WHITE,
+    backgroundColor : PRIMARY_COLOR,
     width : FULL_WIDTH,
     marginTop : FULL_HEIGHT / 34,
-    elevation : 5
+    zIndex : -100
   },
   back_icon_box : {
     width : 40,
@@ -378,8 +383,9 @@ const styles = StyleSheet.create({
     flex : 1,
     height : 40,
     backgroundColor : PRIMARY_COLOR_WHITE,
-    borderRadius : 15,
-    paddingHorizontal : 15,
+    borderRadius : 5,
+    marginRight : 10,
+    paddingHorizontal : 5,
     fontSize : 18
   },
   toTopBotton : {

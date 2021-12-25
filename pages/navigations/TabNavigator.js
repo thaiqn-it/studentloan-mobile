@@ -1,7 +1,7 @@
 import React, { useRef,useEffect,useContext } from "react";
 import { View,StyleSheet, TouchableOpacity } from 'react-native'
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from "../../constants/styles";
+import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from "../../constants/styles";
 import { Icon } from 'react-native-elements';
 import * as Animatable from 'react-native-animatable';
 
@@ -110,22 +110,25 @@ const TabNavigator = () => {
       }, [])
 
     return (
-        <Tab.Navigator            
-            initialRouteName={"Home"} 
-            screenOptions={{             
-                tabBarShowLabel: false,
-                headerShown : false
-            }}
-            >   
-            {TabbarArr.map((item,index) => {
-                return (
-                    <Tab.Screen key={index} name={item.route} component={item.component} options={{
-                        tabBarButton: ( props ) => <BtnIcon { ...props } item={item}/>
-                    }}/> 
-                )
-            })}
-                                 
+        <View style={{ flex : 1, height : FULL_HEIGHT , width : FULL_WIDTH }}>
+            <Tab.Navigator            
+                initialRouteName={"Home"} 
+                screenOptions={{             
+                    tabBarShowLabel: false,
+                    headerShown : false,
+                    tabBarHideOnKeyboard: true,
+                }}
+                >   
+                {TabbarArr.map((item,index) => {
+                    return (
+                        <Tab.Screen key={index} name={item.route} component={item.component} options={{
+                            tabBarButton: ( props ) => <BtnIcon { ...props } item={item}/>
+                        }}/> 
+                    )
+                })}
+                                    
             </Tab.Navigator>
+        </View>
     )
 }
 

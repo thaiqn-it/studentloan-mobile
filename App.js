@@ -5,11 +5,12 @@ import {
   Roboto_700Bold
 } from '@expo-google-fonts/roboto';
 import React from 'react';
-import { ActivityIndicator } from 'react-native';
-import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
+import { ActivityIndicator, StatusBar } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from "@react-navigation/native";
 import AppStack from "./pages/stacks/AppStack";
 import AppProvider from './contexts/App';
+import { PRIMARY_COLOR } from './constants/styles';
 
 console.disableYellowBox = true;  
 

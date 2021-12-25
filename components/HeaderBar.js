@@ -2,13 +2,13 @@ import React, { useRef, useEffect } from 'react'
 import { StyleSheet, Text, Animated } from 'react-native'
 import { Header } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { PRIMARY_COLOR_WHITE } from '../constants/styles';
+import { PRIMARY_COLOR, PRIMARY_COLOR_WHITE } from '../constants/styles';
 import {
     FontAwesome5,
   } from "@expo/vector-icons";
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 export default function HeaderBar({ scrollY,navigation, right}) {
-    const CONTAINER_HEIGHT = 50; 
+    const CONTAINER_HEIGHT = 80; 
     const offsetAnim = useRef(new Animated.Value(0)).current;
     const clampedScroll = Animated.diffClamp(
         Animated.add(
@@ -49,10 +49,13 @@ export default function HeaderBar({ scrollY,navigation, right}) {
 
     return (
         <Animated.View style={[styles.header,{ transform : [{ translateY : headerTranslate }] }]}>
-          <Header
+          <Header 
+            statusBarProps={{
+              backgroundColor : PRIMARY_COLOR
+            }}
             containerStyle={{
-              backgroundColor: PRIMARY_COLOR_WHITE,
-              elevation : 5
+              backgroundColor: PRIMARY_COLOR,
+              height : 80
             }}
             placement="left"
             leftComponent={
@@ -69,19 +72,20 @@ export default function HeaderBar({ scrollY,navigation, right}) {
                 name={"chevron-left"}
                 size={20}
                 style={{ width: 30 }}
-                color={"black"}
+                color={"white"}
               />
               <Text
                 style={{
                   fontSize: 20,
                   marginLeft: -5,
+                  color : PRIMARY_COLOR_WHITE
                 }}
               >
                 Back
               </Text>
             </TouchableOpacity>
           }
-            leftContainerStyle={{ flex: 4, flexDirection: "row" }}
+            leftContainerStyle={{ flexDirection: "row" }}
             rightComponent={
               right
             }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useRef } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -7,436 +7,318 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { Icon } from "react-native-elements/dist/icons/Icon";
-import NumberFormat from "react-number-format";
 import {
   PRIMARY_COLOR,
   PRIMARY_COLOR_WHITE,
   PRIMARY_COLOR_BLACK,
   FULL_WIDTH,
+  FULL_HEIGHT,
 } from "../constants/styles";
+import * as Animatable from 'react-native-animatable';
+import { AntDesign,Ionicons } from '@expo/vector-icons';
 
 export default function Home({ route, navigation }) {
-  //   const { id } = route.params;
-  const [isPress, setisPress] = useState(false);
-  const [recMoney, setRecMoney] = useState();
-  const [category, setcategory] = useState([
+  const transactionData = [
     {
-      id: 1,
-      name: "All",
+      id : 1,
+      date : '23-10-2021',
+      data : [
+        {
+          id : 1,
+          name : 'Nguyễn Quốc Thái',
+          timeAt : '10:32 AM',
+          date : '23-10-2020',
+          money : '30.000.000',
+          type : 'top-up',
+          status : 'up'
+        },
+        {
+          id : 2,
+          name : 'Nguyễn Quốc Thái II',
+          timeAt : '10:35 AM',
+          date : '23-10-2020',
+          money : '20.000.000',
+          type : 'withdraw',
+          status : 'down'
+        },
+      ]
     },
     {
-      id: 2,
-      name: "Recieve",
+      id : 2,
+      date : '2-1-2021',
+      data : [
+        {
+          id : 3,
+          name : 'Đinh Phú Cường',
+          timeAt : '08:21 AM',
+          date : '23-10-2020',
+          money : '20.000.000',
+          type : 'invest',
+          status : 'down'
+        },
+        {
+          id : 4,
+          name : 'Nguyễn Quốc Thái III',
+          timeAt : '10:35 AM',
+          date : '23-10-2020',
+          money : '20.000.000',
+          type : 'withdraw',
+          status : 'down'
+        },
+      ]
     },
     {
-      id: 3,
-      name: "Sent",
+      id : 3,
+      date : '22-4-2021',
+      data : [
+        {
+          id : 5,
+          name : 'Nguyễn Trường Phi',
+          timeAt : '16:11 AM',
+          date : '23-10-2020',
+          money : '20.000.000',
+          type : 'earned',
+          status : 'up'
+        },
+        {
+          id : 3,
+          name : 'Đinh Phú Cường',
+          timeAt : '08:21 AM',
+          date : '23-10-2020',
+          money : '20.000.000',
+          type : 'invest',
+          status : 'down'
+        },
+      ]
     },
-  ]);
-  const [listMonth, setlistMonth] = useState([
-    {
-      id: 122021,
-      name: "Dec. 2021",
-    },
-    {
-      id: 112021,
-      name: "Nov. 2021",
-    },
-    {
-      id: 102021,
-      name: "Oct. 2021",
-    },
-  ]);
-  const [listTrans, setlistTrans] = useState([
-    {
-      id: 1,
-      shortcut: "TL",
-      name: "Trần Long",
-      type: "sent",
-      money: "50000",
-      time: "05 Dec 2021",
-    },
-    {
-      id: 2,
-      shortcut: "DPC",
-      name: "Đinh Phú Cường",
-      type: "recieve",
-      money: "50000",
-      time: "27 Nov 2021",
-    },
-    {
-      id: 3,
-      shortcut: "QT",
-      name: "Quốc Thái",
-      type: "recieve",
-      money: "100000",
-      time: "15 Oct 2021",
-    },
-  ]);
+  ]
 
-  const generateColor = () => {
-    const randomColor = Math.floor(Math.random() * 16777215)
-      .toString(16)
-      .padStart(6, "0");
-    return `#${randomColor}`;
-  };
+  //state
+  const [isDown,setIsDown] = useState(true)
+  const [transaction,setTransaction] = useState(transactionData)
 
-  const isSentMoney = (num, type) => {
-    if (type == "sent") {
-      return (
-        <NumberFormat
-          renderText={(text) => (
-            <Text
-              style={{
-                marginBottom: "auto",
-                marginTop: "auto",
-                marginStart: "auto",
-                marginEnd: 10,
-                fontSize: 15,
-              }}
-            >
-              -{text}
-            </Text>
-          )}
-          value={num}
-          displayType={"text"}
-          thousandSeparator={true}
-          prefix={"$"}
-        />
-      );
-    } else {
-      return (
-        <NumberFormat
-          renderText={(text) => (
-            <Text
-              style={{
-                marginBottom: "auto",
-                marginTop: "auto",
-                marginStart: "auto",
-                marginEnd: 10,
-                fontSize: 15,
-              }}
-            >
-              {text}
-            </Text>
-          )}
-          value={num}
-          displayType={"text"}
-          thousandSeparator={true}
-          prefix={"$"}
-        />
-      );
-    }
-  };
+  //animable
+  const topContainerRef = useRef(null)
+  const WithdrawMoneyRef = useRef(null)
+  const EarnedMoneyRef = useRef(null)
+  const InvestMoneyRef = useRef(null)
 
-  const isRecieveMoney = (num, type) => {
-    if (type == "spent") {
-      return (
-        <NumberFormat
-          renderText={(text) => (
-            <Text
-              style={{
-                fontSize: 13,
-                color: PRIMARY_COLOR_WHITE,
-                marginStart: "auto",
-              }}
-            >
-              -{text}
-            </Text>
-          )}
-          value={num}
-          displayType={"text"}
-          thousandSeparator={true}
-          prefix={"$"}
-        />
-      );
-    } else {
-      return (
-        <NumberFormat
-          renderText={(text) => (
-            <Text
-              style={{
-                fontSize: 13,
-                color: PRIMARY_COLOR_WHITE,
-              }}
-            >
-              {text}
-            </Text>
-          )}
-          value={num}
-          displayType={"text"}
-          thousandSeparator={true}
-          prefix={"$"}
-        />
-      );
-    }
-  };
-
-  function renderListTrans({ item }) {
-    return (
+  //component
+  const transactionView = ({ item }) => {
+    return(
       <View>
-        <TouchableOpacity
-        onPress={()=>navigation.navigate('DetailTransaction')}
-          style={{
-            flexDirection: "row",
-            padding: 10,
-          }}
-          onPress={() => navigation.navigate("TransactionInfo")}
-        >
-          <View
-            style={{
-              backgroundColor: PRIMARY_COLOR_WHITE,
-              height: 70,
-              width: 70,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 80,
-              elevation: 2,
-            }}
-          >
-            <Text
-              style={{
-                color: generateColor(),
-                fontWeight: "bold",
-                fontSize: 17,
-              }}
-            >
-              {item.shortcut}
-            </Text>
-          </View>
-
-          <View
-            style={{
-              marginBottom: "auto",
-              marginTop: "auto",
-              marginStart: 17,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 17,
-                color: PRIMARY_COLOR_BLACK,
-              }}
-            >
-              {item.name}
-            </Text>
-            <View
-              style={{
-                flexDirection: "row",
-              }}
-            >
-              <Text
-                style={{
-                  marginTop: 10,
-                  fontSize: 15,
-                  color: item.type == "sent" ? "#ff3300" : PRIMARY_COLOR,
-                }}
-              >
-                {item.type}
-              </Text>
-              <Text
-                style={{
-                  marginTop: 10,
-                  marginStart: 5,
-                  fontSize: 15,
-                  color: PRIMARY_COLOR_BLACK,
-                }}
-              >
-                at
-              </Text>
-              <Text
-                style={{
-                  marginTop: 10,
-                  fontSize: 15,
-                  marginStart: 5,
-                  color: PRIMARY_COLOR_BLACK,
-                }}
-              >
-                {item.time}
-              </Text>
-            </View>
-          </View>
-          {isSentMoney(item.money, item.type)}
-        </TouchableOpacity>
-        <View
-          style={{
-            marginTop: 5,
-            marginBottom: 5,
-            height: 1,
-            borderRadius: 10,
-            width: "90%",
-            marginLeft: "auto",
-            marginRight: "auto",
-            backgroundColor: "#f2f2f2",
-          }}
-        />
-      </View>
-    );
-  }
-
-  function renderListMonth({ item }) {
-    return (
-      <View>
-        <View
-          style={{
-            flexDirection: "row",
-            backgroundColor: PRIMARY_COLOR,
-          }}
-        >
-          <Text style={styles.textListMonth}>{item.name}</Text>
-          <View
-            style={{
-              flexDirection: "row-reverse",
-              flex: 1,
-            }}
-          >
-            <View
-              style={{
-                padding: 5,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                width: FULL_WIDTH / 2.7,
-              }}
-            >
-              <View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                  }}
-                >
-                  <View
-                    style={{
-                      height: "100%",
-                      borderColor: PRIMARY_COLOR_WHITE,
-                      borderWidth: 0.7,
-                      marginEnd:5,
-                    }}
-                  />
-                  <Icon
-                    name="long-arrow-alt-up"
-                    type="font-awesome-5"
-                    color={"#00ff00"}
-                    style={{
-                      margin: 2,
-                    }}
-                    size={15}
-                  />
-                  <Text style={styles.textRecSpe}>Recieve</Text>
+        <Text style={{ fontSize : 18, fontWeight : 'bold', marginHorizontal : 10 }}>{item.date}</Text>
+        {
+          item.data.map(data =>{
+            return(
+              <View style={styles.transactionItem}>
+                <View style={{ flexDirection : 'row' }}>
+                  <View style={styles.nameIcon}>
+                    <Text>QT</Text>
+                  </View>
+                  <View style={{ justifyContent : 'center', marginLeft : 5 }}>
+                    <Text style={{ fontSize : 16, fontWeight : 'bold' }}>{data.name}</Text>
+                    <Text style={{ marginTop : 3, fontSize : 16, opacity : 0.6}}>{data.date}</Text>
+                  </View>
                 </View>
-
-                <View
-                  style={{
-                    flexDirection: "row",
-                  }}
-                >
-                  <View
-                    style={{
-                      height: "100%",
-                      borderColor: PRIMARY_COLOR_WHITE,
-                      borderWidth: 0.7,
-                      marginEnd:5,
-                    }}
-                  />
-                  <Icon
-                    name="long-arrow-alt-down"
-                    type="font-awesome-5"
-                    color={"red"}
-                    style={{
-                      margin: 2,
-                    }}
-                    size={15}
-                  />
-                  <Text style={styles.textRecSpe}>Spent</Text>
+                <View style={{ justifyContent : 'center', alignItems : 'flex-end' }}>
+                  <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'green' }}>{data.money}</Text>
+                  <Text style={{ marginTop : 3, fontSize : 16 }}>{data.type}</Text>
                 </View>
               </View>
-              <View>
-                {isRecieveMoney(150000, "recieve")}
-                {isRecieveMoney(50000, "spent")}
-              </View>
-            </View>
-          </View>
-        </View>
-        <FlatList
-          data={listTrans}
-          contentContainerStyle={{
-            borderRadius: 10,
-            margin: 20,
-            backgroundColor: PRIMARY_COLOR_WHITE,
-            elevation: 4,
-          }}
-          renderItem={renderListTrans}
-          keyExtractor={(item) => item.id.toString()}
-        />
+            )
+          })
+        }
       </View>
-    );
+    )
   }
 
-  function renderListCategory({ item }) {
-    return (
-      <TouchableOpacity
-        style={{
-          borderRadius: 5,
-          backgroundColor: PRIMARY_COLOR_WHITE,
-          padding: 10,
-          paddingHorizontal : 20,
-          justifyContent: "center",
-          margin: 5,
-          elevation: 2,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 15,
-            color: PRIMARY_COLOR_BLACK,
-          }}
-        >
-          {item.name}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      style={{
-        backgroundColor: PRIMARY_COLOR_WHITE,
-      }}
-    >
-      <FlatList
-        data={category}
-        renderItem={renderListCategory}
-        contentContainerStyle={{
-          marginTop: 40,
-        }}
-        keyExtractor={(item) => item.id.toString()}
-        horizontal
-      />
-      <FlatList
-        data={listMonth}
-        contentContainerStyle={{
-          borderRadius: 10,
-          backgroundColor: PRIMARY_COLOR_WHITE,
-          elevation: 4,
-          marginTop : 10
-        }}
-        renderItem={renderListMonth}
-        keyExtractor={(item) => item.id.toString()}
-      />
-    </ScrollView>
+    <View style={{ height : FULL_HEIGHT, backgroundColor : PRIMARY_COLOR_WHITE, marginTop : 20 }}>
+        <Animatable.View style={styles.topContainer} ref={topContainerRef}>
+          <View style={{ padding : 10,flexDirection : 'row', justifyContent : 'center',alignItems : 'center' }}>     
+            <View style={{ 
+              position : 'absolute',
+              left : 15,
+              alignSelf : 'center'
+            }}>
+              <AntDesign name="arrowleft" size={28} color="white" onPress={() => navigation.goBack()}/>
+            </View>
+            <Text style={{ 
+              fontSize : 18, 
+              color : PRIMARY_COLOR_WHITE,
+              fontWeight : 'bold'
+            }}>Transaction History</Text>   
+          </View>
+
+          <View style={{ flexDirection : 'row', paddingHorizontal : 15 }}>
+            <View>
+              <View style={{ 
+                  height : 40,
+                  width : FULL_WIDTH - 80,
+                  borderRadius : 10,
+                  backgroundColor : '#FFA15D',
+                  marginTop : 5,
+                  marginRight : 10,
+                  justifyContent : 'center',
+                  zIndex : 200
+                }}>
+                  <View style={{ flexDirection : 'row', justifyContent : "space-between", paddingHorizontal : 10}}>
+                    <Text style={{ color : PRIMARY_COLOR_WHITE,fontSize : 16 }}>Top-Up Money</Text>
+                    <Text style={{ color : PRIMARY_COLOR_WHITE,fontSize : 16 , fontWeight : 'bold'  }}>20.000đ</Text>
+                  </View>
+              </View>
+              <Animatable.View ref={WithdrawMoneyRef} style={{ 
+                  height : 40,
+                  width : FULL_WIDTH - 80,
+                  borderRadius : 10,
+                  backgroundColor : '#FFA15D',
+                  marginTop : 5,
+                  marginRight : 10,
+                  justifyContent : 'center',
+                  zIndex : 100,
+                  position : 'absolute'
+                }}>
+                  <View style={{ flexDirection : 'row', justifyContent : "space-between", paddingHorizontal : 10}}>
+                    <Text style={{ color : PRIMARY_COLOR_WHITE,fontSize : 16 }}>Withdraw Money</Text>
+                    <Text style={{ color : PRIMARY_COLOR_WHITE,fontSize : 16 , fontWeight : 'bold'  }}>20.000đ</Text>
+                  </View>
+              </Animatable.View>
+              <Animatable.View ref={EarnedMoneyRef} style={{ 
+                  height : 40,
+                  width : FULL_WIDTH - 80,
+                  borderRadius : 10,
+                  backgroundColor : '#FFA15D',
+                  marginTop : 5,
+                  marginRight : 10,
+                  justifyContent : 'center',
+                  zIndex : 100,
+                  position : 'absolute'
+                }}>
+                  <View style={{ flexDirection : 'row', justifyContent : "space-between", paddingHorizontal : 10}}>
+                    <Text style={{ color : PRIMARY_COLOR_WHITE,fontSize : 16 }}>Earned Money</Text>
+                    <Text style={{ color : PRIMARY_COLOR_WHITE,fontSize : 16, fontWeight : 'bold'  }}>20.000đ</Text>
+                  </View>
+              </Animatable.View>
+              <Animatable.View ref={InvestMoneyRef} style={{ 
+                  height : 40,
+                  width : FULL_WIDTH - 80,
+                  borderRadius : 10,
+                  backgroundColor : '#FFA15D',
+                  marginTop : 5,
+                  marginRight : 10,
+                  justifyContent : 'center',
+                  zIndex : 100,
+                  position : 'absolute'
+                }}>
+                  <View style={{ flexDirection : 'row', justifyContent : "space-between", paddingHorizontal : 10}}>
+                    <Text style={{ color : PRIMARY_COLOR_WHITE,fontSize : 16 }}>Invested Money</Text>
+                    <Text style={{ color : PRIMARY_COLOR_WHITE,fontSize : 16, fontWeight : 'bold'   }}>20.000đ</Text>
+                  </View>
+              </Animatable.View>
+            </View>
+            <TouchableOpacity style={{ zIndex : 200 }} onPress={() => {
+                if(isDown) {
+                  setIsDown(false)
+                  topContainerRef.current.transitionTo({ height : 250 }, 400)
+                  WithdrawMoneyRef.current.transitionTo({ translateY : 45 }, 400)
+                  EarnedMoneyRef.current.transitionTo({ translateY : 90 }, 450)
+                  InvestMoneyRef.current.transitionTo({ translateY : 135 }, 500)
+                } else {
+                  setIsDown(true)
+                  topContainerRef.current.transitionTo({ height : FULL_HEIGHT * 0.5 / 3,}, 400)
+                  WithdrawMoneyRef.current.transitionTo({ translateY : 0 }, 500)
+                  EarnedMoneyRef.current.transitionTo({ translateY : 0 }, 400)
+                  InvestMoneyRef.current.transitionTo({ translateY : 0 }, 300)
+                }              
+            }}>
+                <View style={{ 
+                  height : 40,
+                  width : 40,
+                  borderRadius : 40,
+                  backgroundColor : '#FFA15D',
+                  marginTop : 5,
+                  alignItems : 'center',
+                  justifyContent : 'center',
+                }}>
+                  {
+                    isDown === true 
+                    ?
+                    <Ionicons name="md-chevron-down-sharp" size={30} color={PRIMARY_COLOR_WHITE} />
+                    :
+                    <Ionicons name="md-chevron-up-sharp" size={30} color={PRIMARY_COLOR_WHITE} />
+                  }
+                  
+                </View>
+            </TouchableOpacity>
+          </View>
+          <View style={{
+            position : 'absolute',
+            bottom : -10,
+            backgroundColor : PRIMARY_COLOR,
+            height : 100,
+            width : FULL_WIDTH / 1.1,
+            alignSelf : 'center',
+            opacity : 0.3,
+            borderRadius : 10,
+          }}/> 
+          <View style={{
+            position : 'absolute',
+            bottom : -20,
+            backgroundColor : PRIMARY_COLOR,
+            height : 100,
+            width : FULL_WIDTH / 1.2,
+            alignSelf : 'center',
+            opacity : 0.15,
+            borderRadius : 10,
+          }}/> 
+        </Animatable.View>
+        <ScrollView 
+          style={{ marginTop : 30 }} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: FULL_HEIGHT / 30 }}
+          onScrollBeginDrag={() => {
+            setIsDown(true)
+            topContainerRef.current.transitionTo({ height : FULL_HEIGHT * 0.5 / 3,}, 400)
+            WithdrawMoneyRef.current.transitionTo({ translateY : 0 }, 500)
+            EarnedMoneyRef.current.transitionTo({ translateY : 0 }, 400)
+            InvestMoneyRef.current.transitionTo({ translateY : 0 }, 300)
+        }}>
+          <FlatList 
+            data={transaction}
+            renderItem={transactionView}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+          />
+        
+        </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  textListMonth: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: PRIMARY_COLOR_WHITE,
-    margin: 10,
+  topContainer : {
+      height : FULL_HEIGHT * 0.5 / 3,
+      backgroundColor : PRIMARY_COLOR,
+      borderBottomLeftRadius : 25,
+      borderBottomRightRadius : 25,
   },
-  textRecSpe: {
-    fontSize: 15,
-    marginHorizontal : 5,
-    color: PRIMARY_COLOR_WHITE,
+  nameIcon : {
+    height : 50,
+    width : 50,
+    borderRadius : 50,
+    backgroundColor : PRIMARY_COLOR,
+    alignItems : 'center',
+    justifyContent : 'center'
   },
+  transactionItem : {
+    margin : 10,
+    backgroundColor : PRIMARY_COLOR_WHITE,
+    elevation : 5,
+    padding : 10,
+    paddingVertical : 15,
+    flexDirection : 'row',
+    justifyContent : 'space-between',
+    borderRadius : 10
+  }
 });
