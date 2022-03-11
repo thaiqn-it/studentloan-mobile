@@ -51,7 +51,7 @@ const register = (data) => {
 }
 
 const getProfile = () => {
-  return defaultInstance.get('/user/student/me')
+  return defaultInstance.get('/user/investor/me')
 }
 
 export const userApi = {

@@ -23,27 +23,27 @@ import { SimpleLineIcons } from '@expo/vector-icons';
 
 export default function Wallet({ route, navigation }) {
   return (
-    <View style={{ height : FULL_HEIGHT, marginTop : 20,backgroundColor : PRIMARY_COLOR_WHITE }}>
+    <View style={{ height : FULL_HEIGHT,backgroundColor : PRIMARY_COLOR_WHITE }}>
       <View style={styles.topContainer}>
         <View style={styles.profileContainer}>
           <View style={{ flexDirection : 'row' }}>
             <Avatar
               rounded
-              size={50}
+              size={55}
               source={{
                 uri:
                   'https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80',
               }}
             />
-            <View>
-              <Text>Nguyen Quoc Thai</Text>
-              <Text>thai_dtm@yahoo.com.vn</Text>
+            <View style={{ alignSelf : 'center', marginLeft : 10}}>
+              <Text style={{ fontSize : 16 }}>Nguyen Quoc Thai</Text>
+              <Text style={{ fontSize : 16 }}>thai_dtm@yahoo.com.vn</Text>
             </View>  
           </View>
         </View>
         <View style={{ alignSelf : 'center', alignItems : 'center', marginTop : FULL_HEIGHT / 7 }}>
           <Text style={{ color : PRIMARY_COLOR_WHITE, fontSize : 20 }}>
-            My Wallet Balance
+            Số dư ví
           </Text>
           <Text style={{ color : PRIMARY_COLOR_WHITE, fontSize : 40,fontWeight : 'bold'}}>
             20.000.000 đ
@@ -53,26 +53,26 @@ export default function Wallet({ route, navigation }) {
           <SimpleLineIcons name="reload" size={20} color="white" />
           <Pressable onPress={() => navigation.navigate("History")}>
             <Text style={{ color : PRIMARY_COLOR_WHITE, fontSize : 18, margin : 10 }}>
-              Transaction history
+              Lịch sử giao dịch
             </Text>
           </Pressable>
         </View>
         
         <View style={styles.buttonContainer}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("DepositMoney")}>
             <View style={{ alignItems : 'center', marginRight : 30 }}>
               <View style={styles.button}>
                   <Image source={require('../assets/top-up.png')} style={{ width : 30, height : 30, tintColor : PRIMARY_COLOR_WHITE }}/>
               </View>
-              <Text style={{ marginTop : 5 }}>Top-Up</Text>
+              <Text style={{ marginTop : 5, fontSize : 16 }}>Nạp tiền</Text>
            </View>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("WithdrawMoney")}>
             <View style={{ alignItems : 'center', marginLeft : 30  }}>
               <View style={styles.button}>
                   <Image source={require('../assets/withdraw.png')} style={{ width : 30, height : 30, tintColor : PRIMARY_COLOR_WHITE }}/>
               </View>
-              <Text style={{ marginTop : 5 }}>Withdraw</Text>
+              <Text style={{ marginTop : 5, fontSize : 16 }}>Rút tiền</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     justifyContent : 'center',
   },
   buttonContainer : {
-    bottom : - 60,
+    bottom : - 40,
     position : 'absolute',
     flexDirection : 'row',
     alignSelf : 'center',

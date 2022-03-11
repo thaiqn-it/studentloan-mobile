@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Animated, FlatList,TouchableOpacity, TextInput } from 'react-native';
-import { Avatar } from 'react-native-elements';
+import { StyleSheet, Text, View, Animated, FlatList,TouchableOpacity, TextInput,StatusBar,Modal,ScrollView } from 'react-native';
+import { Avatar,Slider } from 'react-native-elements';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
-import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from '../constants/styles';
+import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT, SECONDARY_COLOR } from '../constants/styles';
 import * as Progress from 'react-native-progress';
 import { Button } from 'react-native-paper';
-import {
-  FontAwesome5,
-} from "@expo/vector-icons";
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import * as Animatable from 'react-native-animatable';
-import HeaderBar from '../components/HeaderBar';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons,AntDesign,Ionicons,Feather } from '@expo/vector-icons';
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
 
 export default function Invest({ navigation }) {
   const [items, setItems] = useState([
@@ -152,6 +149,37 @@ export default function Invest({ navigation }) {
       const scrollY = useRef(new Animated.Value(0)).current;
       const input_tranlate_x = useRef(null)
       const listRef = useRef(null)
+      const [isFilter,setIsFilter]=useState(false)
+      const [multiSliderValue, setMultiSliderValue] = useState([50000, 100000000]);
+
+      const multiSliderValuesChange = values => setMultiSliderValue(values);
+
+      const yearStudies = [
+        {
+          id : 1,
+          year : 'Tất cả'
+        },
+        {
+          id : 2,
+          year : 'Năm I'
+        },
+        {
+          id : 3,
+          year : 'Năm II'
+        },
+        {
+          id : 4,
+          year : 'Năm III'
+        },
+        {
+          id : 5,
+          year : 'Năm IV'
+        },
+        {
+          id : 6,
+          year : 'Năm IV+'
+        },
+      ]
 
       const offsetAnim = useRef(new Animated.Value(0)).current;
       const clampedScroll = Animated.diffClamp(
@@ -166,7 +194,7 @@ export default function Invest({ navigation }) {
         0,
         10
       )
-
+      
       const opacity = clampedScroll.interpolate({
         inputRange: [0, 10],
         outputRange: [0.9, 0],
@@ -180,22 +208,6 @@ export default function Invest({ navigation }) {
       const ScrollToTop = () => {
         listRef.current.scrollToOffset({ animated: true, offset: 0 });
       }
-
-      const onSearch = () => {
-        input_tranlate_x.current.transitionTo({ zIndex : 200 ,scale : 1}, 1)
-        setFocus(true)
-        setEdit(true)
-      } 
-
-      const onBack = () => {
-        input_tranlate_x.current.transitionTo({ zIndex : 0 ,scale : 0 }, 1)
-        setFocus(false)
-        setEdit(false)
-      }
-
-      useEffect(() => {
-        input_tranlate_x.current.transitionTo({ scale : 0 },1)
-      }, [])
 
   function _renderItem({ item }) {
     return (
@@ -257,67 +269,157 @@ export default function Invest({ navigation }) {
 
   return (
     <View
-      style={{ backgroundColor: '#F2F5FA' }}>
-      <HeaderBar 
-          scrollY={scrollY} 
-          navigation={navigation} 
-          right={
-          <TouchableOpacity
+      style={{ backgroundColor: '#F2F5FA', height : FULL_HEIGHT }}>
+      <View style={styles.topContainer}>
+        <View style={{ padding : 10,flexDirection : 'row', justifyContent : 'center',alignItems : 'center', zIndex : 200 }}>     
+          <TextInput
+              style={styles.input}
+          />
+          {/* <TouchableOpacity
             style={{ marginRight: 10 }}
-            onPress={onSearch}
           >
             <Icon
               name="search"
               type={"fontawesome"}
-              size={30}
+              size={25}
               color="white"
             />
+          </TouchableOpacity>      */}
+          <TouchableOpacity
+            style={{ marginRight: 10 }}
+          >
+            <MaterialIcons name="sort" size={25} color="white" />
           </TouchableOpacity>
-        }/>
-      <Animatable.View 
-        style={styles.input_box} ref={input_tranlate_x}>
-        <TouchableHighlight
-          activeOpacity={1}
-          onPress={onBack}
-          style={styles.back_icon_box}
-          underlayColor="#ccd0d5">
-            <Icon name="chevron-left" size={35} color={PRIMARY_COLOR_WHITE}/>
-        </TouchableHighlight>
-        <TextInput 
-          placeholder="Search"
-          clearButtonMode="always"
-          value={searchValue}
-          onChangeText={setSearchValue}
-          style={styles.input}
-          focusable={isFocus}
-          editable={isEdit}/>
-      </Animatable.View>
-      {/* <SectionedMultiSelect
-        items={items}
-        readOnlyHeadings={false}
-        IconRenderer={Icon}
-        colors={{
-          primary: PRIMARY_COLOR,
-        }}
-        uniqueKey="id"
-        subKey="children"
-        selectText="Press here to filter major!"
-        showDropDowns={true}
-        onSelectedItemsChange={setSelectedItems}
-        SectionedMultiSelect={selectedItems}
-      /> */}
+          <TouchableOpacity
+            style={{ marginRight: 10 }}
+            onPress={() => setIsFilter(true)}
+          >
+            <AntDesign name="filter" size={25} color="white" />
+          </TouchableOpacity>     
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isFilter}
+          >
+            <View style={styles.filterModal}>
+              <View style={{ justifyContent : 'center' }}>
+                <Text style={{
+                  fontSize : 20,
+                  fontWeight : 'bold',
+                  alignSelf : 'center',
+                  paddingVertical : 10
+                }}>Bộ lọc</Text>
+                
+                <TouchableOpacity
+                  style={{ 
+                    position : 'absolute',
+                    right : 20
+                  }}
+                  onPress={() => setIsFilter(false)}
+                >
+                  <AntDesign name="close" size={24} color="black" />
+                </TouchableOpacity> 
+              </View>
+              <TouchableOpacity style={{
+                flexDirection : 'row',
+                alignItems : 'center',
+                borderWidth : 1,
+                opacity : 0.5,
+                marginHorizontal : 25,
+                borderRadius : 25,
+                paddingVertical : 10,
+                paddingLeft : 10
+              }}>
+                <Ionicons name="search" size={24} color="black" />
+                <Text style={{ fontSize : 18, marginLeft : 5 }}>Thêm trường</Text>
+              </TouchableOpacity>
+              <View style={{ marginTop : 10 }}>
+                <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', opacity : 0.6 }}>Khoản tiền</Text>
+                <View style={{ marginHorizontal : 40, marginTop : 20 }}>
+                  <View style={{ flexDirection : 'row', justifyContent : 'space-between'}}>
+                    <Text style={{ fontSize : 15, fontWeight :'bold' }}>{multiSliderValue[0]}</Text>
+                    <Text style={{ fontSize : 15, fontWeight :'bold' }}>{multiSliderValue[1]}</Text>
+                  </View>            
+                  <MultiSlider
+                      values={[multiSliderValue[0], multiSliderValue[1]]}
+                      sliderLength={FULL_WIDTH - 80}
+                      onValuesChange={multiSliderValuesChange}
+                      min={50000}
+                      max={100000000}
+                      step={50000}   
+                      markerStyle={{ height : 20, width : 20}}
+                    />
+                </View>   
+              </View>
+              <View style={{ marginTop : 20, flexDirection : 'row', justifyContent : 'space-between', marginHorizontal : 25 }}>
+                <Text style={{ fontSize : 16, fontWeight : 'bold', opacity : 0.6 }}>Ngành</Text>
+                <View style={{ alignItems : 'center', flexDirection : 'row' }}>
+                  <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', marginRight : 10 }}>Công nghệ thông tin</Text> 
+                  <Feather name="edit" size={20} color={PRIMARY_COLOR} />
+                </View>
+                
+              </View>
+              <View style={{ marginTop : 20, flexDirection : 'row', justifyContent : 'space-between', marginHorizontal : 25 }}>
+                <Text style={{ fontSize : 16, fontWeight : 'bold', opacity : 0.6 }}>Chuyên ngành</Text>
+                <View style={{ alignItems : 'center', flexDirection : 'row' }}>
+                  <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', marginRight : 10 }}>Kỹ thuật phần mềm</Text> 
+                  <Feather name="edit" size={20} color={PRIMARY_COLOR} />
+                </View>
+              </View>
+              <View style={{ marginTop : 20 }}>
+                <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', opacity : 0.6 }}>Năm học</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {
+                    yearStudies.map(year =>{ 
+                      return (
+                        <TouchableOpacity key={year.id}>
+                          <View style={styles.yearItems}>
+                            <Text style={{ color : PRIMARY_COLOR_BLACK, alignSelf : 'center',fontSize : 16, zIndex : 200 }}>{year.year}</Text>
+                          </View>
+                        </TouchableOpacity>
+                      )
+                    })
+                  }
+                </ScrollView>
+                
+              </View>
+            </View>
+          </Modal>
+        </View>
+
+        <View style={{
+          position : 'absolute',
+          bottom : -10,
+          backgroundColor : PRIMARY_COLOR,
+          height : 100,
+          width : FULL_WIDTH / 1.1,
+          alignSelf : 'center',
+          opacity : 0.3,
+          borderRadius : 10,
+        }}/> 
+        <View style={{
+          position : 'absolute',
+          bottom : -20,
+          backgroundColor : PRIMARY_COLOR,
+          height : 100,
+          width : FULL_WIDTH / 1.2,
+          alignSelf : 'center',
+          opacity : 0.15,
+          borderRadius : 10,
+        }}/> 
+      </View>
+     
       <Animated.FlatList
         onScroll={Animated.event(
           [{ nativeEvent : { contentOffset : { y : scrollY }}}],
           { useNativeDriver : true }
         )}
-        onScrollBeginDrag={() => input_tranlate_x.current.transitionTo({ scale : 0 },1)}
         data={filterdData}
         renderItem={_renderItem}
         ref={listRef}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop : FULL_HEIGHT / 9 , paddingBottom : 10 }}
+        contentContainerStyle={{ paddingTop : 20 , paddingBottom : 50 }}
       />
       <Animated.View style={[styles.toTopBotton,{opacity},{zIndex}]}>
         <TouchableOpacity onPress={ScrollToTop}>
@@ -331,7 +433,7 @@ export default function Invest({ navigation }) {
 const styles = StyleSheet.create({
   container : {
     margin : 10,
-    borderRadius: 20,
+    borderRadius: 5,
     backgroundColor: PRIMARY_COLOR_WHITE,
     elevation : 5,
   },
@@ -380,17 +482,18 @@ const styles = StyleSheet.create({
     marginRight : 5
   },
   input : {
-    flex : 1,
+    width : FULL_WIDTH - 100,
     height : 40,
     backgroundColor : PRIMARY_COLOR_WHITE,
     borderRadius : 5,
     marginRight : 10,
     paddingHorizontal : 5,
-    fontSize : 18
+    fontSize : 18,
+    marginLeft : 15
   },
   toTopBotton : {
     position : 'absolute',
-    bottom : FULL_HEIGHT / 20,
+    bottom : FULL_HEIGHT / 8,
     right : 15,
     height : 60,
     width : 60,
@@ -398,5 +501,28 @@ const styles = StyleSheet.create({
     backgroundColor : '#dadee3',
     alignItems : 'center',
     justifyContent : 'center',
+  },
+  topContainer : {
+    height : FULL_HEIGHT * 0.3 / 3,
+    backgroundColor : PRIMARY_COLOR,
+    borderBottomLeftRadius : 25,
+    borderBottomRightRadius : 25
+  },
+  filterModal : {
+    width : FULL_WIDTH,
+    height : FULL_HEIGHT,
+    backgroundColor : PRIMARY_COLOR_WHITE,
+    borderTopLeftRadius : 25,
+    borderTopRightRadius : 25
+  },
+  yearItems : {
+    width : 80,
+    height : 40 ,
+    borderRadius : 5 , 
+    borderWidth : 1.5,
+    borderColor : '#b8b2b2',
+    justifyContent : 'center',
+    margin : 10,
+    backgroundColor : '#f7f5f5'
   }
 });

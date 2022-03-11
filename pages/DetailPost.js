@@ -8,20 +8,30 @@ import {
   Dimensions,
   Pressable,
   TouchableOpacity,
+  StatusBar,
+  ActivityIndicator
 } from "react-native";
 import {
   PRIMARY_COLOR,
   PRIMARY_COLOR_WHITE,
   PRIMARY_COLOR_BLACK,
   FULL_HEIGHT,
-  FULL_WIDTH
+  FULL_WIDTH,
+  SECONDARY_COLOR
 } from "../constants/styles";
-import { Avatar } from "react-native-elements";
+import { Avatar,ListItem } from "react-native-elements";
 import { Icon } from "react-native-elements/dist/icons/Icon";
 import Carousel from 'react-native-snap-carousel';
 import HeaderBar from '../components/HeaderBar';
 import * as Progress from 'react-native-progress';
 import { Button } from 'react-native-paper';
+import { PanGestureHandler, ScrollView } from "react-native-gesture-handler";
+import * as Animatable from 'react-native-animatable';
+import {
+  FontAwesome5,
+} from "@expo/vector-icons";
+import { loanApi } from "../apis/loan";
+import moment from "moment";
 
 const { width: windowWidth } = Dimensions.get("window");
 const SLIDER_WIDTH = Dimensions.get('window').width;
@@ -32,6 +42,8 @@ export default function DetailPost({ navigation,route }) {
   // const {id} = route.params;
   const scrollY = useRef(new Animated.Value(0)).current;
   const carouselRef = useRef(null);
+  const { id,availableInvest } = route.params;
+  const [post,setPost] = useState(null)
 
   const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
     const paddingToBottom = 50;
@@ -72,6 +84,12 @@ export default function DetailPost({ navigation,route }) {
       })
     }, [])
 
+    useEffect(() => {
+      loanApi.getById(id).then(res => {
+        setPost(res.data)
+      })
+    }, [])
+
   const opacity = clampedScroll.interpolate({
     inputRange : [0, CONTAINER_HEIGHT - 20, CONTAINER_HEIGHT],
     outputRange : [1, 0.01 ,0],
@@ -83,445 +101,30 @@ export default function DetailPost({ navigation,route }) {
     outputRange : [0, CONTAINER_HEIGHT * 2],
     extrapolate : 'clamp'
   })
-
-  const StudentInformationBox = () => {
-    return(
-      <View
-        style={{
-          backgroundColor: PRIMARY_COLOR_WHITE,
-          borderRadius: 10,
-          margin : 10,
-          elevation : 5,
-          marginTop : FULL_HEIGHT / 8,
-        }}
-      >
-        <View
-          style={{
-            marginTop: 15,
-            flexDirection: "row",
-          }}
-        >
-          <Avatar
-            rounded
-            containerStyle={{
-              margin: 10,
-            }}
-            size="large"
-            source={{
-              uri: "https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80",
-            }}
-          />
-
-          <View>
-            <Text
-              style={{
-                marginTop: 20,
-                fontSize: 18,
-                color: "#6A6A6A",
-              }}
-            >
-              Created by
-            </Text>
-
-            {/* name student */}
-            <Text
-              style={{
-                fontSize: 23,
-                fontWeight: "bold",
-              }}
-            >
-              Nguyễn Trường Phi
-            </Text>
-          </View>
-        </View>
-
-        <Text
-          style={{
-            marginStart: 10,
-            marginTop: 10,
-            fontSize: 18,
-            color: "#6A6A6A",
-          }}
-        >
-          The tuition fee for the 8th term
-        </Text>
-        <View
-          style={{
-            marginTop: 20,
-            marginStart: 10,
-            flexDirection: "row",
-            flexWrap: "wrap",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-            }}
-          >
-            <Icon
-              onPress={viewProfileStudent}
-              containerStyle={{}}
-              name="hashtag"
-              type="font-awesome-5"
-              color={PRIMARY_COLOR_BLACK}
-              size={20}
-            />
-            <Text
-              style={{
-                marginStart: 5,
-                fontSize: 15,
-              }}
-            >
-              Software Engineering
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-            }}
-          >
-            <Icon
-              onPress={viewProfileStudent}
-              containerStyle={{
-                marginStart: 20,
-              }}
-              name="map-marker-alt"
-              type="font-awesome-5"
-              color={PRIMARY_COLOR_BLACK}
-              size={20}
-            />
-            <Text
-              style={{
-                marginStart: 5,
-                fontSize: 15,
-              }}
-            >
-              FPT Univercity, HCM
-            </Text>
-          </View>
-        </View>
-
-        <View style={{ padding : 15, flexDirection : 'row'}}>
-              <View>
-                <Text style={{  fontSize : 15  }}>2.000.000đ</Text>
-                <Text style={{ opacity : 0.5,fontSize : 14 }}>Available for investment</Text>           
-              </View>
-              <View style={{  alignItems : 'flex-end', flex : 1, fontSize : 13 }}>
-                <Text style={{  fontSize : 15  }}>22.000.000đ</Text>
-                <Text style={{ opacity : 0.5,fontSize : 14 }}>Full amount</Text>  
-              </View>
-          </View>
-          <Progress.Bar progress={0.8} width={FULL_WIDTH / 1.2} style={{ alignSelf : 'center', margin : 5, marginBottom : 25 }} color={PRIMARY_COLOR} />         
-
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            marginBottom: 20,
-          }}
-        >     
-          {/* expired date */}
-          <View
-            style={{
-              alignItems: "center",
-            }}
-          > 
-            <Text>This loan will be expired in</Text>
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-              }}
-            >
-              October 31, 2021
-            </Text>
-           
-          </View>
-        </View>
-      </View>
-    )
-  }
-
-  const LoanInformationBox = () => {
-    return (
-      <View
-      style={{
-        marginTop: 10,
-        borderRadius: 10,
-        margin : 10,
-        backgroundColor: PRIMARY_COLOR_WHITE,
-        elevation : 5
-      }}
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          marginStart: 25,
-          marginTop: 20,
-        }}
-      >
-        <Icon
-          name="comment-dollar"
-          type="font-awesome-5"
-          color={PRIMARY_COLOR_BLACK}
-          size={25}
-        />
-        <Text
-          style={{
-            marginTop: "auto",
-            marginStart: 10,
-            fontSize: 18,
-          }}
-        >
-          What you get!
-        </Text>
-      </View>
-
-      <View
-        style={{
-          alignItems: "center",
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 15,
-            marginTop: 20,
-          }}
-        >
-          While students are still studying:
-        </Text>
-
-        <Text
-          style={{
-            marginTop: 10,
-            fontSize: 18,
-            fontWeight: "bold",
-            color: PRIMARY_COLOR,
-          }}
-        >
-          100.000 VNĐ/ month
-        </Text>
-
-        <Text
-          style={{
-            fontSize: 15,
-            marginTop: 18,
-          }}
-        >
-          After students graduate
-        </Text>
-        <Text
-          style={{
-            fontSize: 15,
-          }}
-        >
-          you will have interest rate:
-        </Text>
-
-        <View
-          style={{
-            flexDirection: "row",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "bold",
-              color: PRIMARY_COLOR,
-            }}
-          >
-            3%/ month
-          </Text>
-        </View>
-
-        <Text
-          style={{
-            fontSize: 15,
-            marginTop: 20,
-          }}
-        >
-          This student is expected to graduate on:
-        </Text>
-
-        {/* ExpectedGraduationDay */}
-        <Text
-          style={{
-            marginTop: 10,
-            fontSize: 18,
-            fontWeight: "bold",
-            color: PRIMARY_COLOR,
-          }}
-        >
-          December 31, 2025
-        </Text>
-
-        <Text
-          style={{
-            fontSize: 15,
-            marginTop: 20,
-          }}
-        >
-          This student undertakes to pay off
-        </Text>
-        <Text
-          style={{
-            fontSize: 15,
-          }}
-        >
-          the following debt after:
-        </Text>
-
-        <Text
-          style={{
-            marginTop: 10,
-            fontSize: 18,
-            marginBottom: 40,
-            fontWeight: "bold",
-            color: PRIMARY_COLOR,
-          }}
-        >
-          December 31, 2029
-        </Text>
-      </View>
-    </View>
-    )
-  }
-
-  const DescriptionBox = () => {
-    return (  
-      <View
-        style={{
-          marginTop: 10,
-          borderRadius: 10,
-          margin : 10,
-          backgroundColor: PRIMARY_COLOR_WHITE,
-          elevation : 5
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            marginStart: 25,
-            marginTop: 20,
-          }}
-        >
-          <Icon
-            name="question-circle"
-            type="font-awesome-5"
-            color={PRIMARY_COLOR_BLACK}
-            size={25}
-          />
-          <Text
-            style={{
-              marginTop: "auto",
-              marginStart: 10,
-              fontSize: 18,
-            }}
-          >
-            Why do I create this post?
-          </Text>
-        </View>
-
-        <Text
-          style={{
-            flexWrap: "wrap",
-            marginTop: 25,
-            fontSize: 17,
-            marginStart: 20,
-            marginEnd: 20,
-            marginBottom: 20,
-          }}
-        >
-          I am a person who is positive about every aspect of life. There are
-          many things I like to do, to see, and to experience. I like to read, I
-          like to write; I like to think, I like to dream; I like to talk, I
-          like to listen. I like to see the sunrise in the morning, I like to
-          see the moonlight at night; I like to feel the music flowing on my
-          face, I like to smell the wind coming from the ocean.
-          {"\n"}
-          {"\n"}I like to look at the clouds in the sky with a blank mind, I
-          like to do thought experiment when I cannot sleep in the middle of the
-          night. I like flowers in spring, rain in summer, leaves in autumn, and
-          snow in winter. I like to sleep early, I like to get up late; I like
-          to be alone, I like to be surrounded by people. I like country’s
-          peace, I like metropolis’ noise; I like the beautiful west lake in
-          Hangzhou, I like the flat cornfield in Champaign. I like delicious
-          food and comfortable shoes; I like good books and romantic movies. I
-          like the land and the nature, I like people. And, I like to laugh.
-          {"\n"}
-          {"\n"}I always wanted to be a great writer, like Victor Hugo who wrote
-          "Les Miserable", or like Roman Roland who wrote "John Christopher".
-          They have influenced millions of people through their books. I also
-          wanted to be a great psychologist, like William James or Sigmund
-          Freud, who could read people’s mind. Of course, I am nowhere close to
-          these people, yet.
-          {"\n"}
-          {"\n"}I am just someone who does some teaching, some research, and
-          some writing. But my dream is still alive.
-        </Text>
-      </View>
-
-    )
-  }
-
-  const AchievementsBox = () => {
-    return (
-      <View
-        style={{
-          marginTop: 10,
-          borderRadius: 10,
-          margin :10,
-          backgroundColor: PRIMARY_COLOR_WHITE,
-          elevation : 5
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            marginStart: 25,
-            marginTop: 20,
-          }}
-        >
-          <Icon
-            name="star-half-alt"
-            type="font-awesome-5"
-            color={PRIMARY_COLOR_BLACK}
-            size={23}
-          />
-          <Text
-            style={{
-              marginStart: 10,
-              fontSize: 18,
-            }}
-          >
-            My achievements
-          </Text>
-        </View>    
-        <View>
-          <Carousel
-            layout={'tinder'}
-            ref={carouselRef}
-            data={dataArchieve}
-            renderItem={renderItem}
-            sliderWidth={ITEM_WIDTH}
-            itemWidth={ITEM_WIDTH - 30}
-          />
-        </View>
-        
   
-      </View>
-    )
-  }
+  const vndFormat = new Intl.NumberFormat('it-IT', {
+    style: 'currency',
+    currency: 'VND',
+  });
+
+  moment.locale('vi')
+
+  const ITEMS = [
+    {
+      id : 1,
+      label : "Thông tin sinh viên",
+    },
+    {
+      id : 2,
+      label : "Cập nhật",
+    },
+  ];
 
   const DemandNoteBox = () => {
     return (   
       <View
         style={{
           marginTop: 10,
-          borderRadius: 10,
-          margin : 15,
           backgroundColor: PRIMARY_COLOR_WHITE,
           elevation : 5,
           marginBottom : FULL_HEIGHT / 10
@@ -563,92 +166,22 @@ export default function DetailPost({ navigation,route }) {
     )
   }
 
-  const ScrollBox = () => {
-    return(
-      <Animated.ScrollView
-        onScroll={Animated.event(
-          [{ nativeEvent : { contentOffset : { y : scrollY }}}],
-          { useNativeDriver : true }
-        )}
-        onMomentumScrollEnd={
-          ({nativeEvent}) => {
-            if (isCloseToBottom(nativeEvent)) {
-              const toValue = _scrollValue > CONTAINER_HEIGHT && _clampScrollValue > CONTAINER_HEIGHT / 2
-                ? _offsetValue + CONTAINER_HEIGHT : _offsetValue - CONTAINER_HEIGHT
-
-              Animated.timing(offsetAnim, {
-                toValue,
-                duration : 200,
-                useNativeDriver : true,
-              }).start()
-            }
-          }}
-
-        //  onMomentumScrollEnd={() => {
-        //   const toValue = _scrollValue > CONTAINER_HEIGHT && _clampScrollValue > CONTAINER_HEIGHT / 2
-        //   ? _offsetValue + CONTAINER_HEIGHT : _offsetValue - CONTAINER_HEIGHT
-
-        //   Animated.timing(offsetAnim, {
-        //     toValue,
-        //     duration : 200,
-        //     useNativeDriver : true,
-        //   }).start()
-        //  }} 
-        // style={{
-        //   backgroundColor: '#F2F5FA',
-        // }}
-      > 
-
-      <StudentInformationBox />
-      <LoanInformationBox />
-      <DescriptionBox />
-      <AchievementsBox />
-      <DemandNoteBox />
-    </Animated.ScrollView>
-    )
-  }
-
   const viewProfileStudent = () => {
     console.log("Nguyễn Trường Phi");
   };
 
   const [dataArchieve, setDataArchieve] = useState([
     {
-      id: "item2",
+      id: "1",
       image: "https://i.imgur.com/N3nQ9CS.jpg",
       title: "màu 1",
     },
     {
-      id: "item3",
+      id: "2",
       image: "https://i.imgur.com/AzdYlDM.jpg",
       title: "màu 2",
     },
-    {
-      id: "item1",
-      image: "https://i.imgur.com/s7GgEa8.jpg",
-      title: "màu 3",
-    },
-    {
-      id: "item6",
-      image: "https://i.imgur.com/1O1Kd6T.jpg",
-      title: "màu 4",
-    },
-    {
-      id: "item4",
-      image: "https://i.imgur.com/eNuhvpN.jpg",
-      title: "màu 5",
-    },
-
-    {
-      id: "item5",
-      image: "https://i.imgur.com/jEiBmma.jpg",
-      title: "màu 6",
-    },
   ]);
-
-  async function clickViewButton() {
-    console.log("Test button");
-  }
 
   function renderItem({ item, index }) {
     const { image, title } = item;
@@ -663,22 +196,633 @@ export default function DetailPost({ navigation,route }) {
       </Pressable>
     );
   }
+  const translateX = useRef(new Animated.Value(0)).current
+  const [page,setPage] = useState(1)
+
+  const onGesture = (event) => {
+    if(event.nativeEvent.translationX < 0){
+      if (page === 1){
+        translateX.setValue(event.nativeEvent.translationX)
+      } else if (page === 2) {
+        translateX.setValue(event.nativeEvent.translationX - FULL_WIDTH)
+      }
+    } else if (event.nativeEvent.translationX > 0) {
+      if (page === 2){
+        translateX.setValue(event.nativeEvent.translationX - FULL_WIDTH)
+      } else if (page === 3) {
+        translateX.setValue(event.nativeEvent.translationX - 2*FULL_WIDTH)
+      }
+    }
+  }
+
+  const onGestureEnd = (event) => {
+    if(event.nativeEvent.translationX < (-FULL_WIDTH / 3) && event.nativeEvent.translationX < 0){   
+        if (page === 1) {
+          Animated.timing(translateX,{
+            toValue : -FULL_WIDTH,
+            duration : 400,
+            useNativeDriver : false
+          }).start()
+          setPage(2)
+          tabPage.setValue(2)
+        } else if (page === 2) {
+          Animated.timing(translateX,{
+            toValue : -2*FULL_WIDTH,
+            duration : 400,
+            useNativeDriver : false
+          }).start()
+          setPage(3)
+          tabPage.setValue(3)
+        }   
+    } else if(event.nativeEvent.translationX > (FULL_WIDTH / 3) && event.nativeEvent.translationX > 0) {
+        if (page === 2) {
+          Animated.timing(translateX,{
+            toValue : 0,
+            duration : 400,
+            useNativeDriver : false
+          }).start()
+          setPage(1)
+          tabPage.setValue(1)
+        } else if (page === 3) {
+          Animated.timing(translateX,{
+            toValue : -FULL_WIDTH,
+            duration : 400,
+            useNativeDriver : false
+          }).start()
+          setPage(2)
+          tabPage.setValue(2)
+        }
+    } else {
+      if (page === 1) {
+        Animated.timing(translateX,{
+          toValue : 0,
+          duration : 400,
+          useNativeDriver : false
+        }).start()
+      } else if (page === 2) {
+        Animated.timing(translateX,{
+          toValue : -FULL_WIDTH,
+          duration : 400,
+          useNativeDriver : false
+        }).start()
+      } else if (page === 3) {
+        Animated.timing(translateX,{
+          toValue : -2*FULL_WIDTH,
+          duration : 400,
+          useNativeDriver : false
+        }).start()
+      }
+    } 
+  }
+
+  const tabTranslate = translateX.interpolate({
+    inputRange: [0, FULL_WIDTH],
+    outputRange: [1, -80],
+  }) 
+
+  const tabPage = useRef(new Animated.Value(page)).current
+
+  const tabWidth = tabPage.interpolate({
+    inputRange: [1 , 2 , 3],
+    outputRange: [80, 80, 140],
+  }) 
 
   return (
-    <View>
-      <HeaderBar 
-        scrollY={scrollY} 
-        navigation={navigation} 
-      />
-      <ScrollBox />
+    <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
+      <View style={styles.topContainer}>
+        <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
+          <TouchableOpacity
+            style={{ flexDirection : 'row', alignSelf : 'center', position : 'absolute', left : 20, alignItems : 'center' }}
+            onPress={() => {
+              navigation.goBack(); 
+            }}
+          >
+              <FontAwesome5
+                name={"chevron-left"}
+                size={20}
+                style={{ width: 30 }}
+                color={"white"}
+              />     
+          </TouchableOpacity>     
+          <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Thông tin khoản vay</Text>   
+        </View>
+      </View>
+      <View style={{ 
+          height : 50,
+          width : FULL_WIDTH, 
+          backgroundColor : PRIMARY_COLOR_WHITE,
+          marginTop : 5,
+          flexDirection : 'row',
+          alignItems : 'center',
+          justifyContent : 'center',
+          elevation: 2,
+        }}>
+          <TouchableOpacity 
+            onPress={() => {
+                translateX.setValue(0)
+                setPage(1)
+                tabPage.setValue(1)
+            }} 
+            style={{ padding : 5, justifyContent : 'center' }}>
+            <Animated.View style={[{ 
+              backgroundColor : SECONDARY_COLOR, 
+              borderRadius : 20, 
+              zIndex : 100, 
+              height : 40,
+              width : tabWidth,
+              position : 'absolute',
+              transform : [
+                {
+                  translateX : tabTranslate
+                }
+              ]
+            }]}/>
+            <Text style={{ fontSize : 16, marginHorizontal : 10, color : PRIMARY_COLOR_BLACK, zIndex : 150, fontWeight : page === 1 ? 'bold' : '100'}}>Bài viết</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => {
+              translateX.setValue(-FULL_WIDTH)
+              setPage(2)
+              tabPage.setValue(2)
+            }} 
+            style={{ padding : 5 }}>
+            <Text style={{ fontSize : 16, marginHorizontal : 10, color : PRIMARY_COLOR_BLACK, zIndex : 150, fontWeight : page === 2 ? 'bold' : '100' }}>Chi tiết</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => {
+              translateX.setValue(-2*FULL_WIDTH)
+              setPage(3)
+              tabPage.setValue(3)
+            }} 
+            style={{ padding : 5 }}>
+            <Text style={{ fontSize : 16, marginHorizontal : 10, zIndex : 150, fontWeight : page === 3 ? 'bold' : '100' }}>Thông tin thêm</Text>
+          </TouchableOpacity>    
+      </View>
+            {
+              post !== null 
+              ?  
+              (
+                <View style={{ flexDirection : 'row' }}>
+                  <PanGestureHandler onGestureEvent={onGesture} onEnded={onGestureEnd}>
+                    <Animated.View style={{height : FULL_HEIGHT * 2.2 / 3, width : FULL_WIDTH,transform : [{ translateX : translateX }]}}>
+                        <ScrollView
+                          contentContainerStyle={{
+                            paddingBottom : 20,
+                          }}
+                          showsVerticalScrollIndicator={false}
+                        >
+                          <View
+                            style={{
+                              marginTop: 5,
+                              flexDirection: "row",
+                            }}
+                          >
+                            <Avatar
+                              rounded
+                              containerStyle={{
+                                margin: 10,
+                              }}
+                              size="large"
+                              source={{
+                                uri: "https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80",
+                              }}
+                            />
+          
+                            <View>
+                              <Text
+                                style={{
+                                  marginTop: 20,
+                                  fontSize: 16,
+                                  color: "#6A6A6A",
+                                }}
+                              >
+                                Tạo bởi
+                              </Text>
+          
+                              {/* name student */}
+                              <Text
+                                style={{
+                                  fontSize: 20,
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {post.loan.Student.lastname + ' ' + post.loan.Student.firstname} - Năm III
+                              </Text>
+                            </View>
+                          </View>
+                          <Text
+                            style={{
+                              marginHorizontal: 10,
+                              marginTop: 5,
+                              fontSize: 18,
+                              color: PRIMARY_COLOR_BLACK,
+                            }}
+                          >
+                            {post.loan.title}
+                          </Text>
+          
+                          <View
+                            style={{
+                              marginTop: 20,
+                              marginHorizontal: 10,
+                              marginBottom : 10,
+                              flexDirection: "row",
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems : 'center'
+                              }}
+                            >
+                              <Icon
+                                onPress={viewProfileStudent}
+                                containerStyle={{
+                                  opacity : 0.6
+                                }}
+                                name="hashtag"
+                                type="font-awesome-5"
+                                color={PRIMARY_COLOR_BLACK}
+                                size={14}
+                              />
+                              <Text
+                                style={{
+                                  marginStart: 5,
+                                  fontSize: 14,
+                                  opacity : 0.6
+                                }}
+                              >
+                                {post.loan.Student.SchoolMajor.Major.name}
+                              </Text>
+                            </View>
+          
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems : 'center',
+                              }}
+                            >
+                              <Icon
+                                onPress={viewProfileStudent}
+                                containerStyle={{
+                                  marginStart: 20,
+                                  opacity : 0.6
+                                }}
+                                name="map-marker-alt"
+                                type="font-awesome-5"
+                                color={PRIMARY_COLOR_BLACK}
+                                size={14}
+                              />
+                              <Text
+                                style={{
+                                  marginStart: 5,
+                                  fontSize: 14,
+                                  opacity : 0.6
+                                }}
+                              >
+                                {post.loan.Student.SchoolMajor.School.name}
+                              </Text>
+                            </View>
+                          </View>
+                          <View style={styles.line}/>
+                          <View style={{ padding : 15, flexDirection : 'row'}}>
+                                <View>
+                                  <Text style={{  fontSize : 16  }}>{post.loan.AccumulatedMoney === null ? vndFormat.format(post.loan.totalMoney) : vndFormat.format(post.loan.totalMoney - post.loan.AccumulatedMoney)}</Text>
+                                  <Text style={{ opacity : 0.5,fontSize : 14 }}>Khoản tiền có thể đầu tư</Text>           
+                                </View>
+                                <View style={{  alignItems : 'flex-end', flex : 1, fontSize : 13 }}>
+                                  <Text style={{  fontSize : 16  }}>{vndFormat.format(post.loan.totalMoney)}</Text>
+                                  <Text style={{ opacity : 0.5,fontSize : 14 }}>Tổng tiền</Text>  
+                                </View>
+                            </View>
+                            <Progress.Bar progress={0.8} width={FULL_WIDTH / 1.2} style={{ alignSelf : 'center', margin : 5, marginBottom : 5 }} color={PRIMARY_COLOR} />         
+                            <View style={{ padding : 15, flexDirection : 'row' }}>
+                              <View>
+                                  <Text style={{ marginBottom : 5,fontSize : 16 }}>Người ủng hộ</Text>
+                                  <Text style={{ fontSize : 16 }}>Hết hạn trong</Text>
+                              </View>
+                              <View style={{ flex : 1 , alignItems : 'flex-end' }}>
+                                  <Text style={{ marginBottom : 5,fontSize : 16 }}>{post.loan.InvestorCount}</Text>
+                                  <Text style={{ fontSize : 16 }}>{moment(post.loan.postExpireAt).toNow()}</Text>
+                              </View>
+                            </View> 
+                            <View style={styles.line}/>
+                            <View style={{ marginHorizontal : 20 }}>
+                                  {ITEMS.map((item, i) => (
+                                      <ListItem
+                                          onPress={() => optionHadleClick(item)}     
+                                          
+                                          bottomDivider
+                                          key={i}            
+                                      >
+                                          <ListItem.Content>
+                                              <ListItem.Title style={{ 
+                                                  color:'black',
+                                                  fontSize : 16
+                                              }}>
+                                                  {item.label}
+                                              </ListItem.Title>
+                                          </ListItem.Content>
+                                          <ListItem.Chevron 
+                                              size={20} 
+                                              color="black"
+                                              style={{ marginRight : 20 }}
+                                          />
+                                      </ListItem>
+                                  ))}
+                              </View>
+          
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              flexWrap: "wrap",
+                              justifyContent: "center",
+                              marginBottom: 20,
+                              marginTop : 20
+                            }}
+                          >     
+                            {/* expired date */}
+                            <View
+                              style={{
+                                alignItems: "center",
+                              }}
+                            > 
+                              <Text style={{ fontSize : 16 }}>Bài gọi vốn hết hạn vào ngày</Text>
+                              <Text
+                                style={{
+                                  fontSize: 17,
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {moment(post.loan.postExpireAt).format('DD-MM-YYYY')}
+                              </Text>
+                            
+                            </View>
+                          </View>
+                        </ScrollView>
+                    </Animated.View>               
+                  </PanGestureHandler>
+                  <PanGestureHandler onGestureEvent={onGesture} onEnded={onGestureEnd}>
+                    <Animated.View style={{ backgroundColor : '#dadee3',height : FULL_HEIGHT * 2.2 / 3, width : FULL_WIDTH,transform : [{ translateX : translateX }]}}>
+                      <ScrollView 
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{ paddingBottom : 20 }}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: PRIMARY_COLOR_WHITE,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              marginHorizontal: 20,
+                              marginTop: 20,
+                              alignItems : 'center'
+                            }}
+                          >
+                            <Icon
+                              name="question-circle"
+                              type="font-awesome-5"
+                              color={SECONDARY_COLOR}
+                              size={20}
+                            />
+                            <Text
+                              style={{
+                                marginTop: "auto",
+                                marginStart: 10,
+                                fontSize: 17,
+                                fontWeight : 'bold',
+                                color : SECONDARY_COLOR
+                              }}
+                            >
+                              Tại sao lại có bài viết này ?
+                            </Text>
+                          </View>
+        
+                          <Text
+                            style={{
+                              flexWrap: "wrap",
+                              marginTop: 20,
+                              fontSize: 16,
+                              marginHorizontal: 20,
+                              marginBottom: 20,
+                            }}
+                          >
+                            {post.loan.description}
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            marginTop: 5,
+                            backgroundColor: PRIMARY_COLOR_WHITE,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              marginHorizontal: 20,
+                              marginTop: 20,
+                              alignItems : 'center'
+                            }}
+                          >
+                            <Icon
+                              name="comment-dollar"
+                              type="font-awesome-5"
+                              color={SECONDARY_COLOR}
+                              size={20}
+                            />
+                            <Text
+                              style={{
+                                marginTop: "auto",
+                                marginStart: 10,
+                                fontSize: 17,
+                                fontWeight : 'bold',
+                                color : SECONDARY_COLOR
+                              }}
+                            >
+                              Những gì nhà đầu tư nhận được
+                            </Text>
+                          </View>
+        
+                          <View
+                            style={{
+                          
+                            }}
+                          > 
+                            <View style={{ flexDirection : 'row', alignItems : 'center', marginTop : 15, justifyContent : "space-between", paddingHorizontal : 20 }}> 
+                              <Text
+                                style={{
+                                  fontSize: 15,                 
+                                }}
+                              >
+                                Tiền trả lúc còn học :
+                              </Text>
+          
+                              <Text
+                                style={{
+                                  fontSize: 16,
+                                  fontWeight: "bold",
+                                  color: PRIMARY_COLOR,
+                                }}
+                              >
+                                100.000 VNĐ/ tháng
+                              </Text>
+                            </View>
+                            <View style={{ flexDirection : 'row', alignItems : 'center', marginTop : 15, justifyContent : "space-between", paddingHorizontal : 20 }}>
+                              <Text
+                                style={{
+                                  color: PRIMARY_COLOR_BLACK,
+                                  fontSize: 15,
+                                }}
+                              >
+                                Lãi suất
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 16,
+                                  fontWeight: "bold",
+                                  color: PRIMARY_COLOR,
+                                }}
+                              >
+                                {post.loan.interest}% / tháng
+                              </Text>
+                            </View>
+                            <View style={{ flexDirection : 'row', alignItems : 'center', marginTop : 15, justifyContent : "space-between", paddingHorizontal : 20 }}>
+                              <Text
+                                style={{
+                                  fontSize: 15,
+                                }}
+                              >
+                                Ngày tốt nghiệp :
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 16,
+                                  fontWeight: "bold",
+                                  color: PRIMARY_COLOR,
+                                }}
+                              >
+                                5 tháng
+                              </Text>
+                            </View>
+                            <View style={{ flexDirection : 'row', alignItems : 'center', marginTop : 15, justifyContent : "space-between", paddingHorizontal : 20 }}>
+                              <Text
+                                style={{
+                                  fontSize: 15,
+                                  color : PRIMARY_COLOR_BLACK
+                                }}
+                              >
+                                Thời hạn :
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 16,
+                                  fontWeight: "bold",
+                                  color: PRIMARY_COLOR,
+                                }}
+                              >
+                                {post.loan.duration} tháng
+                              </Text>
+                            </View>
+                            <View style={{ flexDirection : 'row', alignItems : 'center', marginVertical : 15, justifyContent : "space-between", paddingHorizontal : 20 }}>
+                              <Text
+                                style={{
+                                  fontSize: 15,
+                                  color : PRIMARY_COLOR_BLACK
+                                }}
+                              >
+                                Lãi phạt :
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 16,
+                                  fontWeight: "bold",
+                                  color: PRIMARY_COLOR,
+                                }}
+                              >
+                                10%
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </ScrollView>
+                    </Animated.View>
+                  </PanGestureHandler>
+                  <PanGestureHandler onGestureEvent={onGesture} onEnded={onGestureEnd}>
+                    <Animated.View style={{backgroundColor : '#dadee3',height : FULL_HEIGHT * 2.2 / 3, width : FULL_WIDTH, transform : [{ translateX : translateX }]}}>
+                      <ScrollView
+                        contentContainerStyle={{
+                          backgroundColor :PRIMARY_COLOR_WHITE,
+                          paddingBottom: 20 ,
+                        }}
+                      >
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            marginHorizontal: 20,
+                            marginTop: 20,
+                          }}
+                        >
+                          <Icon
+                            name="archive"
+                            type="feather"
+                            color={SECONDARY_COLOR}
+                            size={20}
+                          />
+                          <Text
+                            style={{
+                              marginStart: 10,
+                              fontSize: 16,
+                              color : SECONDARY_COLOR,
+                              fontWeight : 'bold'
+                            }}
+                          >
+                            Thành tích cá nhân
+                          </Text>
+                        </View>   
+                        {
+                          post.loan.Student.Archievements.map((item,index) => (
+                            <View key={index} style={{ marginVertical : 10 }}>
+                              <Image 
+                                source={{ uri : item.imageUrl }}
+                                style={{
+                                  width : FULL_WIDTH,
+                                  height : FULL_HEIGHT / 3
+                                }}
+                              />
+                              <Text style={{
+                                padding : 10
+                              }}>{item.description}</Text>
+                            </View>
+                          ))
+                        }    
+                      </ScrollView>
+                    </Animated.View>
+                  </PanGestureHandler>
+                </View>
+              )
+              :
+              (
+                (
+                  <ActivityIndicator size="large" color={PRIMARY_COLOR}/>
+                )
+              )
+            }
+      
+          
       <Animated.View
         style={[styles.btnContainer, { transform : [{ translateY : bottomTranslate }]}]}
       >    
         <Button
           style={[styles.btnInvest,{opacity}]}
           color={PRIMARY_COLOR}
-          onPress={() => navigation.navigate("BackSelection")}
-            >Invest</Button> 
+          onPress={() => navigation.navigate("BackSelection", {
+            id,
+            availableInvest
+          })}
+            >Đầu tư</Button> 
       </Animated.View>
     </View>
   );
@@ -740,6 +884,21 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right : 0,
-    elevation : 10
-  }
+    elevation : 10,
+    height : FULL_HEIGHT / 10,
+    justifyContent : 'center'
+  },
+  line : { 
+    borderBottomWidth : 0.95, 
+    borderBottomColor : '#dadee3',
+    width : FULL_WIDTH / 1.12, 
+    alignSelf : 'center' ,
+    marginTop : 10
+  },
+  topContainer : {
+    height : FULL_HEIGHT * 0.3 / 4,
+    backgroundColor : PRIMARY_COLOR,
+    borderBottomLeftRadius : 25,
+    borderBottomRightRadius : 25,
+  },
 });

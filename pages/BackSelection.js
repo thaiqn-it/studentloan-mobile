@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,17 +6,24 @@ import {
   ScrollView,
   FlatList,
   TouchableOpacity,
+  Alert 
 } from "react-native";
 import {
   PRIMARY_COLOR,
   PRIMARY_COLOR_WHITE,
   PRIMARY_COLOR_BLACK,
   FULL_WIDTH,
+  FULL_HEIGHT,
+  SECONDARY_COLOR
 } from "../constants/styles";
 import { Icon } from "react-native-elements/dist/icons/Icon";
 import InputSpinner from "react-native-input-spinner";
 import { FontAwesome } from '@expo/vector-icons'; 
 import { Button } from 'react-native-paper';
+import { Ionicons,FontAwesome5 } from '@expo/vector-icons';
+import { AppContext } from '../contexts/App';
+import { vndFormat } from "../utils";
+import { investmentApi } from "../apis/investment";
 
 export default function BackSelection({route, navigation}) {
 
@@ -28,24 +35,63 @@ export default function BackSelection({route, navigation}) {
     },
     {
       id: 2,
-      limitMoney: 200000,
+      limitMoney: 100000,
     },
     {
       id: 3,
-      limitMoney: 500000,
+      limitMoney: 200000,
     },
     {
       id: 4,
+      limitMoney: 500000,
+    },
+    {
+      id: 5,
       limitMoney: 1000000,
+    },
+    {
+      id: 6,
+      limitMoney: 20000000,
     },
   ]);
   const [isSelect,setSelect] = useState(null)
   const [rate,setRate] = useState(3/100)
   const [repayment,setRepayment] = useState(money+(money*rate))
+  const { id,availableInvest } = route.params;
+  const { user } = useContext(AppContext);
 
   const setMoneyByPressBox = (item) => {
-    setMoney(item.limitMoney);
+    if (item.limitMoney > availableInvest) {
+      Alert.alert(
+        "Khoảng đầu tư vượt quá cho phép",
+        `Số tiền đầu tư không thể vượt quá ${vndFormat.format(availableInvest)}`,
+        [
+          { text: "OK" }
+        ]
+      );
+    } else {
+      setMoney(item.limitMoney);
+    } 
   };
+
+  const confirmInvestHandler = () => {
+    investmentApi.create({
+      investorId : user.Investor.id,
+      interest : "3",
+      total : money,
+      loanId : id
+    }).then(res => {
+      
+    }).finally(() => {
+      Alert.alert(
+        "Thành công",
+        "Bạn đã đầu tư thành công",
+        [
+          { text: "OK" }
+        ]
+      );
+    })
+  }
 
   useEffect(() => {
     setRepayment(money+(money*rate))
@@ -59,128 +105,105 @@ export default function BackSelection({route, navigation}) {
         setSelect(item.id)
       }}
     >
-      <Text style={[isSelect === item.id ? styles.textBoxSelect : styles.textBoxUnselect]}>{item.limitMoney} $</Text>
+      <Text style={[isSelect === item.id ? styles.textBoxSelect : styles.textBoxUnselect]}>{vndFormat.format(item.limitMoney)}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <ScrollView
+    <View
       style={{
-        backgroundColor: PRIMARY_COLOR_WHITE,
+        height : FULL_HEIGHT,
+        backgroundColor : PRIMARY_COLOR_WHITE
       }}
     > 
-       <View style={{ marginTop : 50, marginLeft : 20}}>
-        <Text style={{
-          fontSize : 15,
-          color : '#a6a9ad'
-        }}>
-          AMOUNT
-        </Text>
-      </View>
-      <View
-        style={{
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginTop : 20
-        }}
-      >
-          <InputSpinner
-            skin={"clean"}
-            fontSize={18}
-            buttonFontSize={32}
-            width={350}
-            height={50}
-            children={<FontAwesome style={{ marginRight : 20 }} name="dollar" size={20} color="gray" />}
-            min={50000}
-            step={50000}
-            value={money}
-            onChange={(value) => {
-              setMoney(value)
+      <View style={styles.topContainer}>
+        <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
+          <TouchableOpacity
+            style={{ flexDirection : 'row', alignSelf : 'center', position : 'absolute', left : 20, alignItems : 'center' }}
+            onPress={() => {
+              navigation.goBack(); 
             }}
-          />
+          >
+              <FontAwesome5
+                name={"chevron-left"}
+                size={20}
+                style={{ width: 30 }}
+                color={"white"}
+              />     
+          </TouchableOpacity>     
+          <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Đầu tư</Text>   
+        </View>
       </View>
-      <View/>
-        <View
-          style={{
-            flexDirection: "row",
-            alignSelf : 'center',
-            alignItems : 'center',
-            marginTop : 10,
-          }}
-        >
-        <Icon
-          name="exclamation-circle"
-          type="font-awesome-5"
-          containerStyle={{
-            marginRight: 5,
-          }}
-          color={PRIMARY_COLOR}
-          size={17}
-        />
-        <Text
-          style={{
-            fontSize: 15,
-            color: PRIMARY_COLOR,
-          }}
-        >
-          Available amount : 7,405.98 $
-        </Text>
-      </View>
-      <View style={{ marginTop : 20, marginLeft : 20}}>
-        <Text style={{
-          fontSize : 15,
-          color : '#a6a9ad'
-        }}>
-          CHOOSE YOUR AMOUNT
-        </Text>
-      </View>
-
-      <View
-        style={{
-          backgroundColor: PRIMARY_COLOR_WHITE,
-          borderRadius: 10,
-          margin : 10,
-          elevation : 3,
-          padding : 10
-        }}
-      >
+      <View style={{ 
+          borderRadius : 10,
+          elevation : 5,
+          backgroundColor : PRIMARY_COLOR_WHITE,
+          marginTop : 20,
+          marginHorizontal : 10,
+          padding : 15
+       }}>
+         <View style={{ flexDirection : 'row', justifyContent : 'space-between',alignItems : 'center' }}>
+          <Text style={{ fontSize : 16 }}>Số dư ví</Text>
+          <Text style={{ fontSize : 20, fontWeight : 'bold', color : SECONDARY_COLOR }}>{vndFormat.format(20000000)}</Text>
+         </View>
+         <View style={{ borderWidth : 0.6, borderColor : '#c4c7cc', marginTop : 15 }}/>
+          <Text style={{ fontSize : 16, marginTop : 15 }}>Số tiền muốn đầu tư</Text>
+          <View
+            style={{
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop : 20
+            }}
+          >
+              <InputSpinner
+                skin={"clean"}
+                fontSize={20}
+                buttonFontSize={35}
+                width={350}
+                height={60}
+                min={50000}
+                max={availableInvest}
+                step={50000}
+                value={money}
+                onChange={(value) => {
+                    setMoney(value)                   
+                }}
+              >
+              </InputSpinner>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              alignSelf : 'center',
+              alignItems : 'center',
+              marginTop : 15,
+            }}
+          >
+            <Icon
+              name="exclamation-circle"
+              type="font-awesome-5"
+              containerStyle={{
+                marginRight: 5,
+              }}
+              color={PRIMARY_COLOR}
+              size={17}
+            />
+            <Text
+              style={{
+                fontSize: 16,
+                color: PRIMARY_COLOR,
+              }}
+            >
+              Khoảng đầu tư khả dụng : {vndFormat.format(availableInvest)}
+            </Text>
+          </View>
         <FlatList
+          style={{marginTop : 20}}
           data={limit}
-          numColumns={2}
+          numColumns={3}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
         />
-      </View>
-      <View style={{ marginTop : 20, marginLeft : 20}}>
-        <Text style={{
-          fontSize : 15,
-          color : '#a6a9ad'
-        }}>
-          INVEST INFORMATION
-        </Text>
-      </View>
-      <View
-        style={{
-          backgroundColor: PRIMARY_COLOR_WHITE,
-          borderRadius: 10,
-          margin : 10,
-          elevation : 3,
-          padding : 20,
-          flexDirection : 'row'
-        }}
-      >
-        <View style={{ justifyContent : 'flex-start' }}>
-          <Text style={{ fontSize : 15 }}>Annual Interest Rate</Text>
-          <Text style={styles.loanInfoTxt}>Penalty Rate</Text>
-          <Text style={styles.loanInfoTxt}>Total Repayment</Text>
-          <Text style={styles.loanInfoTxt}>Repayment Date</Text>
-        </View>
-        <View style={{ alignItems : 'flex-end',flex : 1 }}>
-          <Text style={{ fontSize : 15 }}>{rate * 100}%</Text>
-          <Text style={styles.loanInfoTxt}>15%</Text>
-          <Text style={styles.loanInfoTxt}>{repayment} $</Text>
-          <Text style={styles.loanInfoTxt}>01/03/2022</Text>
-        </View>
       </View>
       <View
         style={styles.btnContainer}
@@ -188,29 +211,45 @@ export default function BackSelection({route, navigation}) {
         <Button
           style={styles.btnInvest}
           color={PRIMARY_COLOR}
-
-            >Confirm</Button> 
+          onPress={() => {
+            Alert.alert(
+              "Xác nhận",
+              `Bạn muốn đầu tư ${vndFormat.format(money)} cho sinh viên ?`,
+              [ 
+                {
+                  text: "Xác nhận",
+                  onPress: () => confirmInvestHandler(),
+                },
+                {
+                  text: "Hủy",
+                },                
+              ],
+              {
+                cancelable : true
+              }
+            )
+          }}
+            >Đầu tư</Button> 
       </View>
-    </ScrollView> 
+    </View> 
   );  
 }
 
 const styles = StyleSheet.create({
   textBoxUnselect: {
-    fontSize: 15,
-    color: '#babdc2',
-    fontWeight : 'bold'
+    fontSize: 16,
+    color: PRIMARY_COLOR_BLACK,
   },
   textBoxSelect : {
-    fontSize: 15,
+    fontSize: 16,
     color: PRIMARY_COLOR_WHITE,
   },
   boxUnselect : {
-    margin: 10,
-    height:60,
-    width:50,
+    margin: 5,
+    height: 50,
+    width: 50,
     flex: 1,
-    borderRadius : 5,
+    borderRadius : 15,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: PRIMARY_COLOR_WHITE,
@@ -218,16 +257,14 @@ const styles = StyleSheet.create({
     borderColor : '#babdc2'
   },
   boxSelect : {
-    margin: 10,
-    height:60,
-    width:50,
+    margin: 5,
+    height: 50,
+    width: 50,
     flex: 1,
-    borderRadius : 5,
+    borderRadius : 15,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth : 1,
-    borderColor : '#babdc2',
-    backgroundColor: PRIMARY_COLOR,
+    backgroundColor: SECONDARY_COLOR,
   },
   loanInfoTxt : {
     marginTop : 10,
@@ -242,5 +279,16 @@ const styles = StyleSheet.create({
   },
   btnContainer : {
     padding: 10,
-  }
+    position : 'absolute',
+    bottom : 10, 
+    right : 0,
+    left : 0,
+    marginBottom : 20
+  },
+  topContainer : {
+    height : FULL_HEIGHT * 0.3 / 4,
+    backgroundColor : PRIMARY_COLOR,
+    borderBottomLeftRadius : 25,
+    borderBottomRightRadius : 25,
+  },
 });

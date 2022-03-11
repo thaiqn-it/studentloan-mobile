@@ -1,16 +1,23 @@
-import React,{ useState,useEffect } from 'react'
-import { StyleSheet, Text, View,FlatList,TouchableOpacity,ScrollView,Pressable,KeyboardAvoidingView, } from 'react-native'
-import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_FONT,PRIMARY_COLOR_WHITE, FULL_WIDTH } from '../constants/styles'
+import React,{ useState,useEffect,useRef } from 'react'
+import { StyleSheet, Text, View,FlatList,TouchableOpacity,StatusBar,Pressable,KeyboardAvoidingView,Modal,Image } from 'react-native'
+import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_FONT,PRIMARY_COLOR_WHITE, FULL_WIDTH,SECONDARY_COLOR,PRIMARY_COLOR_BLACK } from '../constants/styles'
 import { Entypo } from '@expo/vector-icons';
 import LottieView from 'lottie-react-native';
 import { CHANGE_LOTTIE } from '../constants/files'
 import InputSpinner from "react-native-input-spinner";
-import { FontAwesome } from '@expo/vector-icons'; 
+import { FontAwesome,FontAwesome5,Ionicons } from '@expo/vector-icons'; 
 import { CheckBox,Input } from 'react-native-elements'
 import { Button } from 'react-native-paper';
+import RBSheet from "react-native-raw-bottom-sheet";
+import { paypalApi } from "../apis/paypal.js";
+import WebView from 'react-native-webview';
 
-export default function DepositMoney() {
+export default function DepositMoney({ navigation, route }) {
+    const addCardRef = useRef();
+    const [isUsedLater,setUsedLater] = useState(false)
     const [money, setMoney] = useState(50000);
+    const [paypalUrl, setPaypalUrl] = useState("")
+    const [modalVisible, setModalVisible] = useState(false)
     const [limit, setLimit] = useState([
         {
           id: 1,
@@ -18,15 +25,23 @@ export default function DepositMoney() {
         },
         {
           id: 2,
-          limitMoney: 200000,
+          limitMoney: 100000,
         },
         {
           id: 3,
-          limitMoney: 500000,
+          limitMoney: 200000,
         },
         {
           id: 4,
+          limitMoney: 500000,
+        },
+        {
+          id: 5,
           limitMoney: 1000000,
+        },
+        {
+          id: 6,
+          limitMoney: 20000000,
         },
       ]);
     const [isSelect,setSelect] = useState(null)
@@ -36,6 +51,37 @@ export default function DepositMoney() {
         setMoney(item.limitMoney);
     };
 
+    const checkOutHandler = () => {
+        paypalApi
+            .topup(money)
+            .then(res => {
+                setPaypalUrl(res.data)
+                setModalVisible(true)
+            })
+    }
+
+    const paypalStateChange = (navState) => {
+        const { url, title } = navState
+        if (title === "Success") {
+            let splitUrl = url.split('?');
+            let splitOrtherHalf = splitUrl[1].split('&');
+            let paymentId = splitOrtherHalf[0].replace("paymentId=", "");
+            navigation.navigate("TransactionInfo")
+        } else if (title === "Cancel") {
+            setModalVisible(!modalVisible)
+            navigation.navigate("DepositMoney")
+        }
+    }
+
+    const PaypalLoading = () => (
+        <View style={{ height : FULL_HEIGHT - StatusBar.currentHeight,backgroundColor : PRIMARY_COLOR_WHITE, justifyContent : 'center'}}>
+            <Image 
+                style={{height : 150, width : FULL_WIDTH}} 
+                source={{ uri : 'https://tuhocmmo.com/wp-content/uploads/2017/07/paypal-logo.png' }}
+            />
+        </View>
+    )
+
     const renderItem = ({ item }) => (
         <TouchableOpacity
           style={[isSelect === item.id ? styles.boxSelect : styles.boxUnselect]}
@@ -44,54 +90,55 @@ export default function DepositMoney() {
             setSelect(item.id)
           }}
         >
-          <Text style={[isSelect === item.id ? styles.textBoxSelect : styles.textBoxUnselect]}>{item.limitMoney} $</Text>
+          <Text style={[isSelect === item.id ? styles.textBoxSelect : styles.textBoxUnselect]}>{item.limitMoney} đ</Text>
         </TouchableOpacity>
       );
 
     return (
-        <View style={{ backgroundColor : PRIMARY_COLOR_WHITE, height : FULL_HEIGHT }}>
+        <View style={{ backgroundColor : PRIMARY_COLOR_WHITE, flex : 1 }}>
+             <View style={styles.topContainer}>
+                <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
+                <TouchableOpacity
+                    style={{ flexDirection : 'row', alignSelf : 'center', position : 'absolute', left : 20, alignItems : 'center' }}
+                    onPress={() => {
+                    navigation.goBack(); 
+                    }}
+                >
+                    <FontAwesome5
+                        name={"chevron-left"}
+                        size={20}
+                        style={{ width: 30 }}
+                        color={"white"}
+                    />     
+                </TouchableOpacity>     
+                <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Nạp tiền</Text>   
+                </View>
+            </View>
             <KeyboardAvoidingView behavior={'height'}>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                    <View style={{ flexDirection : 'row', marginTop : 50, justifyContent : 'space-between', marginHorizontal : 25 }}>
+                <View showsVerticalScrollIndicator={false}>
+                    <View style={{ flexDirection : 'row', marginTop : 20, justifyContent : 'space-between', marginHorizontal : 25 }}>
                         <Text style={{
                             opacity : 0.6,
                             alignSelf : 'center',
+                            fontSize : 18
                         }}>
-                            YOUR BALANCE
+                            Số dư ví
                         </Text>
                         <Text style={{
                             fontWeight : 'bold',
                             fontSize : 20,
                             alignSelf : 'center',
-                            color : PRIMARY_COLOR
+                            color : SECONDARY_COLOR
                         }}>
-                            20.000.000 $
+                            20.000.000 đ
                         </Text>
-                    </View>
-                    <View style={{ flexDirection : 'row', marginTop : 20, justifyContent : 'space-between'}}>
-                        <Pressable style={({ pressed }) => [{
-                            opacity: pressed
-                            ? 0.3
-                            : 1,
-                        }]}>
-                            <View style={{ flexDirection : 'row',alignItems : 'center', marginHorizontal : 25 }}>
-                                <Text style={{
-                                    fontSize : 18,
-                                    fontWeight : 'bold',
-                                }}>Deposit</Text>
-                                <Entypo name="chevron-down" size={18} color={PRIMARY_COLOR} style={{ marginLeft : 10 }}/>
-                            </View>
-                        </Pressable>
-                        <View style={{ alignItems : 'center', marginHorizontal : 25 }}>
-                            <LottieView source={CHANGE_LOTTIE} style={styles.lottie} autoPlay loop speed={0.8}/>
-                        </View> 
                     </View>
                     <View style={{ marginTop : 25, marginLeft : 25}}>
                         <Text style={{
-                            fontSize : 15,
-                            color : '#a6a9ad'
+                            fontSize : 18,
+                            color : '#b6a9ad'
                         }}>
-                            CHOOSE YOUR AMOUNT
+                            Số tiền muốn nạp
                         </Text>
                     </View>
                     <View
@@ -102,10 +149,10 @@ export default function DepositMoney() {
                         }}>
                         <InputSpinner
                             skin={"clean"}
-                            fontSize={18}
-                            buttonFontSize={32}
+                            fontSize={20}
+                            buttonFontSize={35}
                             width={350}
-                            height={50}
+                            height={60}
                             children={<FontAwesome style={{ marginRight : 20 }} name="dollar" size={20} color="gray" />}
                             min={50000}
                             step={10000}
@@ -125,72 +172,78 @@ export default function DepositMoney() {
                     >
                         <FlatList
                         data={limit}
-                        numColumns={2}
+                        numColumns={3}
                         renderItem={renderItem}
                         keyExtractor={(item) => item.id}
                         />
                     </View>
-                    <View style={{ marginLeft : 25 }}>
+                    <View style={{ marginLeft : 25}}>
                         <Text style={{
-                            fontSize : 15,
-                            color : '#a6a9ad'
+                            fontSize : 18,
+                            color : '#b6a9ad'
                         }}>
-                            CHOOSE YOUR PAYMENT METHOD
+                            Chọn thẻ
                         </Text>
                     </View>
-                    <View style={{ flexDirection : 'row', justifyContent : 'space-around', marginVertical : 10}}>
-                        <CheckBox
-                            title='Paypal'
-                            checked={true}
-                            containerStyle={{ width : FULL_WIDTH / 2 - 40, alignItems : 'center', borderColor : PRIMARY_COLOR }}
-                            checkedColor={PRIMARY_COLOR}
-                        />
-                        <CheckBox
-                            title='Stripe'
-                            checked={check}
-                            containerStyle={{ width : FULL_WIDTH / 2 - 40, alignItems : 'center'  }}
-                        />
-                    </View>   
-                    <View style={{ width : FULL_WIDTH / 1.1, borderBottomWidth : 0.2 , alignSelf : 'center' }}/>
-                    <View style={{ marginTop : 10 }}>
-                        <Text style={styles.labelBankCard}>Number</Text>
-                        <Input
-                            placeholder='xxxx xxxx xxxx xxxx'
-                            inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                            containerStyle= {styles.input}
-                        />
-                        <Text style={styles.labelBankCard}>Owner Name</Text>
-                        <Input
-                            placeholder='Input Name'
-                            inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                            containerStyle= {styles.input}
-                            autoCapitalize="characters"
-                        />
-                        <Text style={styles.labelBankCard}>Issued on</Text>
-                        <Input
-                            placeholder='Input Date'
-                            inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                            containerStyle= {styles.input}
-                        />
-                    </View>
-                    <View style={{ paddingBottom : 60 }}>
-                        <CheckBox
-                            title='Save Card For Later ?'
-                            checked={true}
-                            checkedColor={PRIMARY_COLOR}
-                            containerStyle={{ backgroundColor : PRIMARY_COLOR_WHITE , borderWidth : 0 }}
-                        />
-                    </View>
-                </ScrollView>
+                    <TouchableOpacity style={{ 
+                        backgroundColor : PRIMARY_COLOR_WHITE,
+                        borderRadius : 10,
+                        marginHorizontal : 10,
+                        elevation : 5,
+                        flexDirection : 'row',
+                        alignItems : 'center',
+                        justifyContent : 'center',
+                        paddingVertical : 15,
+                        marginTop : 15
+                    }}>
+                        <Ionicons name="md-add-circle-outline" size={25} color={SECONDARY_COLOR} />
+                        <Text style={{ color : SECONDARY_COLOR, fontSize : 18, marginLeft : 5 }}>Thêm thẻ</Text>
+                    </TouchableOpacity>
+                    {/* <RBSheet
+                        ref={addCardRef}
+                        keyboardAvoidingViewEnabled={true}
+                        closeOnDragDown={true}
+                        closeOnPressMask={true}
+                        height={FULL_HEIGHT}
+                        customStyles={{
+                            container : {
+                                borderTopLeftRadius : 20,
+                                borderTopRightRadius : 20
+                            }
+                        }}
+                    >   
+                   
+                            <WebView 
+                            source={{ uri : paypalUrl }}
+                            />
+                 
+                    </RBSheet>                */}
+                </View>
             </KeyboardAvoidingView>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+            >   
+                <View style={{ height : FULL_HEIGHT - StatusBar.currentHeight, width : FULL_WIDTH, backgroundColor : PRIMARY_COLOR_WHITE}}>
+                    <Entypo style={{ alignSelf : 'flex-end' }} name="cross" size={30} color="black" onPress={() => setModalVisible(!modalVisible)}/>
+                    <WebView 
+                        source={{ uri : paypalUrl }}
+                        startInLoadingState={true}
+                        renderLoading={() => <PaypalLoading />}
+                        onNavigationStateChange={paypalStateChange}  
+                    />
+                   
+                </View>        
+            </Modal>
             <View
                 style={styles.btnContainer}
             >    
                 <Button
                 style={styles.btnConfirm}
                 color={PRIMARY_COLOR}
-
-                    >Confirm</Button> 
+                onPress={checkOutHandler}
+                    >Xác nhận</Button> 
             </View>
         </View>
 
@@ -204,38 +257,35 @@ const styles = StyleSheet.create({
         height: 30,
     },
     textBoxUnselect: {
-        fontSize: 15,
-        color: '#babdc2',
-        fontWeight : 'bold'
-    },
-    textBoxSelect : {
-        fontSize: 15,
+        fontSize: 16,
+        color: PRIMARY_COLOR_BLACK,
+      },
+      textBoxSelect : {
+        fontSize: 16,
         color: PRIMARY_COLOR_WHITE,
-    },
+      },
     boxUnselect : {
-        margin: 10,
-        height:60,
-        width:50,
+        margin: 5,
+        height: 50,
+        width: 50,
         flex: 1,
-        borderRadius : 5,
+        borderRadius : 15,
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: PRIMARY_COLOR_WHITE,
         borderWidth : 1,
         borderColor : '#babdc2'
-    },
-    boxSelect : {
-        margin: 10,
-        height:60,
-        width:50,
+      },
+      boxSelect : {
+        margin: 5,
+        height: 50,
+        width: 50,
         flex: 1,
-        borderRadius : 5,
+        borderRadius : 15,
         justifyContent: "center",
         alignItems: "center",
-        borderWidth : 1,
-        borderColor : '#babdc2',
-        backgroundColor: PRIMARY_COLOR,
-    },
+        backgroundColor: SECONDARY_COLOR,
+      },
     input :{ 
         borderWidth : 1 , 
         borderRadius : 10, 
@@ -257,6 +307,7 @@ const styles = StyleSheet.create({
         borderWidth : 1.2,
         alignSelf : 'center',
         borderColor : PRIMARY_COLOR,
+        marginBottom : 10
     },
     btnContainer : {
         backgroundColor: "white",
@@ -265,6 +316,12 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right : 0,
-        elevation : 10,
+        elevation : 5,
+    },
+    topContainer : {
+        height : FULL_HEIGHT * 0.3 / 4,
+        backgroundColor : PRIMARY_COLOR,
+        borderBottomLeftRadius : 25,
+        borderBottomRightRadius : 25,
     },
 })

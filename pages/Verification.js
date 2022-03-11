@@ -18,7 +18,7 @@ import {
 } from 'react-native-confirmation-code-field';
 import Timer from '../components/Timer';
 import { userApi } from '../apis/user';
-import { studentApi } from '../apis/student';
+import { investorApi } from '../apis/investor';
 import * as SecureStore from "expo-secure-store";
 import { JWT_TOKEN_KEY, resetJWTToken } from '../constants';
 import { loadToken } from '../apis';
@@ -41,7 +41,6 @@ export default function Verification({ navigation, route }) {
       setValue,
     });
     let userData = null
-    
     const ConfirmBtnHandler = async () => {
         setIsLoading(true)
         if (!isResend) {
@@ -57,27 +56,27 @@ export default function Verification({ navigation, route }) {
                         userData = await userApi.registerByFb({
                             access_token : fb_access_token,
                             phoneNumber : phoneNumber,
-                            type : 'STUDENT',
+                            type : 'INVESTOR',
                             password : user.password
                         })                       
                     } else if (gg_access_token !== undefined) {
                         userData = await userApi.registerByGog({
                             access_token : gg_access_token,
                             phoneNumber : phoneNumber,
-                            type : 'STUDENT',
+                            type : 'INVESTOR',
                             password : user.password
                         })  
                     } else {
                         userData = await userApi.register({
                             email : user.email,
                             phoneNumber : phoneNumber,
-                            type : 'STUDENT',
+                            type : 'INVESTOR',
                             password : user.password
                     })
                     }
 
                     if (userData.data.id) {
-                        await studentApi.create({                
+                        await investorApi.create({                
                             userId : userData.data.id,
                             profileUrl : userData.data.profileUrl,
                             firstName : user.firstName,

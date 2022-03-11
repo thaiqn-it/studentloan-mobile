@@ -20,6 +20,8 @@ import History from "../History";
 import TransactionInfo from "../TransactionInfo";
 import DepositMoney from "../DepositMoney";
 import FilterHistory from "../FilterHistory";
+import WithdrawMoney from "../WithdrawMoney";
+import SuccessPayment from "../SuccessPayment";
 
 const Stack = createStackNavigator();
 
@@ -159,9 +161,23 @@ export default function AppStack() {
                 headerShown: false,
               }}
             />
+            <Stack.Screen
+              name={"WithdrawMoney"}
+              component={WithdrawMoney}
+              options={{
+                headerShown: false,
+              }}
+            />
               <Stack.Screen
                 name={"FilterHistory"}
                 component={FilterHistory}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name={"SuccessPayment"}
+                component={SuccessPayment}
                 options={{
                   headerShown: false,
                 }}

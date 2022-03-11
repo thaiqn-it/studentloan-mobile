@@ -111,7 +111,7 @@ export default function Home({ route, navigation }) {
         {
           item.data.map(data =>{
             return(
-              <View style={styles.transactionItem}>
+              <TouchableOpacity key={data.id} style={styles.transactionItem} onPress={() => navigation.navigate("TransactionInfo")}>
                 <View style={{ flexDirection : 'row' }}>
                   <View style={styles.nameIcon}>
                     <Text>QT</Text>
@@ -125,7 +125,7 @@ export default function Home({ route, navigation }) {
                   <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'green' }}>{data.money}</Text>
                   <Text style={{ marginTop : 3, fontSize : 16 }}>{data.type}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             )
           })
         }
@@ -134,7 +134,7 @@ export default function Home({ route, navigation }) {
   }
 
   return (
-    <View style={{ height : FULL_HEIGHT, backgroundColor : PRIMARY_COLOR_WHITE, marginTop : 20 }}>
+    <View style={{ height : FULL_HEIGHT, backgroundColor : PRIMARY_COLOR_WHITE }}>
         <Animatable.View style={styles.topContainer} ref={topContainerRef}>
           <View style={{ padding : 10,flexDirection : 'row', justifyContent : 'center',alignItems : 'center' }}>     
             <View style={{ 

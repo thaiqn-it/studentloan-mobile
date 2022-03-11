@@ -1,12 +1,15 @@
-import React, { useEffect, useState} from 'react'
-import { StyleSheet, Text, View,FlatList,TouchableOpacity } from 'react-native'
+import React, { useEffect, useState,useContext } from 'react'
+import { StyleSheet, Text, View,FlatList,TouchableOpacity, Image } from 'react-native'
 import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from '../constants/styles';
 import { Avatar } from 'react-native-elements';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import * as Progress from 'react-native-progress';
+import { FontAwesome5 } from "@expo/vector-icons";
+import { investmentApi } from '../apis/investment';
+import { AppContext } from '../contexts/App';
 
 export default function MyInvestment({ navigation }) {
-    const [items, setItems] = useState([
+      const [items, setItems] = useState([
         // this is the parent or 'item'
         {
           name: 'IT',
@@ -63,7 +66,8 @@ export default function MyInvestment({ navigation }) {
         },
       ]);
       const [selectedItems, setSelectedItems] = useState('');
-    
+      const { user } = useContext(AppContext);
+      
       const [dataItems, setDataItems] = useState([]);
       const fetchData = () => {
         setDataItems([
@@ -122,10 +126,48 @@ export default function MyInvestment({ navigation }) {
             experiedDay: '09/11/2021',
             processStatus: 100,
           },
+
+          {
+            id: 6,
+            name: 'Nguyễn Trường Phi',
+            school: 'FPT University',
+            sesmester: '8',
+            major: 'Software Engineering',
+            money: '25.000.000 VNĐ',
+            status: 'active',
+            experiedDay: '09/11/2021',
+            processStatus: 100,
+          },
+          {
+            id: 7,
+            name: 'Nguyễn Trường Phi',
+            school: 'FPT University',
+            sesmester: '8',
+            major: 'Software Engineering',
+            money: '25.000.000 VNĐ',
+            status: 'active',
+            experiedDay: '09/11/2021',
+            processStatus: 100,
+          },
+          {
+            id: 8,
+            name: 'Nguyễn Trường Phi',
+            school: 'FPT University',
+            sesmester: '8',
+            major: 'Software Engineering',
+            money: '25.000.000 VNĐ',
+            status: 'active',
+            experiedDay: '09/11/2021',
+            processStatus: 100,
+          },
         ]);
       };
       useEffect(() => {
-        fetchData();
+        investmentApi
+          .findAllByInvestorId(user.Investor.id)
+          .then(res => {
+            setDataItems(res.data)
+          })
       }, []);
 
       const [searchValue, setSearchValue] = useState('');
@@ -139,63 +181,54 @@ export default function MyInvestment({ navigation }) {
         : dataItems;
 
     function _renderItem({ item }) {
+        const totalPaid = parseInt(item.Loan.totalMoney) + parseInt(item.Loan.totalMoney * 3 / 100)
+        const receivedPercent = parseInt(item.total) / totalPaid
+        const paidPercent = (parseInt(item.Loan.PaidMoney) * receivedPercent)
         return (
           <TouchableOpacity
             onPress={() => navigation.navigate("InvestmentDetail")}
             style={styles.container}>
-              <View style={{ flexDirection : 'row', padding : 15}}> 
-                <View style={{ flexDirection : 'row', alignContent : 'flex-start' }}>
-                  <Avatar
-                    rounded
-                    size={50}
-                    source={{
-                      uri:
-                        'https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80',
-                    }}
-                  />
-                  <View style={{ marginLeft : 10 }}>
-                    <Text style={{ fontSize : 15 }}>{item.name.toUpperCase()}</Text>
-                    <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.school}</Text>
-                    <Text style={{ opacity : 0.5,fontSize : 13 }}>Công nghệ thông tin</Text>
-                  </View>         
-                </View>
-                <View style={{ alignItems : 'flex-end', flex : 1,}}>
-                    <Text style={{ backgroundColor : '#dadee3', paddingLeft : 3,paddingRight : 3 , opacity : 0.8,borderRadius : 5, color : PRIMARY_COLOR }}>Processing</Text>
-                </View>
+              <Image source={{ uri: 'https://cdn.nguyenkimmall.com/images/companies/_1/tin-tuc/kinh-nghiem-meo-hay/meo%20vat/man-fixing-hair-for-selfie%201.jpg' }}
+                     style={{ width : FULL_WIDTH / 2 - 10, height : 100, alignSelf : 'center',borderTopLeftRadius : 5, borderTopRightRadius : 5 }}/> 
+              <View style={{ flexDirection : 'row', alignContent : 'flex-start', paddingVertical : 10, paddingHorizontal : 5 }}>
+                <View style={{ marginLeft : 10 }}>
+                  <Text style={{ fontSize : 14 , width : FULL_WIDTH / 2 - 30}}>{item.Loan.Student.firstname + " " + item.Loan.Student.lastname}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 12,width : FULL_WIDTH / 2 - 30 }}>{item.Loan.Student.SchoolMajor.School.name}</Text>
+                </View>         
               </View>
-              <View style={styles.line}/>
-              <View style={{ padding : 15, flexDirection : 'row'}}>
-                  <View>
-                    <Text style={{  fontSize : 15  }}>2.000.000đ</Text>
-                    <Text style={{ opacity : 0.5,fontSize : 13 }}>Earned</Text>           
-                  </View>
-                  <View style={{  alignItems : 'flex-end', flex : 1, fontSize : 13 }}>
-                    <Text style={{  fontSize : 15  }}>22.000.000đ</Text>
-                    <Text style={{ opacity : 0.5,fontSize : 13 }}>Full amount</Text>  
-                  </View>
-              </View>
-              <Progress.Bar progress={0.8} width={FULL_WIDTH / 1.2} style={{ alignSelf : 'center', margin : 5, marginBottom : 25 }} color={PRIMARY_COLOR} />    
-              <View style={styles.line}/>
-              <View style={{ padding : 15, flexDirection : 'row'}}>
-                  <View>
-                    <Text style={{  fontSize : 15  }}>Next repayment in</Text>    
-                  </View>
-                  <View style={{  alignItems : 'flex-end', flex : 1, fontSize : 13 }}>
-                    <Text style={{  fontSize : 15  }}>20/12/2021</Text>
-                  </View>
-              </View>
+              <Progress.Bar progress={paidPercent} width={FULL_WIDTH / 2 - 20} style={{ alignSelf : 'center', margin : 5}} color={PRIMARY_COLOR} />  
+              <Text style={{ fontSize : 12, alignSelf : 'center', marginBottom : 10}}>Student paid {paidPercent}% of loan</Text>  
           </TouchableOpacity>
         );
       }
-
     return (
         <View>
+            <View style={styles.topContainer}>
+              <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
+                <TouchableOpacity
+                  style={{ flexDirection : 'row', alignSelf : 'center', position : 'absolute', left : 20, alignItems : 'center' }}
+                  onPress={() => {
+                    navigation.goBack(); 
+                  }}
+                >
+                    <FontAwesome5
+                      name={"chevron-left"}
+                      size={20}
+                      style={{ width: 30 }}
+                      color={"white"}
+                    />     
+                </TouchableOpacity>     
+                <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Các khoản đầu tư</Text>   
+              </View>
+            </View>
+            <Text style={{ fontSize : 15, alignSelf : 'center', marginVertical : 10 }}>You have invested 8 students</Text>
             <FlatList
+                numColumns={2}
                 data={filterdData}
                 renderItem={_renderItem}
                 keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingTop : FULL_HEIGHT / 9 , paddingBottom : 10 }}
+                contentContainerStyle={{ paddingBottom : 120 }}
             />
         </View>
     )
@@ -203,8 +236,8 @@ export default function MyInvestment({ navigation }) {
 
 const styles = StyleSheet.create({
     container : {
-        margin : 10,
-        borderRadius: 20,
+        margin : 5,
+        borderRadius: 5,
         backgroundColor: PRIMARY_COLOR_WHITE,
         elevation : 5,
       },
@@ -261,5 +294,11 @@ const styles = StyleSheet.create({
         backgroundColor : '#dadee3',
         alignItems : 'center',
         justifyContent : 'center',
-      }
+      },
+      topContainer : {
+        height : FULL_HEIGHT * 0.3 / 4,
+        backgroundColor : PRIMARY_COLOR,
+        borderBottomLeftRadius : 25,
+        borderBottomRightRadius : 25,
+      },
 })

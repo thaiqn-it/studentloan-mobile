@@ -25,7 +25,6 @@ export default function RegisterPhone({ navigation, route }) {
         setIsLoading(true)
         if (phoneInput.current?.isValidNumber(formattedValue)) {
             const res = await userApi.sendOTP(formattedValue)
-
             if (res.data.secret !== undefined || res.data.secret !== null) {
                 if (fb_access_token !== undefined) {
                     navigation.navigate("Verification", {
