@@ -6,7 +6,15 @@ const topup = (money) => {
     });
 }
 
+const transfer = (email,money) => {
+    return defaultInstance.post("/paypal/transfer", {
+        email,
+        money
+    });
+}
+
 export const paypalApi = {
     topup,
+    transfer
 };
   

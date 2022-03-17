@@ -92,7 +92,7 @@ export default function Setting({navigation}) {
       };
       
       useEffect(() => {
-        setName(user.Student.firstName + " " + user.Student.lastName)
+        setName(user.Investor.firstName + " " + user.Investor.lastName)
         setPhone(user.phoneNumber)
         setEmail(user.email)
       }, []);

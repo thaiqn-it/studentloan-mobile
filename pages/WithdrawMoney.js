@@ -1,4 +1,5 @@
-import React,{ useState,useEffect,useRef } from 'react'
+import React,{ useState,useEffect,useRef,useContext } from 'react'
+import { useIsFocused } from "@react-navigation/native";
 import { StyleSheet, Text, View,FlatList,TouchableOpacity,ScrollView,Pressable,KeyboardAvoidingView, } from 'react-native'
 import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_FONT,PRIMARY_COLOR_WHITE, FULL_WIDTH,SECONDARY_COLOR,PRIMARY_COLOR_BLACK } from '../constants/styles'
 import { Entypo } from '@expo/vector-icons';
@@ -9,11 +10,24 @@ import { FontAwesome,FontAwesome5,Ionicons } from '@expo/vector-icons';
 import { CheckBox,Input } from 'react-native-elements'
 import { Button } from 'react-native-paper';
 import RBSheet from "react-native-raw-bottom-sheet";
+import { accountApi } from '../apis/account';
+import { transactionApi } from '../apis/transaction';
+import { configApi } from '../apis/systemconfig';
+import { AppContext } from '../contexts/App';
+import { vndFormat } from '../utils'
+import { paypalApi } from '../apis/paypal'
 
 const WithdrawMoney = ({ navigation, route }) => {
-    const addCardRef = useRef();
+    const payoutRef = useRef();
     const [isUsedLater,setUsedLater] = useState(false)
     const [money, setMoney] = useState(50000);
+    const [ receiveMoney, setReceiveMoney ] = useState(0)
+    const [ fee, setFee ] = useState(0)
+    const { user } = useContext(AppContext);
+    const [ account,setAccount ] = useState(0)
+    const [ email,setEmail ] = useState("sb-eqq2m14474872@personal.example.com")
+    const isFocused = useIsFocused();
+    const [ transactionFee, setTransactionFee ] = useState(0)
     const [limit, setLimit] = useState([
         {
           id: 1,
@@ -42,11 +56,60 @@ const WithdrawMoney = ({ navigation, route }) => {
       ]);
     const [isSelect,setSelect] = useState(null)
     const [check,setCheck] = useState(false)
+
+    useEffect(() => {
+        configApi
+            .getByType("TRANSACTION_FEE")
+            .then(res => {
+                setTransactionFee(res.data.value)
+            })
+    }, [])
+
+    useEffect(() => {
+        const FEE = money*transactionFee/100
+        setFee(FEE)
+        setReceiveMoney(money - FEE)
+    }, [money,transactionFee])
+
+    useEffect(() => {
+        accountApi
+            .getByUserId(user.id)
+            .then(res => {
+                setAccount(res.data)
+            })
+    }, [isFocused])
  
     const setMoneyByPressBox = (item) => {
         setMoney(item.limitMoney);
     };
 
+    const transferMoney = () => {
+        payoutRef.current.close()
+        paypalApi
+            .transfer(email,receiveMoney)
+            .then(res => {
+                const data = {
+                    money : money,
+                    type : "WITHDRAW",
+                    description : `Chuyển tiền vào tài khoản paypal ${email}` ,
+                    status : "SUCCESS",
+                    accountId : account.id,
+                    target : res.data.payoutId,
+                    targetName : 'Paypal',
+                    transactionFee : fee
+                }
+                transactionApi
+                    .create(data)
+                    .then(res => {
+                        const transactionId = res.data.id
+                        accountApi.update(-receiveMoney,account.id).then(res => {
+                            navigation.navigate("TransactionInfo", {
+                                transactionId
+                            })
+                        })
+                    })
+            })
+    }
     const renderItem = ({ item }) => (
         <TouchableOpacity
           style={[isSelect === item.id ? styles.boxSelect : styles.boxUnselect]}
@@ -94,7 +157,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                             alignSelf : 'center',
                             color : SECONDARY_COLOR
                         }}>
-                            20.000.000 đ
+                            {vndFormat.format(account.money)}
                         </Text>
                     </View>
                     <View style={{ marginTop : 25, marginLeft : 25}}>
@@ -141,34 +204,37 @@ const WithdrawMoney = ({ navigation, route }) => {
                         keyExtractor={(item) => item.id}
                         />
                     </View>
-                    <View style={{ marginLeft : 25}}>
-                        <Text style={{
-                            fontSize : 18,
-                            color : '#b6a9ad'
-                        }}>
-                            Chọn thẻ nhận tiền
-                        </Text>
-                    </View>
-                    <TouchableOpacity onPress={() => addCardRef.current.open()} style={{ 
-                        backgroundColor : PRIMARY_COLOR_WHITE,
-                        borderRadius : 10,
-                        marginHorizontal : 10,
-                        elevation : 5,
-                        flexDirection : 'row',
-                        alignItems : 'center',
-                        justifyContent : 'center',
-                        paddingVertical : 15,
-                        marginTop : 15
+                    <Text style={{
+                        fontSize : 14,
+                        fontWeight : 'bold',
+                        marginHorizontal : 30,
+                        marginTop : 10
                     }}>
-                        <Ionicons name="md-add-circle-outline" size={25} color={SECONDARY_COLOR} />
-                        <Text style={{ color : SECONDARY_COLOR, fontSize : 18, marginLeft : 5 }}>Thêm thẻ</Text>
-                    </TouchableOpacity>
+                        Biểu phí rút tiền là {transactionFee}% * tổng số tiền rút / 1 lần rút
+                    </Text>
+                    <View style={{
+                        marginHorizontal : 25,
+                        borderRadius : 10,
+                        backgroundColor : PRIMARY_COLOR_WHITE,
+                        elevation : 4,
+                        padding : 15,
+                        marginTop : 10
+                    }}>
+                        <View style={{ flexDirection : 'row', justifyContent : 'space-between' }}>
+                            <Text style={{ fontSize : 16 }}>Số tiền nhận được</Text>
+                            <Text style={{ fontSize : 16, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(receiveMoney)}</Text>
+                        </View>     
+                        <View style={{ flexDirection : 'row', justifyContent : 'space-between', marginTop : 15 }}>
+                            <Text style={{ fontSize : 16 }}>Phí giao dịch</Text>
+                            <Text style={{ fontSize : 16, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(fee)}</Text>
+                        </View>           
+                    </View>
                     <RBSheet
-                        ref={addCardRef}
+                        ref={payoutRef}
                         keyboardAvoidingViewEnabled={true}
                         closeOnDragDown={true}
                         closeOnPressMask={true}
-                        height={FULL_HEIGHT / 1.8}
+                        height={FULL_HEIGHT / 2.5}
                         customStyles={{
                             container : {
                                 borderTopLeftRadius : 20,
@@ -179,38 +245,38 @@ const WithdrawMoney = ({ navigation, route }) => {
                         <View style={{ flexDirection : 'row', alignItems : 'center', justifyContent : 'space-between', marginHorizontal : 20}}>                 
                             <View style={{ flexDirection : 'row', alignItems : 'center'}}>
                                 <Ionicons name="arrow-back-outline" size={25} color="black" onPress={() => addCardRef.current.close()} />
-                                <Text style={{ fontSize : 20, fontWeight : 'bold', marginLeft : 10}}>Thêm thẻ mới</Text>      
+                                <Text style={{ fontSize : 20, fontWeight : 'bold', marginLeft : 10}}>Nhập thông tin</Text>      
                             </View>
-                            <Entypo name="check" size={28} color={SECONDARY_COLOR} />
+                            <TouchableOpacity onPress={() => transferMoney()}>
+                                <Entypo 
+                                    name="check" 
+                                    size={28} 
+                                    color={SECONDARY_COLOR} 
+                                />
+                            </TouchableOpacity>
                         </View>
                         <View style={{ borderWidth : 0.6, borderColor : '#c4c7cc', marginTop : 15, marginHorizontal : 20 }}/>
                         <ScrollView showsVerticalScrollIndicator={false} style={{ marginVertical : 10 }}>
-                            <Text style={styles.labelBankCard}>Số thẻ</Text>
+                            <Text style={styles.labelBankCard}>Địa chỉ email tài khoản paypal: </Text>
                             <Input
-                                placeholder='xxxx xxxx xxxx xxxx'
+                                placeholder='paypal@gmail.com'
                                 inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
                                 containerStyle= {styles.input}
-                            />
-                            <Text style={styles.labelBankCard}>Tên chủ thẻ</Text>
-                            <Input
-                                placeholder='Input Name'
-                                inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                                containerStyle= {styles.input}
-                                autoCapitalize="characters"
-                            />
-                            <Text style={styles.labelBankCard}>Ngày hiệu lực</Text>
-                            <Input
-                                placeholder='Input Date'
-                                inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                                containerStyle= {styles.input}
+                                onChangeText={setEmail}
+                                value={email}
                             />
                             <CheckBox
-                                title='Lưu thẻ cho lần sử dụng sau ?'
+                                title='Lưu email cho lần sử dụng sau ?'
                                 checked={isUsedLater}
                                 onPress={() => setUsedLater(!isUsedLater)}
                                 checkedColor={PRIMARY_COLOR}
                                 containerStyle={{ backgroundColor : PRIMARY_COLOR_WHITE , borderWidth : 0 }}
                             />
+                            <Text style={{
+                                fontSize : 14,
+                                opacity : 0.7,
+                                marginHorizontal : 25
+                            }}>Vui lòng nhập địa chỉ email của ví paypal đã đăng ký của bạn. Số tiền sẽ được chuyển đến ví paypal của email đã cung cấp.</Text>
                         </ScrollView>
                     </RBSheet>               
                 </View>
@@ -221,7 +287,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                 <Button
                 style={styles.btnConfirm}
                 color={PRIMARY_COLOR}
-
+                onPress={() => payoutRef.current.open()}        
                     >Xác nhận</Button> 
             </View>
         </View>

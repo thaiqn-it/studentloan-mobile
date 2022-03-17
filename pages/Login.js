@@ -29,8 +29,8 @@ import AppLoading from '../components/AppLoading';
 
 export default function Login() {
     const navigation = useNavigation()
-    const [email, setEmail] = useState("");
-    const [password,setPassword] = useState("")
+    const [email, setEmail] = useState("qthai20102000@gmail.com");
+    const [password,setPassword] = useState("123")
     const [showPassword,setShowPassword] = useState(false)
     const [isLoading,setIsLoading] = useState(false)
 
@@ -38,16 +38,16 @@ export default function Login() {
         resetJWTToken().then(async (token) => {
           if (token) {
             await loadToken();
-            //navigation.navigate("HomeTab");
+            navigation.navigate("HomeTab");
           }
         });
       }, []);
 
     const loginHandler = async (navigation) => {
         try {
-            // const res = await userApi.login(email, password);
-            // await SecureStore.setItemAsync(JWT_TOKEN_KEY, res.data.token);
-            // await loadToken();
+            const res = await userApi.login(email, password);
+            await SecureStore.setItemAsync(JWT_TOKEN_KEY, res.data.token);
+            await loadToken();
 
             navigation.navigate("HomeTab");
           } catch (err) {

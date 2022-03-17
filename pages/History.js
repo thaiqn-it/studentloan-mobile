@@ -1,4 +1,4 @@
-import React, { useState,useRef } from "react";
+import React, { useState,useRef,useContext,useEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -6,96 +6,28 @@ import {
   View,
   TouchableOpacity,
   FlatList,
+  Image
 } from "react-native";
 import {
   PRIMARY_COLOR,
   PRIMARY_COLOR_WHITE,
   PRIMARY_COLOR_BLACK,
+  SECONDARY_COLOR,
   FULL_WIDTH,
   FULL_HEIGHT,
 } from "../constants/styles";
 import * as Animatable from 'react-native-animatable';
 import { AntDesign,Ionicons } from '@expo/vector-icons';
+import { AppContext } from '../contexts/App';
+import { vndFormat } from '../utils'
+import { accountApi } from '../apis/account';
+import { transactionApi } from '../apis/transaction';
 
 export default function Home({ route, navigation }) {
-  const transactionData = [
-    {
-      id : 1,
-      date : '23-10-2021',
-      data : [
-        {
-          id : 1,
-          name : 'Nguyễn Quốc Thái',
-          timeAt : '10:32 AM',
-          date : '23-10-2020',
-          money : '30.000.000',
-          type : 'top-up',
-          status : 'up'
-        },
-        {
-          id : 2,
-          name : 'Nguyễn Quốc Thái II',
-          timeAt : '10:35 AM',
-          date : '23-10-2020',
-          money : '20.000.000',
-          type : 'withdraw',
-          status : 'down'
-        },
-      ]
-    },
-    {
-      id : 2,
-      date : '2-1-2021',
-      data : [
-        {
-          id : 3,
-          name : 'Đinh Phú Cường',
-          timeAt : '08:21 AM',
-          date : '23-10-2020',
-          money : '20.000.000',
-          type : 'invest',
-          status : 'down'
-        },
-        {
-          id : 4,
-          name : 'Nguyễn Quốc Thái III',
-          timeAt : '10:35 AM',
-          date : '23-10-2020',
-          money : '20.000.000',
-          type : 'withdraw',
-          status : 'down'
-        },
-      ]
-    },
-    {
-      id : 3,
-      date : '22-4-2021',
-      data : [
-        {
-          id : 5,
-          name : 'Nguyễn Trường Phi',
-          timeAt : '16:11 AM',
-          date : '23-10-2020',
-          money : '20.000.000',
-          type : 'earned',
-          status : 'up'
-        },
-        {
-          id : 3,
-          name : 'Đinh Phú Cường',
-          timeAt : '08:21 AM',
-          date : '23-10-2020',
-          money : '20.000.000',
-          type : 'invest',
-          status : 'down'
-        },
-      ]
-    },
-  ]
-
-  //state
+  const { user } = useContext(AppContext);
   const [isDown,setIsDown] = useState(true)
-  const [transaction,setTransaction] = useState(transactionData)
+  const [transaction,setTransaction] = useState([])
+  const [ account,setAccount ] = useState(0)
 
   //animable
   const topContainerRef = useRef(null)
@@ -103,34 +35,39 @@ export default function Home({ route, navigation }) {
   const EarnedMoneyRef = useRef(null)
   const InvestMoneyRef = useRef(null)
 
-  //component
-  const transactionView = ({ item }) => {
-    return(
-      <View>
-        <Text style={{ fontSize : 18, fontWeight : 'bold', marginHorizontal : 10 }}>{item.date}</Text>
-        {
-          item.data.map(data =>{
-            return(
-              <TouchableOpacity key={data.id} style={styles.transactionItem} onPress={() => navigation.navigate("TransactionInfo")}>
-                <View style={{ flexDirection : 'row' }}>
-                  <View style={styles.nameIcon}>
-                    <Text>QT</Text>
-                  </View>
-                  <View style={{ justifyContent : 'center', marginLeft : 5 }}>
-                    <Text style={{ fontSize : 16, fontWeight : 'bold' }}>{data.name}</Text>
-                    <Text style={{ marginTop : 3, fontSize : 16, opacity : 0.6}}>{data.date}</Text>
-                  </View>
-                </View>
-                <View style={{ justifyContent : 'center', alignItems : 'flex-end' }}>
-                  <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'green' }}>{data.money}</Text>
-                  <Text style={{ marginTop : 3, fontSize : 16 }}>{data.type}</Text>
-                </View>
-              </TouchableOpacity>
-            )
-          })
-        }
-      </View>
-    )
+  useEffect(() => {
+    accountApi
+        .getByUserId(user.id)
+        .then(res => {
+            setAccount(res.data)
+        })
+  }, [])
+
+  useEffect(() => {
+    transactionApi
+        .getByAccountId(account.id)
+        .then(res => {
+            setTransaction(res.data)
+        })
+  }, [account])
+
+  const convertType = (type) => {
+    var result = "";
+    switch(type) {
+      case "TOPUP":
+        result = "Nạp tiền"
+        break;
+      case "WITHDRAW":
+        result = "Rút tiền"
+        break;
+      case "TRANSFER":
+        result = "Chuyển tiền"
+        break;
+      case "RECEIVE":
+        result = "Nhận tiền"
+        break;
+    }
+    return result
   }
 
   return (
@@ -284,13 +221,56 @@ export default function Home({ route, navigation }) {
             EarnedMoneyRef.current.transitionTo({ translateY : 0 }, 400)
             InvestMoneyRef.current.transitionTo({ translateY : 0 }, 300)
         }}>
-          <FlatList 
-            data={transaction}
-            renderItem={transactionView}
-            keyExtractor={(item) => item.id.toString()}
-            showsVerticalScrollIndicator={false}
-          />
-        
+            { transaction.map(item => {
+              return(
+                <View key={item.date}>
+                  <Text style={{ fontSize : 20, fontWeight : 'bold', marginHorizontal : 15 }}>{item.date}</Text>
+                  {
+                    item.transaction.map(data =>{
+                      return(
+                        <TouchableOpacity key={data.id} style={styles.transactionItem} onPress={() => navigation.navigate("TransactionInfo", {
+                            transactionId : data.id
+                        })}>
+                          <View style={{ flexDirection : 'row', flex : 0.6 }}>
+                            {
+                              data.targetName === "Paypal" 
+                              ? (        
+                                <Image 
+                                  style={{ height : 50, width : 50, borderRadius : 50, elevation : 5 }}
+                                  source={{ uri : 'https://play-lh.googleusercontent.com/iQ8f5plIFy9rrY46Q2TNRwq_8nCvh9LZVwytqMBpOEcfnIU3vTkICQ6L1-RInWS93oQg' }}/>                 
+                              ) 
+                              :(
+                                <View style={styles.nameIcon}>
+                                  <Text>QT</Text>
+                                </View>
+                              )
+                            }          
+                            <View style={{ justifyContent : 'center', marginLeft : 5 }}>
+                              <Text style={{ fontSize : 16, fontWeight : 'bold' , color : SECONDARY_COLOR}}>{data.targetName}</Text>
+                              <Text style={{ marginTop : 3, fontSize : 16, opacity : 0.6}}>{data.date}</Text>
+                            </View>
+                          </View>
+                          <View style={{ justifyContent : 'center', alignItems : 'flex-end', flex : 0.3 }}>
+                            {
+                              data.type === "TOPUP" && "TRANSFER"
+                              ?
+                              (
+                                <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'green' }}>+{vndFormat.format(data.money)}</Text>
+                              )
+                              :
+                              (
+                                <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'red' }}>-{vndFormat.format(data.money)}</Text>
+                              )
+                            }          
+                            <Text style={{ marginTop : 3, fontSize : 16, fontWeight : 'bold' , color : PRIMARY_COLOR_BLACK }}>{convertType(data.type)}</Text>
+                          </View>
+                        </TouchableOpacity>
+                      )
+                    })
+                  }
+                </View>
+              )
+            })}        
         </ScrollView>
     </View>
   );
@@ -319,6 +299,6 @@ const styles = StyleSheet.create({
     paddingVertical : 15,
     flexDirection : 'row',
     justifyContent : 'space-between',
-    borderRadius : 10
+    borderRadius : 5,
   }
 });

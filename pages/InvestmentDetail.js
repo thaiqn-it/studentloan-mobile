@@ -6,7 +6,7 @@ import { Calendar,Agenda } from 'react-native-calendars';
 import * as Animatable from 'react-native-animatable';
 import { FlatList, ScrollView } from 'react-native-gesture-handler';
 
-export default function InvestmentDetail() {
+export default function InvestmentDetail({ navigation, route }) {
     const portfolloView = useRef(null)
     const calendarView = useRef(null)
     const reportView = useRef(null)

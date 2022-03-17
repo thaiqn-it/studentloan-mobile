@@ -1,4 +1,5 @@
-import React,{ useState,useEffect,useRef } from 'react'
+import React,{ useState,useEffect,useRef,useContext } from 'react'
+import { useIsFocused } from "@react-navigation/native";
 import { StyleSheet, Text, View,FlatList,TouchableOpacity,StatusBar,Pressable,KeyboardAvoidingView,Modal,Image } from 'react-native'
 import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_FONT,PRIMARY_COLOR_WHITE, FULL_WIDTH,SECONDARY_COLOR,PRIMARY_COLOR_BLACK } from '../constants/styles'
 import { Entypo } from '@expo/vector-icons';
@@ -11,6 +12,10 @@ import { Button } from 'react-native-paper';
 import RBSheet from "react-native-raw-bottom-sheet";
 import { paypalApi } from "../apis/paypal.js";
 import WebView from 'react-native-webview';
+import { accountApi } from '../apis/account';
+import { transactionApi } from '../apis/transaction';
+import { AppContext } from '../contexts/App';
+import { vndFormat } from '../utils'
 
 export default function DepositMoney({ navigation, route }) {
     const addCardRef = useRef();
@@ -18,6 +23,10 @@ export default function DepositMoney({ navigation, route }) {
     const [money, setMoney] = useState(50000);
     const [paypalUrl, setPaypalUrl] = useState("")
     const [modalVisible, setModalVisible] = useState(false)
+    const { user } = useContext(AppContext);
+    const isFocused = useIsFocused();
+    const [ account,setAccount ] = useState(0)
+
     const [limit, setLimit] = useState([
         {
           id: 1,
@@ -47,6 +56,14 @@ export default function DepositMoney({ navigation, route }) {
     const [isSelect,setSelect] = useState(null)
     const [check,setCheck] = useState(false)
  
+    useEffect(() => {
+        accountApi
+            .getByUserId(user.id)
+            .then(res => {
+                setAccount(res.data)
+            })
+    }, [isFocused])
+
     const setMoneyByPressBox = (item) => {
         setMoney(item.limitMoney);
     };
@@ -66,7 +83,26 @@ export default function DepositMoney({ navigation, route }) {
             let splitUrl = url.split('?');
             let splitOrtherHalf = splitUrl[1].split('&');
             let paymentId = splitOrtherHalf[0].replace("paymentId=", "");
-            navigation.navigate("TransactionInfo")
+            let data = {
+                money,
+                type : "TOPUP",
+                description : "Nạp tiền vào tài khoản",
+                status : "SUCCESS",
+                accountId : account.id,
+                target : paymentId,
+                targetName : 'Paypal',
+                transactionFee : 0
+            }
+            transactionApi
+                .create(data)
+                .then(res => {
+                    const transactionId = res.data.id
+                    accountApi.update(money,account.id).then(res => {                             
+                        navigation.navigate("TransactionInfo",{
+                            transactionId
+                        })
+                    })
+                })
         } else if (title === "Cancel") {
             setModalVisible(!modalVisible)
             navigation.navigate("DepositMoney")
@@ -130,7 +166,7 @@ export default function DepositMoney({ navigation, route }) {
                             alignSelf : 'center',
                             color : SECONDARY_COLOR
                         }}>
-                            20.000.000 đ
+                            {vndFormat.format(account.money)}
                         </Text>
                     </View>
                     <View style={{ marginTop : 25, marginLeft : 25}}>

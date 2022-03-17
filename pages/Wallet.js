@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState,useEffect,useContext } from "react";
+import { useIsFocused } from "@react-navigation/native";
 import {
   FlatList,
   Image,
@@ -20,8 +21,23 @@ import {
   FULL_HEIGHT,
 } from "../constants/styles";
 import { SimpleLineIcons } from '@expo/vector-icons';
+import { accountApi } from '../apis/account'
+import { AppContext } from '../contexts/App';
+import { vndFormat } from '../utils'
 
 export default function Wallet({ route, navigation }) {
+  const { user } = useContext(AppContext);
+  const [ account,setAccount ] = useState(0)
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    accountApi
+      .getByUserId(user.id)
+      .then(res => {
+        setAccount(res.data)
+      })
+  }, [isFocused])
+
   return (
     <View style={{ height : FULL_HEIGHT,backgroundColor : PRIMARY_COLOR_WHITE }}>
       <View style={styles.topContainer}>
@@ -46,7 +62,7 @@ export default function Wallet({ route, navigation }) {
             Số dư ví
           </Text>
           <Text style={{ color : PRIMARY_COLOR_WHITE, fontSize : 40,fontWeight : 'bold'}}>
-            20.000.000 đ
+            {vndFormat.format(account.money)}
           </Text>  
         </View>
         <View style={{ alignSelf : 'center', alignItems : 'center', marginTop : FULL_HEIGHT / 9,flexDirection : "row" }}>
@@ -59,7 +75,9 @@ export default function Wallet({ route, navigation }) {
         </View>
         
         <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate("DepositMoney")}>
+          <TouchableOpacity onPress={() => navigation.navigate("DepositMoney", {
+            accountId : account.id
+          })}>
             <View style={{ alignItems : 'center', marginRight : 30 }}>
               <View style={styles.button}>
                   <Image source={require('../assets/top-up.png')} style={{ width : 30, height : 30, tintColor : PRIMARY_COLOR_WHITE }}/>
