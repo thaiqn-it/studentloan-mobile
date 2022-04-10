@@ -8,13 +8,13 @@ const getById = (id) => {
     return defaultInstance.get("/transaction/" + id)
 }
 
-const getByAccountId = (id) => {
-    return defaultInstance.get("/transaction/account/" + id)
+const getByWalletId = (id) => {
+    return defaultInstance.get("/transaction/wallet/" + id)
 }
 
 export const transactionApi = {
     create,
     getById,
-    getByAccountId
+    getByWalletId
 };
   

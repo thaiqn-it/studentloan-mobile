@@ -1,390 +1,244 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Animated, FlatList,TouchableOpacity, TextInput,StatusBar,Modal,ScrollView } from 'react-native';
-import { Avatar,Slider } from 'react-native-elements';
+import { StyleSheet, Text, View, Animated, FlatList,TouchableOpacity, TextInput} from 'react-native';
+import { Avatar,CheckBox } from 'react-native-elements';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
-import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT, SECONDARY_COLOR } from '../constants/styles';
+import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, SECONDARY_COLOR } from '../constants/styles';
 import * as Progress from 'react-native-progress';
 import { Button } from 'react-native-paper';
-import { TouchableHighlight } from 'react-native-gesture-handler';
 import * as Animatable from 'react-native-animatable';
-import { MaterialIcons,AntDesign,Ionicons,Feather } from '@expo/vector-icons';
+import { MaterialIcons,AntDesign,Ionicons,Feather, Entypo } from '@expo/vector-icons';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import { vndFormat } from '../utils'
+import RBSheet from "react-native-raw-bottom-sheet";
+import { loanApi } from '../apis/loan';
+import { ScrollView } from 'react-native-gesture-handler';
+import { schoolApi } from '../apis/school';
+import { majorApi } from '../apis/major';
+import moment from 'moment';
 
-export default function Invest({ navigation }) {
-  const [items, setItems] = useState([
-    // this is the parent or 'item'
-    {
-      name: 'IT',
-      id: 1,
-      // these are the children or 'sub items'
-      children: [
-        {
-          name: 'SE',
-          id: 1,
-        },
-        {
-          name: 'GD',
-          id: 2,
-        },
-        {
-          name: 'AI',
-          id: 3,
-        },
-        {
-          name: 'IoT',
-          id: 4,
-        },
-        {
-          name: 'SI',
-          id: 5,
-        },
-      ],
-    },
-    {
-      name: 'Kinh doanh',
-      id: 2,
-      children: [
-        {
-          name: 'asdasd',
-          id: 6,
-        },
-        {
-          name: 'GadD',
-          id: 7,
-        },
-        {
-          name: 'AeqweI',
-          id: 8,
-        },
-        {
-          name: 'IoTdqwe',
-          id: 9,
-        },
-        {
-          name: 'SI2312',
-          id: 10,
-        },
-      ],
-    },
-  ]);
-  const [selectedItems, setSelectedItems] = useState('');
+export default function Invest({ navigation, route }) {
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const input_tranlate_x = useRef(null)
+    const listRef = useRef(null)
+    const [isFilter,setIsFilter]=useState(false)
+    const [multiSliderValue, setMultiSliderValue] = useState([50000, 100000000]);
+    const [page,setPage] = useState(1)
+    const [loans,setLoans] = useState([]);
 
-  const [dataItems, setDataItems] = useState([]);
-  const fetchData = () => {
-    setDataItems([
-      {
-        id: 1,
-        name: 'Nguyễn Trường Phi',
-        school: 'FPT University',
-        sesmester: '8',
-        major: 'Software Engineering',
-        money: '25.000.000 VNĐ',
-        status: 'active',
-        experiedDay: '09/11/2021',
-        processStatus: 100,
-      },
-      {
-        id: 2,
-        name: 'Trần Long',
-        school: 'FPT University',
-        sesmester: '8',
-        major: 'Software Engineering',
-        money: '25.000.000 VNĐ',
-        status: 'active',
-        experiedDay: '03/10/2021',
-        processStatus: 80,
-      },
-      {
-        id: 3,
-        name: 'Lương Thanh Hà',
-        school: 'FPT University',
-        sesmester: '7',
-        major: 'Software Engineering',
-        money: '25.000.000 VNĐ',
-        status: 'active',
-        experiedDay: '03/10/2021',
-        processStatus: 55,
-      },
-      {
-        id: 4,
-        name: 'Đinh Phú Cường',
-        school: 'FPT University',
-        sesmester: '8',
-        major: 'Software Engineering',
-        money: '25.000.000 VNĐ',
-        status: 'active',
-        experiedDay: '03/10/2021',
-        processStatus: 95,
-      },
-      {
-        id: 5,
-        name: 'Nguyễn Trường Phi',
-        school: 'FPT University',
-        sesmester: '8',
-        major: 'Software Engineering',
-        money: '25.000.000 VNĐ',
-        status: 'active',
-        experiedDay: '09/11/2021',
-        processStatus: 100,
-      },
-    ]);
-  };
-  useEffect(() => {
-    fetchData();
-  }, []);
-  
-  const [searchValue, setSearchValue] = useState('');
+    const topContainerRef = useRef(null)
+    const pickerRef = useRef(null)
+    const sortByRef = useRef(null)
 
-  const filterdData = searchValue // based on text, filter data and use filtered data
-    ? dataItems.filter(item => {
-        const itemData = item.name.toUpperCase();
-        const textData = searchValue.toUpperCase();
-        return itemData.indexOf(textData) > -1;
+    const [schoolFilter,setSchoolFilter] = useState([])
+    const [majorFilter,setMajorFilter] = useState([])
+
+    const [schools,setSchools] = useState([])
+    const [majors,setMajors] = useState([])
+
+    const [sort,setSort] = useState('')
+    const [searchText,setSearchText] = useState('')
+
+    const multiSliderValuesChange = values => setMultiSliderValue(values);
+
+    const sortOption = [
+      {
+        id : 1,
+        iconType : 'material-community',
+        iconName : 'sort-numeric-descending',
+        text : 'Số tiền giảm dần',
+        code : 'moneyDown'
+      },
+      {
+        id : 2,
+        iconType : 'material-community',
+        iconName : 'sort-numeric-ascending',
+        text : 'Số tiền tăng dần',
+        code : 'moneyUp'
+      },
+      {
+        id : 3,
+        iconType : 'feather',
+        iconName : 'corner-left-up',
+        text : 'Mới nhất',
+        code : 'lastest'
+      },
+      {
+        id : 4,
+        iconType : 'feather',
+        iconName : 'corner-left-down',
+        text : 'Cũ nhất',
+        code : 'oldest'
+      },
+    ]
+
+    useEffect(() => {
+      loanApi.search({
+        page
+      }).then(res => {
+        setLoans(res.data)
       })
-    : dataItems;
+    }, []);
 
-      const [isFocus,setFocus]=useState(false)
-      const [isEdit,setEdit]=useState(false)
-      const scrollY = useRef(new Animated.Value(0)).current;
-      const input_tranlate_x = useRef(null)
-      const listRef = useRef(null)
-      const [isFilter,setIsFilter]=useState(false)
-      const [multiSliderValue, setMultiSliderValue] = useState([50000, 100000000]);
+    useEffect(() => {
+      schoolApi.getAll().then((res) => {
+        setSchools(res.data)
+      })
+      majorApi.getAll().then(res => {
+        setMajors(res.data)
+      })
+    }, [])
+    
+    const offsetAnim = useRef(new Animated.Value(0)).current;
+    const clampedScroll = Animated.diffClamp(
+      Animated.add(
+        scrollY.interpolate({
+          inputRange : [0, 1],
+          outputRange : [0 ,1],
+          extrapolateLeft : 'clamp',
+        }),
+        offsetAnim,
+      ),
+      0,
+      10
+    )
+    
+    const opacity = clampedScroll.interpolate({
+      inputRange: [0, 10],
+      outputRange: [0.9, 0],
+    })  
 
-      const multiSliderValuesChange = values => setMultiSliderValue(values);
+    const zIndex = clampedScroll.interpolate({
+      inputRange: [0, 10],
+      outputRange: [100, -10],
+    })  
 
-      const yearStudies = [
-        {
-          id : 1,
-          year : 'Tất cả'
-        },
-        {
-          id : 2,
-          year : 'Năm I'
-        },
-        {
-          id : 3,
-          year : 'Năm II'
-        },
-        {
-          id : 4,
-          year : 'Năm III'
-        },
-        {
-          id : 5,
-          year : 'Năm IV'
-        },
-        {
-          id : 6,
-          year : 'Năm IV+'
-        },
-      ]
+    const ScrollToTop = () => {
+      listRef.current.scrollToOffset({ animated: true, offset: 0 });
+    }
 
-      const offsetAnim = useRef(new Animated.Value(0)).current;
-      const clampedScroll = Animated.diffClamp(
-        Animated.add(
-          scrollY.interpolate({
-            inputRange : [0, 1],
-            outputRange : [0 ,1],
-            extrapolateLeft : 'clamp',
-          }),
-          offsetAnim,
-        ),
-        0,
-        10
+    const searchHandler = () => {
+      loanApi.search({
+        page : 1,
+        schools : schoolFilter,
+        majors : majorFilter,
+        minMoney : multiSliderValue[0],
+        maxMoney : multiSliderValue[1],
+        sort,
+        text : searchText
+      }).then(res => {
+        setLoans(res.data)
+        pickerRef.current.close()
+        sortByRef.current.close()
+      })
+    }
+
+    const sortItem = ({item}) => {   
+      return (
+        <TouchableOpacity style={{ flexDirection : 'row', marginVertical  : 10, marginHorizontal : 40, justifyContent : 'space-between', marginTop : 20 }} onPress={() => {
+          setSort(item.code)
+        }}>
+          <View style={{ flexDirection : 'row'}}>
+            <Icon 
+              type={item.iconType} 
+              name={item.iconName}
+              color={PRIMARY_COLOR_BLACK}
+            /> 
+            <Text style={{ fontSize : 16, fontWeight : 'bold', marginLeft : 15 }}>{item.text}</Text>
+          </View>
+          {
+            sort === item.code && (
+              <Icon 
+                type={'ionicon'} 
+                name={'checkmark-circle-outline'}
+                color={PRIMARY_COLOR}
+              />
+            )
+          }            
+        </TouchableOpacity>
       )
-      
-      const opacity = clampedScroll.interpolate({
-        inputRange: [0, 10],
-        outputRange: [0.9, 0],
-      })  
-
-      const zIndex = clampedScroll.interpolate({
-        inputRange: [0, 10],
-        outputRange: [100, -10],
-      })  
-
-      const ScrollToTop = () => {
-        listRef.current.scrollToOffset({ animated: true, offset: 0 });
-      }
+    }
 
   function _renderItem({ item }) {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate("DetailPost")}
-        style={styles.container}>
-          <View style={{ flexDirection : 'row', padding : 15}}> 
-            <View style={{ flexDirection : 'row', alignContent : 'flex-start' }}>
-              <Avatar
-                rounded
-                size={50}
-                source={{
-                  uri:
-                    'https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80',
-                }}
-              />
-              <View style={{ marginLeft : 10 }}>
-                <Text style={{ fontSize : 15 }}>{item.name.toUpperCase()}</Text>
-                <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.school}</Text>
-                <Text style={{ opacity : 0.5,fontSize : 13 }}>Công nghệ thông tin</Text>
-              </View>         
+          onPress={() => navigation.navigate("DetailPost", { 
+            id : item.id        
+          })}
+          style={styles.container}>
+            <View style={{ flexDirection : 'row', padding : 15}}> 
+              <View style={{ flexDirection : 'row', alignContent : 'flex-start' }}>
+                <Avatar
+                  rounded
+                  size={50}
+                  source={{
+                    uri:
+                      'https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80',
+                  }}
+                />
+                <View style={{ marginLeft : 10 }}>
+                  <Text style={{ fontSize : 15 }}>{item.Student.User.lastname + ' ' + item.Student.User.firstname}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.SchoolMajor.School.name}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.SchoolMajor.Major.name}</Text>
+                </View>         
+              </View>
+              <View style={{ alignItems : 'flex-end', flex : 1,}}>
+                  <Text style={{ backgroundColor : '#dadee3', paddingLeft : 3,paddingRight : 3 , opacity : 0.8,borderRadius : 5 }}>Kết thúc</Text>
+                  <Text>trong {moment(item.postExpireAt).diff(new Date(),"days")} ngày</Text>
+              </View>
             </View>
-            <View style={{ alignItems : 'flex-end', flex : 1,}}>
-                <Text style={{ backgroundColor : '#dadee3', paddingLeft : 3,paddingRight : 3 , opacity : 0.8,borderRadius : 5 }}>Expired in</Text>
-                <Text>12 days</Text>
+
+            <View style={styles.line}/>
+            <View style={{ padding : 15, flexDirection : 'row'}}>
+                <View>
+                  <Text style={{  fontSize : 15  }}>{item.AccumulatedMoney === null ? vndFormat.format(item.totalMoney) : vndFormat.format(item.totalMoney - item.AccumulatedMoney)}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 13 }}>Khoản tiền có thể đầu tư</Text>           
+                </View>
+                <View style={{  alignItems : 'flex-end', flex : 1, fontSize : 13 }}>
+                  <Text style={{  fontSize : 15  }}>{vndFormat.format(item.totalMoney)}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 13 }}>Tổng tiền</Text>  
+                </View>
             </View>
-          </View>
-          <View style={styles.line}/>
-          <View style={{ padding : 15, flexDirection : 'row'}}>
+            <Progress.Bar progress={item.AccumulatedMoney/item.totalMoney} width={FULL_WIDTH / 1.2} style={{ alignSelf : 'center', margin : 5, marginBottom : 25 }} color={PRIMARY_COLOR} />    
+            <View style={styles.line}/>
+            <View style={{ padding : 15, flexDirection : 'row' }}>
               <View>
-                <Text style={{  fontSize : 15  }}>2.000.000đ</Text>
-                <Text style={{ opacity : 0.5,fontSize : 13 }}>Available for investment</Text>           
+                <Text style={{ marginBottom : 5,fontSize : 14 }}>Lãi suất</Text>
+                <Text style={{ fontSize : 14 }}>Thời hạn</Text>
+                  
               </View>
-              <View style={{  alignItems : 'flex-end', flex : 1, fontSize : 13 }}>
-                <Text style={{  fontSize : 15  }}>22.000.000đ</Text>
-                <Text style={{ opacity : 0.5,fontSize : 13 }}>Full amount</Text>  
+              <View style={{ flex : 1 , alignItems : 'flex-end' }}>
+                <Text style={{ marginBottom : 5,fontSize : 14 }}>{item.interest}%</Text>
+                <Text style={{ fontSize : 14 }}>{item.duration} tháng</Text>
               </View>
-          </View>
-          <Progress.Bar progress={0.8} width={FULL_WIDTH / 1.2} style={{ alignSelf : 'center', margin : 5, marginBottom : 25 }} color={PRIMARY_COLOR} />    
-          <View style={styles.line}/>
-          <View style={{ padding : 15, flexDirection : 'row' }}>
-            <View>
-                <Text style={{ marginBottom : 5,fontSize : 14 }}>Period</Text>
-                <Text style={{ fontSize : 14 }}>Interest</Text>
-            </View>
-            <View style={{ flex : 1 , alignItems : 'flex-end' }}>
-                <Text style={{ marginBottom : 5,fontSize : 14 }}>18 months</Text>
-                <Text style={{ fontSize : 14 }}>3%</Text>
-            </View>
-          </View> 
-          <Button
-            style={styles.btnLogin}
-            mode = "outlined"
-            color={PRIMARY_COLOR}
-          >Invest</Button>
-      </TouchableOpacity>
+            </View> 
+        </TouchableOpacity>
     );
   }
 
   return (
     <View
       style={{ backgroundColor: '#F2F5FA', height : FULL_HEIGHT }}>
-      <View style={styles.topContainer}>
+      <View style={styles.topContainer} ref={topContainerRef}>
         <View style={{ padding : 10,flexDirection : 'row', justifyContent : 'center',alignItems : 'center', zIndex : 200 }}>     
           <TextInput
               style={styles.input}
+              placeholder={'Tìm kiếm'}
+              value={searchText}
+              onChangeText={(value) => setSearchText(value)}
+              onSubmitEditing={() => searchHandler()}
           />
-          {/* <TouchableOpacity
-            style={{ marginRight: 10 }}
-          >
-            <Icon
-              name="search"
-              type={"fontawesome"}
-              size={25}
-              color="white"
-            />
-          </TouchableOpacity>      */}
-          <TouchableOpacity
+          <TouchableOpacity onPress={() => sortByRef.current.open()}
             style={{ marginRight: 10 }}
           >
             <MaterialIcons name="sort" size={25} color="white" />
           </TouchableOpacity>
           <TouchableOpacity
             style={{ marginRight: 10 }}
-            onPress={() => setIsFilter(true)}
+            onPress={() => pickerRef.current.open()}
           >
             <AntDesign name="filter" size={25} color="white" />
           </TouchableOpacity>     
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isFilter}
-          >
-            <View style={styles.filterModal}>
-              <View style={{ justifyContent : 'center' }}>
-                <Text style={{
-                  fontSize : 20,
-                  fontWeight : 'bold',
-                  alignSelf : 'center',
-                  paddingVertical : 10
-                }}>Bộ lọc</Text>
-                
-                <TouchableOpacity
-                  style={{ 
-                    position : 'absolute',
-                    right : 20
-                  }}
-                  onPress={() => setIsFilter(false)}
-                >
-                  <AntDesign name="close" size={24} color="black" />
-                </TouchableOpacity> 
-              </View>
-              <TouchableOpacity style={{
-                flexDirection : 'row',
-                alignItems : 'center',
-                borderWidth : 1,
-                opacity : 0.5,
-                marginHorizontal : 25,
-                borderRadius : 25,
-                paddingVertical : 10,
-                paddingLeft : 10
-              }}>
-                <Ionicons name="search" size={24} color="black" />
-                <Text style={{ fontSize : 18, marginLeft : 5 }}>Thêm trường</Text>
-              </TouchableOpacity>
-              <View style={{ marginTop : 10 }}>
-                <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', opacity : 0.6 }}>Khoản tiền</Text>
-                <View style={{ marginHorizontal : 40, marginTop : 20 }}>
-                  <View style={{ flexDirection : 'row', justifyContent : 'space-between'}}>
-                    <Text style={{ fontSize : 15, fontWeight :'bold' }}>{multiSliderValue[0]}</Text>
-                    <Text style={{ fontSize : 15, fontWeight :'bold' }}>{multiSliderValue[1]}</Text>
-                  </View>            
-                  <MultiSlider
-                      values={[multiSliderValue[0], multiSliderValue[1]]}
-                      sliderLength={FULL_WIDTH - 80}
-                      onValuesChange={multiSliderValuesChange}
-                      min={50000}
-                      max={100000000}
-                      step={50000}   
-                      markerStyle={{ height : 20, width : 20}}
-                    />
-                </View>   
-              </View>
-              <View style={{ marginTop : 20, flexDirection : 'row', justifyContent : 'space-between', marginHorizontal : 25 }}>
-                <Text style={{ fontSize : 16, fontWeight : 'bold', opacity : 0.6 }}>Ngành</Text>
-                <View style={{ alignItems : 'center', flexDirection : 'row' }}>
-                  <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', marginRight : 10 }}>Công nghệ thông tin</Text> 
-                  <Feather name="edit" size={20} color={PRIMARY_COLOR} />
-                </View>
-                
-              </View>
-              <View style={{ marginTop : 20, flexDirection : 'row', justifyContent : 'space-between', marginHorizontal : 25 }}>
-                <Text style={{ fontSize : 16, fontWeight : 'bold', opacity : 0.6 }}>Chuyên ngành</Text>
-                <View style={{ alignItems : 'center', flexDirection : 'row' }}>
-                  <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', marginRight : 10 }}>Kỹ thuật phần mềm</Text> 
-                  <Feather name="edit" size={20} color={PRIMARY_COLOR} />
-                </View>
-              </View>
-              <View style={{ marginTop : 20 }}>
-                <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', opacity : 0.6 }}>Năm học</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {
-                    yearStudies.map(year =>{ 
-                      return (
-                        <TouchableOpacity key={year.id}>
-                          <View style={styles.yearItems}>
-                            <Text style={{ color : PRIMARY_COLOR_BLACK, alignSelf : 'center',fontSize : 16, zIndex : 200 }}>{year.year}</Text>
-                          </View>
-                        </TouchableOpacity>
-                      )
-                    })
-                  }
-                </ScrollView>
-                
-              </View>
-            </View>
-          </Modal>
         </View>
 
         <View style={{
@@ -407,6 +261,148 @@ export default function Invest({ navigation }) {
           opacity : 0.15,
           borderRadius : 10,
         }}/> 
+        
+        <RBSheet
+            ref={pickerRef}
+            keyboardAvoidingViewEnabled={true}
+            closeOnDragDown={true}
+            closeOnPressMask={true}
+            height={FULL_HEIGHT * 2 / 3}
+            customStyles={{
+                container : {
+                    borderTopLeftRadius : 20,
+                    borderTopRightRadius : 20
+                }
+            }}
+        >       
+            <ScrollView style={styles.filterModal}>
+              <View style={{ justifyContent : 'center' }}>
+                <Text style={{
+                  fontSize : 20,
+                  fontWeight : 'bold',
+                  alignSelf : 'center',
+                  paddingVertical : 5
+                }}>Bộ lọc</Text>
+                <TouchableOpacity
+                  style={{ 
+                    position : 'absolute',
+                    left : 20
+                  }}
+                  onPress={() => pickerRef.current.close()}
+                >
+                  <AntDesign name="close" size={25} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ 
+                    position : 'absolute',
+                    right : 20
+                  }}
+                  onPress={() => searchHandler()}
+                >
+                  <AntDesign name="check" size={25} color={SECONDARY_COLOR} />
+                </TouchableOpacity> 
+              </View>
+              <View style={{ marginTop : 5 }}>
+                <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', opacity : 0.6 }}>Khoản tiền</Text>
+                <View style={{ marginHorizontal : 40, marginTop : 20 }}>
+                  <View style={{ flexDirection : 'row', justifyContent : 'space-between'}}>
+                    <Text style={{ fontSize : 15, fontWeight :'bold' }}>{vndFormat.format(multiSliderValue[0])}</Text>
+                    <Text style={{ fontSize : 15, fontWeight :'bold' }}>{vndFormat.format(multiSliderValue[1])}</Text>
+                  </View>            
+                  <MultiSlider
+                      values={[multiSliderValue[0], multiSliderValue[1]]}
+                      sliderLength={FULL_WIDTH - 80}
+                      onValuesChange={multiSliderValuesChange}
+                      min={50000}
+                      max={200000000}
+                      step={50000}   
+                      markerStyle={{ height : 20, width : 20}}
+                    />
+                </View>   
+              </View>
+              <View style={{ marginHorizontal : 15 }}>
+                  <SectionedMultiSelect
+                    items={schools}
+                    IconRenderer={Icon}
+                    uniqueKey="id"
+                    searchPlaceholderText='Trường'
+                    selectText="Chọn trường"
+                    showDropDowns={true}
+                    onSelectedItemsChange={(selectedItems) => setSchoolFilter(selectedItems)}
+                    selectedItems={schoolFilter}
+                  />
+              </View>
+              <View style={{ marginHorizontal : 15 }}>
+                  <SectionedMultiSelect
+                    items={majors}
+                    IconRenderer={Icon}
+                    uniqueKey="id"
+                    searchPlaceholderText='Ngành'
+                    selectText="Chọn ngành"
+                    showDropDowns={true}
+                    onSelectedItemsChange={(selectedItems) => setMajorFilter(selectedItems)}
+                    selectedItems={majorFilter}
+                  />
+              </View>
+                
+              <View style={{ marginTop : 20, flexDirection : 'row', justifyContent : 'space-between', marginHorizontal : 25 }}>
+                <Text style={{ fontSize : 16, fontWeight : 'bold', opacity : 0.6, flex : 0.6 }}>Thời hạn vay</Text>
+                <TouchableOpacity style={{ alignItems : 'center', flexDirection : 'row', flex : 0.4, justifyContent : 'flex-end' }}>
+                  <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', marginRight : 5 }}>36 tháng</Text> 
+                  <Feather name="edit" size={20} color={PRIMARY_COLOR} />
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+        </RBSheet>          
+
+         <RBSheet
+            ref={sortByRef}
+            keyboardAvoidingViewEnabled={true}
+            closeOnDragDown={true}
+            closeOnPressMask={true}
+            height={FULL_HEIGHT * 2 / 3}
+            customStyles={{
+                container : {
+                    borderTopLeftRadius : 20,
+                    borderTopRightRadius : 20
+                }
+            }}
+        >       
+            <View style={styles.filterModal}>
+              <View style={{ justifyContent : 'center' }}>
+                <Text style={{
+                  fontSize : 20,
+                  fontWeight : 'bold',
+                  alignSelf : 'center',
+                  paddingVertical : 5
+                }}>Sắp xếp</Text>
+                <TouchableOpacity
+                  style={{ 
+                    position : 'absolute',
+                    left : 20
+                  }}
+                  onPress={() => sortByRef.current.close()}
+                >
+                  <AntDesign name="close" size={25} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ 
+                    position : 'absolute',
+                    right : 20
+                  }}
+                  onPress={() => searchHandler()}
+                >
+                  <AntDesign name="check" size={25} color={SECONDARY_COLOR} />
+                </TouchableOpacity> 
+              </View>
+              <FlatList
+                data={sortOption}
+                renderItem={sortItem}
+                keyExtractor={(item) => item.id.toString()}
+                showsVerticalScrollIndicator={false}
+              />
+            </View>
+        </RBSheet>        
       </View>
      
       <Animated.FlatList
@@ -414,12 +410,12 @@ export default function Invest({ navigation }) {
           [{ nativeEvent : { contentOffset : { y : scrollY }}}],
           { useNativeDriver : true }
         )}
-        data={filterdData}
+        data={loans}
         renderItem={_renderItem}
         ref={listRef}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop : 20 , paddingBottom : 50 }}
+        contentContainerStyle={{ marginTop : 20 , paddingBottom : 50 }}
       />
       <Animated.View style={[styles.toTopBotton,{opacity},{zIndex}]}>
         <TouchableOpacity onPress={ScrollToTop}>
@@ -506,23 +502,11 @@ const styles = StyleSheet.create({
     height : FULL_HEIGHT * 0.3 / 3,
     backgroundColor : PRIMARY_COLOR,
     borderBottomLeftRadius : 25,
-    borderBottomRightRadius : 25
+    borderBottomRightRadius : 25,
   },
   filterModal : {
     width : FULL_WIDTH,
-    height : FULL_HEIGHT,
+    height : FULL_HEIGHT / 2,
     backgroundColor : PRIMARY_COLOR_WHITE,
-    borderTopLeftRadius : 25,
-    borderTopRightRadius : 25
   },
-  yearItems : {
-    width : 80,
-    height : 40 ,
-    borderRadius : 5 , 
-    borderWidth : 1.5,
-    borderColor : '#b8b2b2',
-    justifyContent : 'center',
-    margin : 10,
-    backgroundColor : '#f7f5f5'
-  }
 });

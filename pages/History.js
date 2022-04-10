@@ -20,14 +20,14 @@ import * as Animatable from 'react-native-animatable';
 import { AntDesign,Ionicons } from '@expo/vector-icons';
 import { AppContext } from '../contexts/App';
 import { vndFormat } from '../utils'
-import { accountApi } from '../apis/account';
+import { walletApi } from '../apis/wallet';
 import { transactionApi } from '../apis/transaction';
 
 export default function Home({ route, navigation }) {
   const { user } = useContext(AppContext);
   const [isDown,setIsDown] = useState(true)
   const [transaction,setTransaction] = useState([])
-  const [ account,setAccount ] = useState(0)
+  const [ wallet,setWallet ] = useState(0)
 
   //animable
   const topContainerRef = useRef(null)
@@ -36,20 +36,20 @@ export default function Home({ route, navigation }) {
   const InvestMoneyRef = useRef(null)
 
   useEffect(() => {
-    accountApi
+    walletApi
         .getByUserId(user.id)
         .then(res => {
-            setAccount(res.data)
+            setWallet(res.data)
         })
   }, [])
 
   useEffect(() => {
     transactionApi
-        .getByAccountId(account.id)
+        .getByWalletId(wallet.id)
         .then(res => {
             setTransaction(res.data)
         })
-  }, [account])
+  }, [wallet])
 
   const convertType = (type) => {
     var result = "";
@@ -85,7 +85,7 @@ export default function Home({ route, navigation }) {
               fontSize : 18, 
               color : PRIMARY_COLOR_WHITE,
               fontWeight : 'bold'
-            }}>Transaction History</Text>   
+            }}>Lịch sử giao dịch</Text>   
           </View>
 
           <View style={{ flexDirection : 'row', paddingHorizontal : 15 }}>
@@ -220,7 +220,7 @@ export default function Home({ route, navigation }) {
             WithdrawMoneyRef.current.transitionTo({ translateY : 0 }, 500)
             EarnedMoneyRef.current.transitionTo({ translateY : 0 }, 400)
             InvestMoneyRef.current.transitionTo({ translateY : 0 }, 300)
-        }}>
+          }}>
             { transaction.map(item => {
               return(
                 <View key={item.date}>
@@ -231,9 +231,9 @@ export default function Home({ route, navigation }) {
                         <TouchableOpacity key={data.id} style={styles.transactionItem} onPress={() => navigation.navigate("TransactionInfo", {
                             transactionId : data.id
                         })}>
-                          <View style={{ flexDirection : 'row', flex : 0.6 }}>
+                          <View style={{ flex : 0.15 }}>
                             {
-                              data.targetName === "Paypal" 
+                              data.description === "Paypal" 
                               ? (        
                                 <Image 
                                   style={{ height : 50, width : 50, borderRadius : 50, elevation : 5 }}
@@ -245,24 +245,26 @@ export default function Home({ route, navigation }) {
                                 </View>
                               )
                             }          
-                            <View style={{ justifyContent : 'center', marginLeft : 5 }}>
-                              <Text style={{ fontSize : 16, fontWeight : 'bold' , color : SECONDARY_COLOR}}>{data.targetName}</Text>
-                              <Text style={{ marginTop : 3, fontSize : 16, opacity : 0.6}}>{data.date}</Text>
-                            </View>
                           </View>
-                          <View style={{ justifyContent : 'center', alignItems : 'flex-end', flex : 0.3 }}>
-                            {
-                              data.type === "TOPUP" && "TRANSFER"
-                              ?
-                              (
-                                <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'green' }}>+{vndFormat.format(data.money)}</Text>
-                              )
-                              :
-                              (
-                                <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'red' }}>-{vndFormat.format(data.money)}</Text>
-                              )
-                            }          
-                            <Text style={{ marginTop : 3, fontSize : 16, fontWeight : 'bold' , color : PRIMARY_COLOR_BLACK }}>{convertType(data.type)}</Text>
+                          <View style={{ flex : 0.85 }}>
+                            <View style={{ flexDirection : 'row' }}>
+                              <Text style={{ fontSize : 16, fontWeight : 'bold' , color : PRIMARY_COLOR_BLACK, flex : 0.6}}>{data.description}</Text>
+                              {
+                                data.type === "TOPUP" && "TRANSFER"
+                                ?
+                                (
+                                  <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'green', flex : 0.4, textAlign : 'right' }}>+{vndFormat.format(data.money)}</Text>
+                                )
+                                :
+                                (
+                                  <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'red', flex : 0.4, textAlign : 'right' }}>-{vndFormat.format(data.money)}</Text>
+                                )
+                              }
+                            </View>
+                            <View style={{ flexDirection : 'row' }}>
+                              <Text style={{ marginTop : 3, fontSize : 16, opacity : 0.6 , flex : 0.5}}>{data.date}</Text>
+                              <Text style={{ marginTop : 3, fontSize : 16,  color : PRIMARY_COLOR_BLACK, flex : 0.5, textAlign : 'right' }}>{convertType(data.type)}</Text>
+                            </View>                                                             
                           </View>
                         </TouchableOpacity>
                       )
@@ -284,9 +286,9 @@ const styles = StyleSheet.create({
       borderBottomRightRadius : 25,
   },
   nameIcon : {
-    height : 50,
-    width : 50,
-    borderRadius : 50,
+    height : 45,
+    width : 45,
+    borderRadius : 45,
     backgroundColor : PRIMARY_COLOR,
     alignItems : 'center',
     justifyContent : 'center'

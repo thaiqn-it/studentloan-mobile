@@ -1,16 +1,16 @@
 import { defaultInstance } from "./index";
 
 const getByUserId = () => {
-    return defaultInstance.get("/account")
+    return defaultInstance.get("/wallet")
 }
 
 const update = (money,id) => {
-    return defaultInstance.put("/account/" + id, {
+    return defaultInstance.put("/wallet/" + id, {
         money
     })
 }
 
-export const accountApi = {
+export const walletApi = {
     update,
     getByUserId
 };

@@ -12,9 +12,8 @@ import { Button } from 'react-native-paper';
 import RBSheet from "react-native-raw-bottom-sheet";
 import { paypalApi } from "../apis/paypal.js";
 import WebView from 'react-native-webview';
-import { accountApi } from '../apis/account';
+import { walletApi } from '../apis/wallet';
 import { transactionApi } from '../apis/transaction';
-import { AppContext } from '../contexts/App';
 import { vndFormat } from '../utils'
 
 export default function DepositMoney({ navigation, route }) {
@@ -23,10 +22,21 @@ export default function DepositMoney({ navigation, route }) {
     const [money, setMoney] = useState(50000);
     const [paypalUrl, setPaypalUrl] = useState("")
     const [modalVisible, setModalVisible] = useState(false)
-    const { user } = useContext(AppContext);
     const isFocused = useIsFocused();
-    const [ account,setAccount ] = useState(0)
+    const [ wallet,setWallet ] = useState(0)
+    // Linking.openURL('https://res.cloudinary.com/larrytran/image/upload/v1648740774/pdf/contract_gbuhj4.pdf');
 
+    // useEffect(() => {
+    //     console.log(FileSystem.documentDirectory);
+    //     FileSystem.downloadAsync('https://res.cloudinary.com/larrytran/image/upload/v1648740774/pdf/contract_gbuhj4.pdf', FileSystem.documentDirectory + 'small.mp4', {})
+    //     .then(({ uri }) => {
+    //         console.log('Finished downloading to ', uri);
+    //       })
+    //       .catch(error => {
+    //         console.error(error);
+    //       });
+    // }, [])
+  
     const [limit, setLimit] = useState([
         {
           id: 1,
@@ -57,10 +67,10 @@ export default function DepositMoney({ navigation, route }) {
     const [check,setCheck] = useState(false)
  
     useEffect(() => {
-        accountApi
-            .getByUserId(user.id)
+        walletApi
+            .getByUserId()
             .then(res => {
-                setAccount(res.data)
+                setWallet(res.data)
             })
     }, [isFocused])
 
@@ -86,18 +96,19 @@ export default function DepositMoney({ navigation, route }) {
             let data = {
                 money,
                 type : "TOPUP",
-                description : "Nạp tiền vào tài khoản",
+                description : "Nạp tiền vào ví",
                 status : "SUCCESS",
-                accountId : account.id,
-                target : paymentId,
-                targetName : 'Paypal',
+                walletId : wallet.id,
+                paypalTransaction : paymentId,
+                recipientName : 'Ví của tôi',
+                senderName : 'Paypal',
                 transactionFee : 0
             }
             transactionApi
                 .create(data)
                 .then(res => {
                     const transactionId = res.data.id
-                    accountApi.update(money,account.id).then(res => {                             
+                    walletApi.update(money,wallet.id).then(res => {                             
                         navigation.navigate("TransactionInfo",{
                             transactionId
                         })
@@ -126,7 +137,7 @@ export default function DepositMoney({ navigation, route }) {
             setSelect(item.id)
           }}
         >
-          <Text style={[isSelect === item.id ? styles.textBoxSelect : styles.textBoxUnselect]}>{item.limitMoney} đ</Text>
+          <Text style={[isSelect === item.id ? styles.textBoxSelect : styles.textBoxUnselect]}>{vndFormat.format(item.limitMoney)}</Text>
         </TouchableOpacity>
       );
 
@@ -166,7 +177,7 @@ export default function DepositMoney({ navigation, route }) {
                             alignSelf : 'center',
                             color : SECONDARY_COLOR
                         }}>
-                            {vndFormat.format(account.money)}
+                            {vndFormat.format(wallet.money)}
                         </Text>
                     </View>
                     <View style={{ marginTop : 25, marginLeft : 25}}>
@@ -235,25 +246,6 @@ export default function DepositMoney({ navigation, route }) {
                         <Ionicons name="md-add-circle-outline" size={25} color={SECONDARY_COLOR} />
                         <Text style={{ color : SECONDARY_COLOR, fontSize : 18, marginLeft : 5 }}>Thêm thẻ</Text>
                     </TouchableOpacity>
-                    {/* <RBSheet
-                        ref={addCardRef}
-                        keyboardAvoidingViewEnabled={true}
-                        closeOnDragDown={true}
-                        closeOnPressMask={true}
-                        height={FULL_HEIGHT}
-                        customStyles={{
-                            container : {
-                                borderTopLeftRadius : 20,
-                                borderTopRightRadius : 20
-                            }
-                        }}
-                    >   
-                   
-                            <WebView 
-                            source={{ uri : paypalUrl }}
-                            />
-                 
-                    </RBSheet>                */}
                 </View>
             </KeyboardAvoidingView>
             <Modal

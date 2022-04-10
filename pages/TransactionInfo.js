@@ -79,12 +79,12 @@ export default function TransactionInfo({ navigation, route}) {
                 <View style={styles.line}/>
                 <View style={{ flexDirection : 'row', justifyContent : 'space-between', margin : 10 }}>
                     <Text style={styles.leftText}>Nguồn tiền</Text>
-                    <Text style={styles.rightText}>{transaction.targetName}</Text>
+                    <Text style={styles.rightText}>{transaction.senderName}</Text>
                 </View>
                 <View style={styles.line}/>
                 <View style={{ flexDirection : 'row', justifyContent : 'space-between', margin : 10 }}>
                     <Text style={styles.leftText}>Người nhận</Text>
-                    <Text style={styles.rightText}>Ví của tôi</Text>
+                    <Text style={styles.rightText}>{transaction.recipientName}</Text>
                 </View>
                 <View style={styles.line}/>
                 <View style={{ flexDirection : 'row', justifyContent : 'space-between', margin : 10 }}>
@@ -95,7 +95,7 @@ export default function TransactionInfo({ navigation, route}) {
             <View style={styles.descriptionContainer}>
                 <Text style={{ fontSize : 17, margin : 10, fontWeight : 'bold' }}>Mô tả</Text>
                 <View style={styles.line}/>
-                <Text style={{ fontSize : 17, margin : 10 }}>Nạp tiền vào ví</Text>
+                <Text style={{ fontSize : 17, margin : 10 }}>{transaction.description}</Text>
             </View>
         </View>
     )

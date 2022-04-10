@@ -1,6 +1,6 @@
 import React,{ useState,useEffect,useRef,useContext } from 'react'
 import { useIsFocused } from "@react-navigation/native";
-import { StyleSheet, Text, View,FlatList,TouchableOpacity,ScrollView,Pressable,KeyboardAvoidingView, } from 'react-native'
+import { StyleSheet, Text, View,FlatList,TouchableOpacity,ScrollView,Pressable,KeyboardAvoidingView,Alert } from 'react-native'
 import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_FONT,PRIMARY_COLOR_WHITE, FULL_WIDTH,SECONDARY_COLOR,PRIMARY_COLOR_BLACK } from '../constants/styles'
 import { Entypo } from '@expo/vector-icons';
 import LottieView from 'lottie-react-native';
@@ -10,10 +10,9 @@ import { FontAwesome,FontAwesome5,Ionicons } from '@expo/vector-icons';
 import { CheckBox,Input } from 'react-native-elements'
 import { Button } from 'react-native-paper';
 import RBSheet from "react-native-raw-bottom-sheet";
-import { accountApi } from '../apis/account';
+import { walletApi } from '../apis/wallet';
 import { transactionApi } from '../apis/transaction';
 import { configApi } from '../apis/systemconfig';
-import { AppContext } from '../contexts/App';
 import { vndFormat } from '../utils'
 import { paypalApi } from '../apis/paypal'
 
@@ -23,8 +22,7 @@ const WithdrawMoney = ({ navigation, route }) => {
     const [money, setMoney] = useState(50000);
     const [ receiveMoney, setReceiveMoney ] = useState(0)
     const [ fee, setFee ] = useState(0)
-    const { user } = useContext(AppContext);
-    const [ account,setAccount ] = useState(0)
+    const [ wallet,setWallet ] = useState(0)
     const [ email,setEmail ] = useState("sb-eqq2m14474872@personal.example.com")
     const isFocused = useIsFocused();
     const [ transactionFee, setTransactionFee ] = useState(0)
@@ -59,23 +57,23 @@ const WithdrawMoney = ({ navigation, route }) => {
 
     useEffect(() => {
         configApi
-            .getByType("TRANSACTION_FEE")
+            .getTransactionFee()
             .then(res => {
-                setTransactionFee(res.data.value)
+                setTransactionFee(res.data.transactionFee)
             })
     }, [])
 
     useEffect(() => {
-        const FEE = money*transactionFee/100
+        const FEE = money*transactionFee
         setFee(FEE)
         setReceiveMoney(money - FEE)
     }, [money,transactionFee])
 
     useEffect(() => {
-        accountApi
-            .getByUserId(user.id)
+        walletApi
+            .getByUserId()
             .then(res => {
-                setAccount(res.data)
+                setWallet(res.data)
             })
     }, [isFocused])
  
@@ -86,28 +84,35 @@ const WithdrawMoney = ({ navigation, route }) => {
     const transferMoney = () => {
         payoutRef.current.close()
         paypalApi
-            .transfer(email,receiveMoney)
+            .transfer(email,receiveMoney,wallet.id)
             .then(res => {
                 const data = {
                     money : money,
                     type : "WITHDRAW",
-                    description : `Chuyển tiền vào tài khoản paypal ${email}` ,
+                    description : `Chuyển tiền vào ví paypal` ,
                     status : "SUCCESS",
-                    accountId : account.id,
-                    target : res.data.payoutId,
-                    targetName : 'Paypal',
+                    walletId : wallet.id,
+                    paypalTransaction : res.data.payoutId,
+                    recipientName : 'Paypal',
+                    senderName : 'Ví của tôi',
                     transactionFee : fee
                 }
                 transactionApi
                     .create(data)
                     .then(res => {
                         const transactionId = res.data.id
-                        accountApi.update(-receiveMoney,account.id).then(res => {
+                        walletApi.update(-receiveMoney,wallet.id).then(res => {
                             navigation.navigate("TransactionInfo", {
                                 transactionId
                             })
+                        }).catch(err => {
+                          
                         })
+                    }).catch(err => {
+                       
                     })
+            }).catch(err => {
+                Alert.alert("Không thể thực hiện", err.response.data.error);
             })
     }
     const renderItem = ({ item }) => (
@@ -118,7 +123,7 @@ const WithdrawMoney = ({ navigation, route }) => {
             setSelect(item.id)
           }}
         >
-          <Text style={[isSelect === item.id ? styles.textBoxSelect : styles.textBoxUnselect]}>{item.limitMoney} đ</Text>
+          <Text style={[isSelect === item.id ? styles.textBoxSelect : styles.textBoxUnselect]}>{vndFormat.format(item.limitMoney)}</Text>
         </TouchableOpacity>
       );
   return (
@@ -157,7 +162,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                             alignSelf : 'center',
                             color : SECONDARY_COLOR
                         }}>
-                            {vndFormat.format(account.money)}
+                            {vndFormat.format(wallet.money)}
                         </Text>
                     </View>
                     <View style={{ marginTop : 25, marginLeft : 25}}>
@@ -210,7 +215,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                         marginHorizontal : 30,
                         marginTop : 10
                     }}>
-                        Biểu phí rút tiền là {transactionFee}% * tổng số tiền rút / 1 lần rút
+                        Biểu phí rút tiền là {transactionFee*100}% * tổng số tiền rút / 1 lần rút
                     </Text>
                     <View style={{
                         marginHorizontal : 25,
@@ -225,7 +230,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                             <Text style={{ fontSize : 16, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(receiveMoney)}</Text>
                         </View>     
                         <View style={{ flexDirection : 'row', justifyContent : 'space-between', marginTop : 15 }}>
-                            <Text style={{ fontSize : 16 }}>Phí giao dịch</Text>
+                            <Text style={{ fontSize : 16 }}>Phí hệ thống</Text>
                             <Text style={{ fontSize : 16, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(fee)}</Text>
                         </View>           
                     </View>

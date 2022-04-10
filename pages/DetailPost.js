@@ -31,6 +31,7 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { loanApi } from "../apis/loan";
+import { investmentApi } from "../apis/investment";
 import moment from "moment";
 
 const { width: windowWidth } = Dimensions.get("window");
@@ -42,8 +43,11 @@ export default function DetailPost({ navigation,route }) {
   // const {id} = route.params;
   const scrollY = useRef(new Animated.Value(0)).current;
   const carouselRef = useRef(null);
-  const { id,availableInvest } = route.params;
+  const { id } = route.params;
   const [post,setPost] = useState(null)
+  const [isInvest,setIsInvest] = useState(null)
+  const [isLoading,setIsLoading] = useState(true)
+  const [investmentId,setInvesmentId] = useState('')
 
   const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
     const paddingToBottom = 50;
@@ -87,6 +91,14 @@ export default function DetailPost({ navigation,route }) {
     useEffect(() => {
       loanApi.getById(id).then(res => {
         setPost(res.data)
+        investmentApi.checkExist(res.data.loan.id).then(res => {
+          setIsInvest(res.data.isInvest)
+          if (res.data.isInvest) {
+            setInvesmentId(res.data.investmentId)
+          }
+        }).finally(() => {
+          setIsLoading(!isLoading)
+        })
       })
     }, [])
 
@@ -106,8 +118,6 @@ export default function DetailPost({ navigation,route }) {
     style: 'currency',
     currency: 'VND',
   });
-
-  moment.locale('vi')
 
   const ITEMS = [
     {
@@ -388,7 +398,7 @@ export default function DetailPost({ navigation,route }) {
                               }}
                             />
           
-                            <View>
+                            <View style={{ flex : 1 }}>
                               <Text
                                 style={{
                                   marginTop: 20,
@@ -406,7 +416,7 @@ export default function DetailPost({ navigation,route }) {
                                   fontWeight: "bold",
                                 }}
                               >
-                                {post.loan.Student.lastname + ' ' + post.loan.Student.firstname} - Năm III
+                                {post.loan.Student.User.lastname + ' ' + post.loan.Student.User.firstname}
                               </Text>
                             </View>
                           </View>
@@ -504,7 +514,7 @@ export default function DetailPost({ navigation,route }) {
                               </View>
                               <View style={{ flex : 1 , alignItems : 'flex-end' }}>
                                   <Text style={{ marginBottom : 5,fontSize : 16 }}>{post.loan.InvestorCount}</Text>
-                                  <Text style={{ fontSize : 16 }}>{moment(post.loan.postExpireAt).toNow()}</Text>
+                                  <Text style={{ fontSize : 16 }}>trong {moment(post.loan.postExpireAt).diff(new Date(),"days")} ngày</Text>
                               </View>
                             </View> 
                             <View style={styles.line}/>
@@ -695,7 +705,7 @@ export default function DetailPost({ navigation,route }) {
                                   fontSize: 15,
                                 }}
                               >
-                                Ngày tốt nghiệp :
+                                Thời gian tốt nghiệp :
                               </Text>
                               <Text
                                 style={{
@@ -814,15 +824,40 @@ export default function DetailPost({ navigation,route }) {
           
       <Animated.View
         style={[styles.btnContainer, { transform : [{ translateY : bottomTranslate }]}]}
-      >    
-        <Button
-          style={[styles.btnInvest,{opacity}]}
-          color={PRIMARY_COLOR}
-          onPress={() => navigation.navigate("BackSelection", {
-            id,
-            availableInvest
-          })}
-            >Đầu tư</Button> 
+      >  
+        {
+          isLoading
+          ?
+          (
+            <ActivityIndicator size="large" color={PRIMARY_COLOR}/>
+          )
+          : 
+          (
+            isInvest
+            ?
+            (        
+              <Button
+              style={[styles.btnInvest,{opacity}]}
+              color={PRIMARY_COLOR}
+              onPress={() => navigation.navigate("InvestmentDetail", {
+                investmentId
+              })}
+                >Quản lý</Button> 
+            )
+            :
+            (
+              <Button
+              style={[styles.btnInvest,{opacity}]}
+              color={PRIMARY_COLOR}
+              onPress={() => navigation.navigate("BackSelection", {
+                id,
+                availableInvest : post.loan.totalMoney - post.loan.AccumulatedMoney
+              })}
+                >Đầu tư</Button> 
+            ) 
+          ) 
+        }
+    
       </Animated.View>
     </View>
   );

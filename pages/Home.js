@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Animated,StyleSheet, Text, SafeAreaView, Image,View,Pressable,StatusBar, ActivityIndicator } from "react-native";
 import * as Animatable from 'react-native-animatable';
 import HeaderBar from '../components/HeaderBar';
-import { Icon,Avatar } from "react-native-elements";
+import { Icon,Avatar,Badge } from "react-native-elements";
 import * as Progress from 'react-native-progress';
 import {
   FlatList,
@@ -43,7 +43,7 @@ export default function Home({ route, navigation }) {
 
   useEffect(() => {
     socket.current.on("welcome", message => {
-      console.log(message);
+      
     })
  
   }, [socket])
@@ -80,8 +80,7 @@ export default function Home({ route, navigation }) {
     return(
       <TouchableOpacity
           onPress={() => navigation.navigate("DetailPost", { 
-            id : item.id,
-            availableInvest : item.totalMoney - item.AccumulatedMoney
+            id : item.id        
           })}
           style={styles.postStyle}>
             <View style={{ flexDirection : 'row', padding : 15}}> 
@@ -95,7 +94,7 @@ export default function Home({ route, navigation }) {
                   }}
                 />
                 <View style={{ marginLeft : 10 }}>
-                  <Text style={{ fontSize : 15 }}>{item.Student.lastname + ' ' + item.Student.firstname}</Text>
+                  <Text style={{ fontSize : 15 }}>{item.Student.User.lastname + ' ' + item.Student.User.firstname}</Text>
                   <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.SchoolMajor.School.name}</Text>
                   <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.SchoolMajor.Major.name}</Text>
                 </View>         
@@ -140,7 +139,7 @@ export default function Home({ route, navigation }) {
     const [page,setPage] = useState(1)
 
     useEffect(() => {
-      loanApi.getAll({
+      loanApi.search({
         page,
         sort : 'lastest'
       }).then((res) => {  
@@ -191,7 +190,7 @@ export default function Home({ route, navigation }) {
     const [page,setPage] = useState(1)
 
     useEffect(() => {
-      loanApi.getAll({
+      loanApi.search({
         page,
         sort : 'endingSoon'
       }).then((res) => {
@@ -242,7 +241,7 @@ export default function Home({ route, navigation }) {
     const [page,setPage] = useState(1)
 
     useEffect(() => {
-      loanApi.getAll({
+      loanApi.search({
         page,
         sort : 'popular'
       }).then((res) => {
@@ -291,43 +290,49 @@ export default function Home({ route, navigation }) {
     <View>
         <View style={styles.topContainer}>
           <View style={{ padding : 10,flexDirection : 'row', alignItems : 'center', justifyContent : 'space-between', paddingHorizontal : 20 }}>         
-            <Text style={{ fontSize : 22, color : PRIMARY_COLOR_WHITE, fontWeight : 'bold' }}>QUICK TUITION</Text>   
+            {/* <Image source={require('../assets/logo.png')} style={{ height : 50, width : 85}}/>   */}
+            <Text style={{ fontSize : 22, color : PRIMARY_COLOR_WHITE, fontWeight : 'bold' }}>STUDENT LOAN</Text>    
             <TouchableOpacity onPress={() => navigation.navigate("Invest")} style={{ alignSelf : 'center' }}>
               <Ionicons name="search" size={25} color="white" />
             </TouchableOpacity>   
           </View>
           <View style={{ flexDirection : 'row', justifyContent : 'space-around', marginTop : 20 }}>
-            <TouchableOpacity style={{ alignItems : 'center' }}>
-              <Image source={require('../assets/chat.png')} style={{ 
+            <TouchableOpacity style={{ alignItems : 'center' }} onPress={() => navigation.navigate("Notification")}>
+              <Image source={require('../assets/bell.png')} style={{ 
                 height : 30,
                 width : 30,
                 tintColor : PRIMARY_COLOR_WHITE
               }}/>
-              <Text style={{ color : PRIMARY_COLOR_WHITE, marginTop : 10 }}>Nhắn tin</Text>
+              <Badge
+                value={3}
+                  status={"error"}
+                  containerStyle={{ position: 'absolute', top: 0, right: 1 }}
+                />
+              <Text style={{ color : PRIMARY_COLOR_WHITE, marginTop : 10 }}>Thông báo</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{ alignItems : 'center' }}>
+            <TouchableOpacity style={{ alignItems : 'center' }} onPress={() => navigation.navigate("Contract")}>
               <Image source={require('../assets/contract.png')} style={{ 
                 height : 30,
                 width : 30,
                 tintColor : PRIMARY_COLOR_WHITE
               }}/>
-              <Text style={{ color : PRIMARY_COLOR_WHITE, marginTop : 10 }}>Nhắn tin</Text>
+              <Text style={{ color : PRIMARY_COLOR_WHITE, marginTop : 10 }}>Hợp đồng</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{ alignItems : 'center' }}>
-              <Image source={require('../assets/chat.png')} style={{ 
+            <TouchableOpacity style={{ alignItems : 'center' }} onPress={() => navigation.navigate("Analytic")}>
+              <Image source={require('../assets/analytics.png')} style={{ 
                 height : 30,
                 width : 30,
                 tintColor : PRIMARY_COLOR_WHITE
               }}/>
-              <Text style={{ color : PRIMARY_COLOR_WHITE, marginTop : 10 }}>Nhắn tin</Text>
+              <Text style={{ color : PRIMARY_COLOR_WHITE, marginTop : 10 }}>Thống kê</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{ alignItems : 'center' }}>
+            <TouchableOpacity style={{ alignItems : 'center' }} onPress={() => navigation.navigate("Verify")}>
               <Image source={require('../assets/user-avatar.png')} style={{ 
                 height : 30,
                 width : 30,
                 tintColor : PRIMARY_COLOR_WHITE
               }}/>
-              <Text style={{ color : PRIMARY_COLOR_WHITE, marginTop : 10 }}>Cá nhân</Text>
+              <Text style={{ color : PRIMARY_COLOR_WHITE, marginTop : 10 }}>Xác thực</Text>
             </TouchableOpacity>
           </View> 
         </View>

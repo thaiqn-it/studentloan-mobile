@@ -21,18 +21,16 @@ import {
   FULL_HEIGHT,
 } from "../constants/styles";
 import { SimpleLineIcons } from '@expo/vector-icons';
-import { accountApi } from '../apis/account'
-import { AppContext } from '../contexts/App';
+import { walletApi } from '../apis/wallet'
 import { vndFormat } from '../utils'
 
 export default function Wallet({ route, navigation }) {
-  const { user } = useContext(AppContext);
   const [ account,setAccount ] = useState(0)
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    accountApi
-      .getByUserId(user.id)
+    walletApi
+      .getByUserId()
       .then(res => {
         setAccount(res.data)
       })

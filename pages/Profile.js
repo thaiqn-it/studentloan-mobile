@@ -1,25 +1,155 @@
-import React, {useRef,useState,useEffect} from 'react'
+import React, {useRef,useState,useEffect,useContext} from 'react'
 import { StyleSheet, Text, View,ScrollView,TouchableOpacity, Image} from 'react-native'
-import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE } from '../constants/styles'
-import { Ionicons,Entypo,Fontisto } from '@expo/vector-icons';
-import { Input } from 'react-native-elements';
+import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, SECONDARY_COLOR } from '../constants/styles'
+import { Ionicons,Entypo,Fontisto,FontAwesome5,Feather  } from '@expo/vector-icons';
+import { Input,Overlay, useTheme } from 'react-native-elements';
 import { Button, RadioButton } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
+import { AppContext } from '../contexts/App';
+import * as ImagePicker from 'expo-image-picker';
+import getEnvVars from '../constants/env';
+import { userApi } from '../apis/user';
+import AppLoading from '../components/AppLoading'
 
 export default function Profile({ navigation }) {
+    const { user, setUser, getUser } = useContext(AppContext);
+
     const [viewSelected,setViewSelected] = useState(1);
     const [date, setDate] = useState(moment(new Date()).format("DD/MM/YYYY"))
     const [modalVisible, setModalVIsible] = useState(false);
+    const [imagePickerVisible, setImagePickerVisible] = useState(false);
 
-    const showModal = () => setModalVIsible(true);
+    const [firstName,setFirstName] = useState(null)
+    const [lastName,setLastName] = useState('')
+    const [phone,setPhone] = useState('')
+    const [email,setEmail] = useState('')
+    const [address,setAddress] = useState('')
+    const [image,setImage] = useState(null)
+
+    const [isLoading,setIsLoading] = useState(false)
+
+    useEffect(() => {
+        setFirstName(user.firstName)
+        setLastName(user.lastName)
+        setAddress(user.address)
+        setEmail(user.email)
+        setPhone(user.phoneNumber)
+        setDate(user.birthDate)
+      }, []);
+
+      const openCamera = async () => {
+        hideImagePicker()
+        let result = await ImagePicker.launchCameraAsync()
+        if (!result.cancelled) {
+            setImage(result);
+        }
+    }
+
+    const loadUser = () => {
+        async function load() {
+          const data = await getUser();
+          setUser({
+            type: "LOAD",
+            data,
+          });
+        }
+        load();
+      };
+
+    const openLibrary = async () => {
+        hideImagePicker()
+        let result = await ImagePicker.launchImageLibraryAsync()
+        if (!result.cancelled) {
+            setImage(result);
+        }
+    }
     const hideModal = () => setModalVIsible(false);
+    const showModal = () => setModalVIsible(true);
+
+    const hideImagePicker = () => setImagePickerVisible(false);
+    const showImagePicker= () => setImagePickerVisible(true);
+
+    const createFormData = () => {
+        const data = new FormData();
+        let localUri = image.uri;
+        let filename = localUri.split("/").pop();
+    
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+    
+        data.append("file", {
+          name: filename,
+          type: type,
+          uri: Platform.OS === "ios" ? localUri.replace("file://", "") : localUri,
+        });
+    
+        return data;
+    };
+
+    const uploadImage = async () => {
+        const { API_URI } = getEnvVars();
+        try {
+            const res = await fetch(`${API_URI}/image/upload`, {
+            method: "POST",
+            body: createFormData(),
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+            }).then((res) => {
+                return res.json();
+            })
+            return res.url;
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const ModalPicker = () => {
+        return(    
+            <Overlay isVisible={imagePickerVisible} onBackdropPress={hideImagePicker} overlayStyle={{borderRadius : 10, height : 200, width : FULL_WIDTH - 40}}>
+                <Text style={{ margin : 15, alignSelf : 'center',fontSize : 17}}>Upload your image</Text>
+                <View style={{ flexDirection : 'row', justifyContent : 'space-around' }}>
+                    <TouchableOpacity style={styles.iconPicker} onPress={() => openCamera()}>                  
+                        <Feather name="camera" size={25} color={PRIMARY_COLOR_WHITE}/>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.iconPicker} onPress={() => openLibrary()}>
+                        <Ionicons name="library-outline" size={25} color={PRIMARY_COLOR_WHITE}/>
+                    </TouchableOpacity>
+                </View>
+            </Overlay>
+        )
+    }
+
+    const save = async () => {
+        setIsLoading(true)      
+        try {
+            let url = user.profileUrl
+            if (image !== null) {
+                url = await uploadImage();       
+            }   
+            const data = {
+                firstName,
+                lastName,
+                address,
+                birthDate: date,
+                profileUrl: url,
+            }; 
+            await userApi.update(data)
+        } catch (error) {
+            console.log(error);
+        } finally{
+            loadUser()
+            setIsLoading(false)
+        }
+        
+    }
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
 
         hideModal()
-        setDate(moment(currentDate).format("DD/MM/YYYY"));
+        setDate(currentDate);
       };
     
     const DatePicker = () => {
@@ -41,163 +171,131 @@ export default function Profile({ navigation }) {
             </View>
         )
     }
-    const PersonalInformation = () => {
-        return(
-            <ScrollView style={styles.viewContent} showsVerticalScrollIndicator={false}>
-            <View style={{ backgroundColor : PRIMARY_COLOR_WHITE , elevation : 5}}>
-                <TouchableOpacity activeOpacity={1} style={styles.imagePicker}>
-                    <Ionicons name="person" size={100} color="gray" />
-                    <View style={styles.cameraIcon}>
-                        <Entypo name="camera" size={25} color={"white"} />
-                    </View>        
-                </TouchableOpacity>
-
-                <Text style={styles.informationText}>First Name :</Text>
-                <Input
-                    placeholder='Input Information'
-                    inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                    containerStyle= {styles.input}
-                />
-                <Text style={styles.informationText}>Last Name :</Text>
-                <Input
-                    placeholder='Input Information'
-                    inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                    containerStyle= {styles.input}
-                />
-                <Text style={styles.informationText} >Phone :</Text>
-                <Input
-                    placeholder='Input Information'
-                    inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                    containerStyle= {styles.input}
-                />
-                <Text style={styles.informationText}>Email :</Text>
-                <Input
-                    placeholder='Input Information'
-                    inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                    containerStyle={styles.input}
-                />
-                <Text style={styles.informationText}>Date of Birth :</Text>
-                <TouchableOpacity style={styles.datePicker} onPress={() => {
-                    showModal()
-                }}>
-                    <View style={{ justifyContent : 'center', flex : 1}}>
-                        <Text style={{ color : PRIMARY_COLOR_BLACK, fontSize : 20, marginLeft : 10}}>{date}</Text>
-                    </View>
-                    <Fontisto name="date" size={25} color='#a6aaad' style={{ alignSelf : 'center', marginRight : 10}} />
-                </TouchableOpacity>
-                <Text style={styles.informationText}>Gender :</Text>
-                <RadioButton.Group>
-                    <View style={{ flexDirection : 'row', marginVertical : 10 }}>
-                        <View style={{ flexDirection : 'row', alignItems : 'center'}}>
-                            <RadioButton value="male" />
-                            <Text style={{ fontSize : 15 }}>Male</Text>                     
-                        </View>
-                        <View style={{ flexDirection : 'row', alignItems : 'center', marginLeft : 10 }}>
-                            <RadioButton value="female"/>
-                            <Text style={{ fontSize : 15 }}>Female</Text>                      
-                        </View>
-                        <View style={{ flexDirection : 'row', alignItems : 'center', marginLeft : 10}}>
-                            <RadioButton value="other" />
-                            <Text style={{ fontSize : 15 }}>Other</Text>                
-                        </View>
-                    </View>
-                    </RadioButton.Group>
-            </View>
-            <View style={{ backgroundColor : PRIMARY_COLOR_WHITE , elevation : 5, marginTop : 10, paddingTop : 10, marginBottom : FULL_HEIGHT / 12.5}}>
-                <Text style={styles.informationText}>Province :</Text>
-                <Input
-                    placeholder='Input Information'
-                    inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                    containerStyle={styles.input}
-                />
-                <Text style={styles.informationText}>District :</Text>
-                <Input
-                    placeholder='Input Information'
-                    inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                    containerStyle={styles.input}
-                />
-                <Text style={styles.informationText} >Commune :</Text>
-                <Input
-                    placeholder='Input Information'
-                    inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                    containerStyle={styles.input}
-                />
-                <Text style={styles.informationText}>Apartment number :</Text>
-                <Input
-                    placeholder='Input Information'
-                    inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                    containerStyle={styles.input}
-                />
-            </View>
-        </ScrollView>
-        )
-    }
-
-    const Other = () => {
-        return(
-            <ScrollView style={[styles.viewContent,{ height : FULL_HEIGHT }]} showsVerticalScrollIndicator={false}>
-                <View style={{ backgroundColor : PRIMARY_COLOR_WHITE , elevation : 5,paddingTop : 10 , height : FULL_HEIGHT - 100}}>
-                    <Text style={styles.informationText}>Identity Card Number :</Text>
-                    <Input
-                        placeholder='Input Information'
-                        inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                        containerStyle={styles.input}
-                    />
-                    <Text style={styles.informationText}>Issued on :</Text>
-                    <Input
-                        placeholder='Input Information'
-                        inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                        containerStyle={styles.input}
-                    />
-                    <Text style={styles.informationText} >Issued by :</Text>
-                    <Input
-                        placeholder='Input Information'
-                        inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                        containerStyle={styles.input}
-                    />
-                    <Text style={styles.informationText}>Expired in :</Text>
-                    <Input
-                        placeholder='Input Information'
-                        inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                        containerStyle={styles.input}
-                    />
-                </View>
-            </ScrollView>
-    )
-}
-
-
 
     return (
-        <View style={{ height : '100%'}}>
-            <View style={{ flexDirection : 'row', marginTop : 50, marginHorizontal : 10 }}>
-                <TouchableOpacity style={[viewSelected === 1 ? [styles.tab,{ borderBottomWidth : 0, backgroundColor : PRIMARY_COLOR_WHITE }] : [styles.tab,{ backgroundColor : '#dadee3'}]]}
-                                  onPress={() => setViewSelected(1)}>
-                    <Text style={styles.tabText}>Personal Information</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[viewSelected === 2 ? [styles.tab,{ borderBottomWidth : 0, backgroundColor : PRIMARY_COLOR_WHITE }] : [styles.tab,{ backgroundColor : '#dadee3'}]]}
-                                  onPress={() => setViewSelected(2)}>
-                    <Text style={styles.tabText}>Other</Text>
-                </TouchableOpacity>
-                <View style={{ borderBottomWidth : 1, width : FULL_WIDTH - 300 - 20 }}/>
+        <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
+            <View style={styles.topContainer}>
+                <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
+                <TouchableOpacity
+                    style={{ flexDirection : 'row', alignSelf : 'center', position : 'absolute', left : 20, alignItems : 'center' }}
+                    onPress={() => {
+                    navigation.goBack(); 
+                    }}
+                >
+                    <FontAwesome5
+                        name={"chevron-left"}
+                        size={20}
+                        style={{ width: 30 }}
+                        color={"white"}
+                    />     
+                </TouchableOpacity>     
+                <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Thông tin tài khoản</Text>   
+                </View>
             </View>
-            {
-                viewSelected === 1 
-                ?
-                <PersonalInformation />
-                :
-                <Other />
-            }
+            {/* <View style={{ flexDirection : 'row', marginTop : 10, justifyContent : 'center', backgroundColor : '#F6F5FF', paddingVertical : 10, marginHorizontal : 20, borderRadius : 10 }}>
+                <TouchableOpacity style={[viewSelected === 1 ? [styles.tab,{ backgroundColor : SECONDARY_COLOR }] : [styles.tab,{ backgroundColor : '#F6F5FF'}]]}
+                                  onPress={() => setViewSelected(1)}>
+                    <Text style={[viewSelected === 1 ? [ styles.tabText, { color : PRIMARY_COLOR_WHITE } ] : [styles.tabText, { color : PRIMARY_COLOR_BLACK }]]}>Thông tin cơ bản</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[viewSelected === 2 ? [styles.tab,{backgroundColor : SECONDARY_COLOR }] : [styles.tab,{ backgroundColor : '#F6F5FF' }]]}
+                                  onPress={() => setViewSelected(2)}>
+                    <Text style={[viewSelected === 2 ? [ styles.tabText, { color : PRIMARY_COLOR_WHITE } ] : [styles.tabText, { color : PRIMARY_COLOR_BLACK }]]}>Giấy tờ cá nhân</Text>
+                </TouchableOpacity>
+            </View> */}
+            <View style={{ height : FULL_HEIGHT * 2.5 / 3 }}>
+                <ScrollView style={styles.viewContent} showsVerticalScrollIndicator={false}>
+                    <View style={{ backgroundColor : PRIMARY_COLOR_WHITE , elevation : 5, paddingBottom : 20}}>
+                        <TouchableOpacity activeOpacity={1} style={styles.imagePicker} onPress={() => showImagePicker()}>
+                            {
+                                !user.profileUrl
+                                ?
+                                (   
+                                    <Ionicons name="person" size={100} color="gray" />               
+                                )
+                                : 
+                                (
+                                    image !== null 
+                                    ?
+                                    (
+                                        <Image source={{ uri : image.uri }} style={{ height : 137 , width : 137, borderRadius : 80  }}/>
+                                    )
+                                    :
+                                    (
+                                        <Image source={{ uri : user.profileUrl }} style={{ height : 135 , width : 135, borderRadius : 80  }}/>
+                                    )
+                                )
+                            }
+
+                            <View style={styles.cameraIcon}>
+                                <Entypo name="camera" size={25} color={"white"} />
+                            </View>        
+                        </TouchableOpacity>
+
+                        <Text style={styles.informationText}>Họ :</Text>
+                        <Input
+                            value={lastName}
+                            onChangeText={value => setLastName(value)}
+                            placeholder='Nhập họ'
+                            inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
+                            containerStyle= {styles.input}
+                        />
+                        <Text style={styles.informationText}>Tên :</Text>
+                        <Input
+                            value={firstName}
+                            onChangeText={value => setFirstName(value)}
+                            placeholder='Nhập tên'
+                            inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
+                            containerStyle= {styles.input}
+                        />
+                        <Text style={styles.informationText} >Số điện thoại :</Text>
+                        <Input
+                            value={phone}
+                            disabled
+                            // placeholder='Input Information'
+                            inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
+                            containerStyle= {styles.input}
+                        />
+                        <Text style={styles.informationText}>Email :</Text>
+                        <Input
+                            value={email}
+                            disabled
+                            onChangeText={value => setEmail(value)}
+                            placeholder='Nhận email'
+                            inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
+                            containerStyle={styles.input}
+                        />
+                        <Text style={styles.informationText}>Địa chỉ :</Text>
+                        <Input
+                            value={address}
+                            onChangeText={value => setAddress(value)}
+                            placeholder='Nhập địa chỉ'
+                            inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
+                            containerStyle={styles.input}
+                        />
+                        <Text style={styles.informationText}>Ngày sinh :</Text>
+                        <TouchableOpacity style={styles.datePicker} onPress={() => {
+                            showModal()
+                        }}>
+                            <View style={{ justifyContent : 'center', flex : 1}}>
+                                <Text style={{ color : PRIMARY_COLOR_BLACK, fontSize : 20, marginLeft : 10}}>{moment(date).format("DD/MM/YYYY")}</Text>
+                            </View>
+                            <Fontisto name="date" size={25} color='#a6aaad' style={{ alignSelf : 'center', marginRight : 10}} />
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </View>              
             <View
                 style={[styles.btnContainer]}
             >    
                 <Button
                     style={[styles.btnInvest]}
                     color={PRIMARY_COLOR}
-        
-                        >Update</Button> 
+                    onPress={() => save()}
+                        >Cập nhật</Button> 
             </View>
             <DatePicker />
+            <ModalPicker />
+            <AppLoading isLoading={isLoading}/>
         </View>
     )
 }
@@ -206,16 +304,12 @@ const styles = StyleSheet.create({
     tab : {
         width : 150,
         height : 50,
-        borderWidth : 1,
         alignItems : 'center',
         justifyContent : 'center',
-        borderColor : '#a6aaad'
+        borderRadius : 15,
     },
     viewContent : {
-        borderRightWidth : 1,
-        borderLeftWidth : 1,
-        marginHorizontal : 10,
-        borderColor : '#a6aaad',
+        height : 100
     },
     tabText : {
         fontSize : 15,
@@ -270,19 +364,34 @@ const styles = StyleSheet.create({
         borderWidth : 1 , 
         borderRadius : 10, 
         height : 50, 
-        width : FULL_WIDTH - 40, 
+        width : FULL_WIDTH - 20, 
         margin : 10,
-        borderColor : '#a6aaad'
+        borderColor : '#a6aaad',
     },
     datePicker : {
         height : 50, 
-        width : FULL_WIDTH - 40, 
+        width : FULL_WIDTH - 20,  
         borderWidth : 1,
         borderColor : '#a6aaad',
         alignSelf : 'center',
         borderRadius : 10,
         flexDirection : 'row',
-        marginVertical : 10
-        
-    }
+        margin : 10,
+    },
+    topContainer : {
+        height : FULL_HEIGHT * 0.3 / 4,
+        backgroundColor : PRIMARY_COLOR,
+        borderBottomLeftRadius : 25,
+        borderBottomRightRadius : 25,
+    },
+    iconPicker : {
+        height : 100, 
+        width : 100, 
+        elevation : 5, 
+        alignSelf : 'center', 
+        alignItems : 'center', 
+        backgroundColor: PRIMARY_COLOR,
+        justifyContent : 'space-around',
+        borderRadius : 100,
+    },
 })

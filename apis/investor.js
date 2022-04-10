@@ -6,7 +6,12 @@ const create = (data) => {
     });
 }
 
+const update = (data) => {
+    return defaultInstance.put("/investor",data);
+}
+
 export const investorApi = {
     create,
+    update
 };
   

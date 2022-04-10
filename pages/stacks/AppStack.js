@@ -22,6 +22,10 @@ import DepositMoney from "../DepositMoney";
 import FilterHistory from "../FilterHistory";
 import WithdrawMoney from "../WithdrawMoney";
 import SuccessPayment from "../SuccessPayment";
+import Contract from "../Contract";
+import ContractDetail from "../ContractDetail";
+import Analytic from "../Analytic";
+import Notification from "../Notification";
 
 const Stack = createStackNavigator();
 
@@ -175,9 +179,30 @@ export default function AppStack() {
                   headerShown: false,
                 }}
               />
+               <Stack.Screen
+                name={"Contract"}
+                component={Contract}
+                options={{
+                  headerShown: false,
+                }}
+              />
               <Stack.Screen
-                name={"SuccessPayment"}
-                component={SuccessPayment}
+                name={"ContractDetail"}
+                component={ContractDetail}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name={"Analytic"}
+                component={Analytic}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name={"Notification"}
+                component={Notification}
                 options={{
                   headerShown: false,
                 }}

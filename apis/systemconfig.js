@@ -1,11 +1,11 @@
 import { defaultInstance } from "./index";
 
-const getByType = (type) => {
-    return defaultInstance.get("/config/"+type)
+const getTransactionFee = (type) => {
+    return defaultInstance.get("/config/transaction-fee")
 }
 
 
 export const configApi = {
-    getByType
+    getTransactionFee
 };
   

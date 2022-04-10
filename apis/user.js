@@ -54,6 +54,10 @@ const getProfile = () => {
   return defaultInstance.get('/user/investor/me')
 }
 
+const update = (data) => {
+  return defaultInstance.put('/user', data)
+}
+
 export const userApi = {
     login,
     loginByFb,
@@ -63,6 +67,7 @@ export const userApi = {
     register,
     loginByGoogle,
     registerByGog,
-    getProfile
+    getProfile,
+    update
 };
   

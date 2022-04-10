@@ -3,14 +3,15 @@ import {
     StyleSheet, 
     Text, 
     View,
-    Animated
+    Animated,
+    TouchableOpacity
 } from 'react-native'
 import { 
     Avatar, 
     ListItem 
 } from "react-native-elements";
 import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from '../constants/styles'
-import { Feather } from '@expo/vector-icons'
+import { Feather,FontAwesome5 } from '@expo/vector-icons'
 import { Icon } from 'react-native-elements';
 import { AppContext } from '../contexts/App';
 import HeaderBar from '../components/HeaderBar';
@@ -92,15 +93,33 @@ export default function Setting({navigation}) {
       };
       
       useEffect(() => {
-        setName(user.Investor.firstName + " " + user.Investor.lastName)
+        setName(user.firstName + " " + user.lastName)
         setPhone(user.phoneNumber)
         setEmail(user.email)
       }, []);
+      
     return (
         <View 
             style={{ backgroundColor : PRIMARY_COLOR_WHITE }}>
-            <HeaderBar scrollY={scrollY} navigation={navigation}/>
-            <View style={[styles.topContainer]}>
+            <View style={styles.topContainer}>
+                <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
+                <TouchableOpacity
+                    style={{ flexDirection : 'row', alignSelf : 'center', position : 'absolute', left : 20, alignItems : 'center' }}
+                    onPress={() => {
+                    navigation.goBack(); 
+                    }}
+                >
+                    <FontAwesome5
+                        name={"chevron-left"}
+                        size={20}
+                        style={{ width: 30 }}
+                        color={"white"}
+                    />     
+                </TouchableOpacity>     
+                <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Cài đặt</Text>   
+                </View>
+            </View>
+            <View style={[styles.infoContainer]}>
                 <View style={{ flexDirection: "row", padding : 5 }}>           
                     <Avatar
                         rounded
@@ -175,8 +194,8 @@ export default function Setting({navigation}) {
 }
 
 const styles = StyleSheet.create({
-    topContainer: {
-        marginTop : FULL_HEIGHT / 9,
+    infoContainer: {
+        marginTop : 10,
         margin : 15,
         backgroundColor: '#F2F5FA',
         justifyContent: "center",
@@ -195,5 +214,11 @@ const styles = StyleSheet.create({
     bottomContainer: {
         backgroundColor: "white",
         height: "100%",
+    },
+    topContainer : {
+        height : FULL_HEIGHT * 0.3 / 4,
+        backgroundColor : PRIMARY_COLOR,
+        borderBottomLeftRadius : 25,
+        borderBottomRightRadius : 25,
     },
 })

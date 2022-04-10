@@ -6,10 +6,11 @@ const topup = (money) => {
     });
 }
 
-const transfer = (email,money) => {
+const transfer = (email,money,accountId) => {
     return defaultInstance.post("/paypal/transfer", {
         email,
-        money
+        money,
+        accountId
     });
 }
 

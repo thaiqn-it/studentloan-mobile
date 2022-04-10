@@ -6,7 +6,6 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import * as Progress from 'react-native-progress';
 import { FontAwesome5 } from "@expo/vector-icons";
 import { investmentApi } from '../apis/investment';
-import { AppContext } from '../contexts/App';
 
 export default function MyInvestment({ navigation }) {
       const [items, setItems] = useState([
@@ -66,7 +65,6 @@ export default function MyInvestment({ navigation }) {
         },
       ]);
       const [selectedItems, setSelectedItems] = useState('');
-      const { user } = useContext(AppContext);
       
       const [dataItems, setDataItems] = useState([]);
       const fetchData = () => {
@@ -164,7 +162,7 @@ export default function MyInvestment({ navigation }) {
       };
       useEffect(() => {
         investmentApi
-          .findAllByInvestorId(user.Investor.id)
+          .findAllByInvestorId()
           .then(res => {
             setDataItems(res.data)
           })
@@ -186,13 +184,15 @@ export default function MyInvestment({ navigation }) {
         const paidPercent = (parseInt(item.Loan.PaidMoney) * receivedPercent)
         return (
           <TouchableOpacity
-            onPress={() => navigation.navigate("InvestmentDetail")}
+            onPress={() => navigation.navigate("DetailPost", {
+              id : item.Loan.id
+            })}
             style={styles.container}>
               <Image source={{ uri: 'https://cdn.nguyenkimmall.com/images/companies/_1/tin-tuc/kinh-nghiem-meo-hay/meo%20vat/man-fixing-hair-for-selfie%201.jpg' }}
                      style={{ width : FULL_WIDTH / 2 - 10, height : 100, alignSelf : 'center',borderTopLeftRadius : 5, borderTopRightRadius : 5 }}/> 
               <View style={{ flexDirection : 'row', alignContent : 'flex-start', paddingVertical : 10, paddingHorizontal : 5 }}>
                 <View style={{ marginLeft : 10 }}>
-                  <Text style={{ fontSize : 14 , width : FULL_WIDTH / 2 - 30}}>{item.Loan.Student.firstname + " " + item.Loan.Student.lastname}</Text>
+                  <Text style={{ fontSize : 14 , width : FULL_WIDTH / 2 - 30}}>{item.Loan.Student.User.firstname + " " + item.Loan.Student.User.lastname}</Text>
                   <Text style={{ opacity : 0.5,fontSize : 12,width : FULL_WIDTH / 2 - 30 }}>{item.Loan.Student.SchoolMajor.School.name}</Text>
                 </View>         
               </View>
