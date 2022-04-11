@@ -16,10 +16,15 @@ const getOneById = (id) => {
     return defaultInstance.get("/investment/"+ id)
 }
 
+const updateById = (id,data) => {
+    return defaultInstance.put("/investment/"+ id,data)
+}
+
 export const investmentApi = {
     findAllByInvestorId,
     create,
     checkExist,
-    getOneById
+    getOneById,
+    updateById
 };
   

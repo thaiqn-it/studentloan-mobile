@@ -186,7 +186,7 @@ export default function Analytic() {
                     </View>
                 </View>
             </View>
-            <View style={{height : FULL_HEIGHT / 2.5 }}>
+            {/* <View style={{height : FULL_HEIGHT / 2.5 }}>
                 <Text>Số giao dịch trong tuần</Text>
                 <BarChart   
                     
@@ -198,7 +198,7 @@ export default function Analytic() {
                     yAxisThickness={0}
                     xAxisThickness={0}
                 />
-            </View>
+            </View> */}
         </ScrollView>
     )
 }

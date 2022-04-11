@@ -221,7 +221,7 @@ export default function Home({ route, navigation }) {
             EarnedMoneyRef.current.transitionTo({ translateY : 0 }, 400)
             InvestMoneyRef.current.transitionTo({ translateY : 0 }, 300)
           }}>
-            { transaction.map(item => {
+            { transaction?.map(item => {
               return(
                 <View key={item.date}>
                   <Text style={{ fontSize : 20, fontWeight : 'bold', marginHorizontal : 15 }}>{item.date}</Text>

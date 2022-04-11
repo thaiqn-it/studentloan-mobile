@@ -26,6 +26,9 @@ import Contract from "../Contract";
 import ContractDetail from "../ContractDetail";
 import Analytic from "../Analytic";
 import Notification from "../Notification";
+import Evidence from "../Evidence";
+import LoanHistory from "../LoanHistory";
+import AdjustInvestment from "../AdjustInvestment";
 
 const Stack = createStackNavigator();
 
@@ -201,8 +204,29 @@ export default function AppStack() {
                 }}
               />
               <Stack.Screen
+                name={"LoanHistory"}
+                component={LoanHistory}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name={"Evidence"}
+                component={Evidence}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
                 name={"Notification"}
                 component={Notification}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name={"AdjustInvestment"}
+                component={AdjustInvestment}
                 options={{
                   headerShown: false,
                 }}

@@ -310,6 +310,20 @@ export default function Verify({ navigation }) {
         )
     }
 
+    const VerifyView = () => (
+        <View style={{ justifyContent : 'center', flex : 1,alignItems : 'center' }}>
+            <Image source={require('../assets/verified.png')} style={{ height : FULL_HEIGHT / 2.5, width : FULL_WIDTH / 1.3  }}/>
+            <Text style={{ fontWeight : 'bold', fontSize : 18, textAlign : 'center', marginTop : 30 }}>Thông tin của bạn đã được xác thực thành công.</Text>
+        </View>
+    )
+
+    const PendingView = () => (
+        <View style={{ justifyContent : 'center', flex : 1,alignItems : 'center' }}>
+            <Image source={require('../assets/userpending.png')} style={{ height : FULL_HEIGHT / 2.5, width : FULL_WIDTH / 1.3  }}/>
+            <Text style={{ fontWeight : 'bold', fontSize : 18, textAlign : 'center', marginTop : 30 }}>Thông tin của bạn đang được chúng tôi xác thực. Vui lòng trở lại sau.</Text>
+        </View>
+    )
+
     return (
         <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
              <View style={styles.topContainer}>
@@ -345,11 +359,11 @@ export default function Verify({ navigation }) {
                     user.status === 'PENDING'
                     ?
                     (
-                        <Text>Đang đợi xác thực</Text>
+                        <PendingView />
                     )
                     :          
                     (
-                        <Text>ĐThah2 công</Text>
+                        <VerifyView />
                     )  
                 )
             }            

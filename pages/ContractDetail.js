@@ -38,7 +38,7 @@ export default function ContractDetail({ navigation, route }) {
         <PDFReader
             onLoad={() => setLoading(!loading)}
             onLoadEnd={() => setLoading(!loading)}
-            useGoogleReader={true}
+    
             source={{
                 uri: contractUrl
             }}

@@ -60,10 +60,13 @@ export default function Wallet({ route, navigation }) {
             Số dư ví
           </Text>
           <Text style={{ color : PRIMARY_COLOR_WHITE, fontSize : 40,fontWeight : 'bold'}}>
-            {vndFormat.format(account.money)}
+            {vndFormat.format(account.money - account.totalPending)}
           </Text>  
+          <Text style={{ color : PRIMARY_COLOR_WHITE, fontSize : 16, marginTop : 10, opacity : 0.8, fontWeight : 'bold' }}>
+            ( Đang chờ giải quyết : {vndFormat.format(account.totalPending)} )
+          </Text> 
         </View>
-        <View style={{ alignSelf : 'center', alignItems : 'center', marginTop : FULL_HEIGHT / 9,flexDirection : "row" }}>
+        <View style={{ alignSelf : 'center', alignItems : 'center', marginTop : FULL_HEIGHT / 8,flexDirection : "row" }}>
           <SimpleLineIcons name="reload" size={20} color="white" />
           <Pressable onPress={() => navigation.navigate("History")}>
             <Text style={{ color : PRIMARY_COLOR_WHITE, fontSize : 18, margin : 10 }}>

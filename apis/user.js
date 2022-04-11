@@ -1,21 +1,24 @@
 import { defaultInstance } from "./index";
 
-const login = (email, password) => {
+const login = (email, password,type) => {
   return defaultInstance.post("/user/login", {
     email,
     password,
+    type
   });
 };
 
-const loginByFb = ({ access_token }) => {
+const loginByFb = ({ access_token, type }) => {
   return defaultInstance.post("/user/loginByFb", {
-    access_token
+    access_token,
+    type
   });
 };
 
-const loginByGoogle = ({ access_token }) => {
+const loginByGoogle = ({ access_token, type }) => {
   return defaultInstance.post("/user/loginByGoogle", {
-    access_token
+    access_token,
+    type
   });
 };
 

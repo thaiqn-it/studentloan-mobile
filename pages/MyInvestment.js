@@ -179,16 +179,20 @@ export default function MyInvestment({ navigation }) {
         : dataItems;
 
     function _renderItem({ item }) {
-        const totalPaid = parseInt(item.Loan.totalMoney) + parseInt(item.Loan.totalMoney * 3 / 100)
-        const receivedPercent = parseInt(item.total) / totalPaid
-        const paidPercent = (parseInt(item.Loan.PaidMoney) * receivedPercent)
+        const totalPaid = parseInt(item.Loan.totalMoney) + parseInt(item.Loan.totalMoney * item.Loan.interest * item.Loan.duration)
+        const totalReceive = totalPaid * item.percent
+        const paidReceive = (parseInt(item.Loan.PaidMoney) * item.percent)
+        const paidPercent = ((paidReceive / totalReceive) * 100).toFixed(0)
+      
         return (
           <TouchableOpacity
             onPress={() => navigation.navigate("DetailPost", {
               id : item.Loan.id
             })}
             style={styles.container}>
-              <Image source={{ uri: 'https://cdn.nguyenkimmall.com/images/companies/_1/tin-tuc/kinh-nghiem-meo-hay/meo%20vat/man-fixing-hair-for-selfie%201.jpg' }}
+              <Image source={{ 
+                uri: item.Loan.Student.User.profileUrl ? item.Loan.Student.User.profileUrl : 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZmlsZXxlbnwwfHwwfHw%3D&w=1000&q=80'
+               }}
                      style={{ width : FULL_WIDTH / 2 - 10, height : 100, alignSelf : 'center',borderTopLeftRadius : 5, borderTopRightRadius : 5 }}/> 
               <View style={{ flexDirection : 'row', alignContent : 'flex-start', paddingVertical : 10, paddingHorizontal : 5 }}>
                 <View style={{ marginLeft : 10 }}>
@@ -196,8 +200,8 @@ export default function MyInvestment({ navigation }) {
                   <Text style={{ opacity : 0.5,fontSize : 12,width : FULL_WIDTH / 2 - 30 }}>{item.Loan.Student.SchoolMajor.School.name}</Text>
                 </View>         
               </View>
-              <Progress.Bar progress={paidPercent} width={FULL_WIDTH / 2 - 20} style={{ alignSelf : 'center', margin : 5}} color={PRIMARY_COLOR} />  
-              <Text style={{ fontSize : 12, alignSelf : 'center', marginBottom : 10}}>Student paid {paidPercent}% of loan</Text>  
+              <Progress.Bar progress={paidPercent/100} width={FULL_WIDTH / 2 - 20} style={{ alignSelf : 'center', margin : 5}} color={PRIMARY_COLOR} />  
+              <Text style={{ fontSize : 12, alignSelf : 'center', margin : 5 }}>Sinh viên đã trả {paidPercent}% khoảng vay</Text>  
           </TouchableOpacity>
         );
       }
@@ -221,14 +225,13 @@ export default function MyInvestment({ navigation }) {
                 <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Các khoản đầu tư</Text>   
               </View>
             </View>
-            <Text style={{ fontSize : 15, alignSelf : 'center', marginVertical : 10 }}>You have invested 8 students</Text>
             <FlatList
                 numColumns={2}
                 data={filterdData}
                 renderItem={_renderItem}
                 keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom : 120 }}
+                contentContainerStyle={{ paddingBottom : 120, marginTop : 10 }}
             />
         </View>
     )
@@ -240,6 +243,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: PRIMARY_COLOR_WHITE,
         elevation : 5,
+        flex : 0.48
       },
       line : { 
         borderBottomWidth : 1, 

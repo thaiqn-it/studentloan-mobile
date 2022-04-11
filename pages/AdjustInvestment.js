@@ -26,9 +26,9 @@ import { vndFormat } from "../utils";
 import { investmentApi } from "../apis/investment";
 import { walletApi } from "../apis/wallet";
 
-export default function BackSelection({route, navigation}) {
-  const [ wallet,setWallet ] = useState(null)
-  const [money, setMoney] = useState(50000);
+export default function AdjustInvestment({ navigation,route }) {
+    const [money, setMoney] = useState(50000);
+    const [ wallet,setWallet ] = useState(null)
   const [limit, setLimit] = useState([
     {
       id: 1,
@@ -56,40 +56,39 @@ export default function BackSelection({route, navigation}) {
     },
   ]);
   const [isSelect,setSelect] = useState(null)
-  const { id,availableInvest } = route.params;
+  const [rate,setRate] = useState(3/100)
+  const [repayment,setRepayment] = useState(money+(money*rate))
+  const { investmentId,availableInvest,investingMoney, total } = route.params;
   const { user } = useContext(AppContext);
-
+  
   const setMoneyByPressBox = (item) => {
-    if (item.limitMoney > availableInvest) {
-      Alert.alert(
-        "Khoảng đầu tư vượt quá cho phép",
-        `Số tiền đầu tư không thể vượt quá ${vndFormat.format(availableInvest)}`,
-        [
-          { text: "OK" }
-        ]
-      );
-    } else {
       setMoney(item.limitMoney);
-    } 
   };
 
   const confirmInvestHandler = () => {
-    if (wallet?.money- wallet?.totalPending > parseInt(money)) {
-      investmentApi.create({
-        investorId : user.Investor.id,
-        total : money,
-        loanId : id
-      }).then(res => {
-        
-      }).finally(() => {
+    if (wallet?.money > parseInt(money)){
+      if ((parseInt(money) - parseInt(investingMoney)) <= parseInt(availableInvest))  {        
+        investmentApi.updateById(investmentId,{
+            total : money,
+            percent : parseInt(money) / parseInt(total)
+        }).finally(() => {
+            Alert.alert(
+              "Thành công",
+              "Bạn đã điểu chỉnh mức đầu tư thành công",
+              [
+                { text: "OK" }
+              ]
+            );
+          })
+      } else {
         Alert.alert(
-          "Thành công",
-          "Bạn đã đầu tư thành công",
-          [
-            { text: "OK" }
-          ]
+            "Thất bại",
+            `Bạn không thể đầu tư lớn hơn ${vndFormat.format(parseInt(availableInvest) + parseInt(investingMoney))}.`,
+            [
+                { text: "OK" }
+            ]
         );
-      })
+      }           
     } else {
       Alert.alert(
         "Thất bại",
@@ -97,7 +96,7 @@ export default function BackSelection({route, navigation}) {
         [
             { text: "OK" }
         ]
-      );
+    );
     }
   }
 
@@ -143,7 +142,7 @@ export default function BackSelection({route, navigation}) {
                 color={"white"}
               />     
           </TouchableOpacity>     
-          <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Đầu tư</Text>   
+          <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Điều chỉnh mức đầu tư</Text>   
         </View>
       </View>
       <View style={{ 
@@ -174,7 +173,7 @@ export default function BackSelection({route, navigation}) {
                 width={350}
                 height={60}
                 min={50000}
-                max={availableInvest}
+                max={wallet?.money - wallet?.totalPending}
                 step={50000}
                 value={money}
                 onChange={(value) => {
@@ -183,7 +182,7 @@ export default function BackSelection({route, navigation}) {
               >
               </InputSpinner>
           </View>
-          <View
+          {/* <View
             style={{
               flexDirection: "row",
               alignSelf : 'center',
@@ -208,7 +207,7 @@ export default function BackSelection({route, navigation}) {
             >
               Khoảng đầu tư khả dụng : {vndFormat.format(availableInvest)}
             </Text>
-          </View>
+          </View> */}
         <FlatList
           style={{marginTop : 20}}
           data={limit}
@@ -226,7 +225,7 @@ export default function BackSelection({route, navigation}) {
           onPress={() => {
             Alert.alert(
               "Xác nhận",
-              `Bạn muốn đầu tư ${vndFormat.format(money)} cho sinh viên ?`,
+              `Bạn muốn điểu chỉnh mức đầu tư thành ${vndFormat.format(money)} ?`,
               [ 
                 {
                   text: "Xác nhận",
@@ -241,66 +240,66 @@ export default function BackSelection({route, navigation}) {
               }
             )
           }}
-            >Đầu tư</Button> 
+            >Xác nhận</Button> 
       </View>
     </View> 
-  );  
+  )
 }
 
 const styles = StyleSheet.create({
-  textBoxUnselect: {
-    fontSize: 16,
-    color: PRIMARY_COLOR_BLACK,
-  },
-  textBoxSelect : {
-    fontSize: 16,
-    color: PRIMARY_COLOR_WHITE,
-  },
-  boxUnselect : {
-    margin: 5,
-    height: 50,
-    width: 50,
-    flex: 1,
-    borderRadius : 15,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: PRIMARY_COLOR_WHITE,
-    borderWidth : 1,
-    borderColor : '#babdc2'
-  },
-  boxSelect : {
-    margin: 5,
-    height: 50,
-    width: 50,
-    flex: 1,
-    borderRadius : 15,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: SECONDARY_COLOR,
-  },
-  loanInfoTxt : {
-    marginTop : 10,
-    fontSize : 15
-  },
-  btnInvest : {
-    width : FULL_WIDTH / 1.4,
-    borderRadius : 5,
-    borderWidth : 1.2,
-    alignSelf : 'center',
-    borderColor : PRIMARY_COLOR,
-  },
-  btnContainer : {
-    padding: 10,
-    position : 'absolute',
-    bottom : 10, 
-    right : 0,
-    left : 0,
-    marginBottom : 20
-  },
-  topContainer : {
-    height : FULL_HEIGHT * 0.3 / 4,
-    backgroundColor : PRIMARY_COLOR,
-    borderBottomLeftRadius : 25,
-    borderBottomRightRadius : 25,
-  },
-});
+    textBoxUnselect: {
+        fontSize: 16,
+        color: PRIMARY_COLOR_BLACK,
+      },
+      textBoxSelect : {
+        fontSize: 16,
+        color: PRIMARY_COLOR_WHITE,
+      },
+      boxUnselect : {
+        margin: 5,
+        height: 50,
+        width: 50,
+        flex: 1,
+        borderRadius : 15,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: PRIMARY_COLOR_WHITE,
+        borderWidth : 1,
+        borderColor : '#babdc2'
+      },
+      boxSelect : {
+        margin: 5,
+        height: 50,
+        width: 50,
+        flex: 1,
+        borderRadius : 15,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: SECONDARY_COLOR,
+      },
+      loanInfoTxt : {
+        marginTop : 10,
+        fontSize : 15
+      },
+      btnInvest : {
+        width : FULL_WIDTH / 1.4,
+        borderRadius : 5,
+        borderWidth : 1.2,
+        alignSelf : 'center',
+        borderColor : PRIMARY_COLOR,
+      },
+      btnContainer : {
+        padding: 10,
+        position : 'absolute',
+        bottom : 10, 
+        right : 0,
+        left : 0,
+        marginBottom : 20
+      },
+      topContainer : {
+        height : FULL_HEIGHT * 0.3 / 4,
+        backgroundColor : PRIMARY_COLOR,
+        borderBottomLeftRadius : 25,
+        borderBottomRightRadius : 25,
+      },
+})

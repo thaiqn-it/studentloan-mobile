@@ -1,5 +1,5 @@
 import React,{ useEffect,useState,useRef } from 'react'
-import { StyleSheet, Text, View,Pressable,Image, TouchableOpacity,StatusBar, ActivityIndicator } from 'react-native'
+import { StyleSheet, Text, View,Pressable,Image, TouchableOpacity,StatusBar, ActivityIndicator,Alert } from 'react-native'
 import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, SECONDARY_COLOR } from '../constants/styles'
 import { Avatar } from 'react-native-elements';
 import { Calendar,Agenda } from 'react-native-calendars';
@@ -9,6 +9,7 @@ import { FontAwesome5,Feather,FontAwesome } from "@expo/vector-icons";
 import { vndFormat } from "../utils/index"
 import { investmentApi } from '../apis/investment';
 import { loanScheduleApi } from '../apis/loanSchedule';
+import { Button } from 'react-native-paper';
 import moment from 'moment';
 
 export default function InvestmentDetail({ navigation, route }) {
@@ -20,7 +21,7 @@ export default function InvestmentDetail({ navigation, route }) {
     const reportText = useRef(null)
     const plate = useRef(null)
 
-    const { investmentId } = route.params;
+    const { investmentId,availableInvest } = route.params;
     const [ investment, setInvestment ] = useState(null)
     const [ loanSchedules, setLoanSchedules ] = useState(null)
 
@@ -35,6 +36,12 @@ export default function InvestmentDetail({ navigation, route }) {
             })
     }, [])
 
+    const cancelInvest = () => {
+        investmentApi.updateById(investment.id, {
+            status : 'CANCEL'
+        })
+    }
+
     const PortfolloView = () => {
         return (
             <View>
@@ -43,7 +50,13 @@ export default function InvestmentDetail({ navigation, route }) {
                     ?
                     (
                         <ScrollView 
-                            style={{ height : FULL_HEIGHT - (StatusBar.currentHeight + 40 + FULL_HEIGHT * 0.3 / 4) }} 
+                            style={[
+                                investment?.status === 'PENDING' 
+                                ? 
+                                { height : FULL_HEIGHT - (StatusBar.currentHeight + 40 + FULL_HEIGHT * 0.3 / 4) - FULL_HEIGHT / 10 }
+                                :
+                                { height : FULL_HEIGHT - (StatusBar.currentHeight + 40 + FULL_HEIGHT * 0.3 / 4) }
+                            ]} 
                             showsVerticalScrollIndicator={false}
                         >
                             <View style={{ height : 'auto', elevation : 5, marginHorizontal : 10, borderRadius : 10, padding : 10, marginVertical : 15, backgroundColor : PRIMARY_COLOR_WHITE }}>
@@ -61,20 +74,17 @@ export default function InvestmentDetail({ navigation, route }) {
                                 </View>  
                                 <View style={{ flexDirection : 'row', justifyContent : 'space-between', alignItems : 'center', marginBottom : 5 }}>
                                     <Text style={{ fontSize : 16 }}>Số tiền đã đầu tư : </Text>
-                                    <View style={{ flexDirection : 'row'}}>
-                                        <Text style={{ fontSize : 16 }}>{vndFormat.format(investment.total)}</Text>
-                                        <FontAwesome name="edit" size={24} color={SECONDARY_COLOR} style={{ marginLeft : 10 }} />
-                                    </View>      
+                                    <Text style={{ fontSize : 16 }}>{vndFormat.format(investment.total)}</Text>    
                                 </View> 
                                 <View style={styles.line}/>
                                 <View style={{ flexDirection : 'row',justifyContent : 'space-around'}}>
                                     <View style={{ margin : 5}}>
                                         <Text style={{ fontSize : 15, textAlign : 'center',opacity : 0.7 }}>Tiền lãi</Text>
-                                        <Text style={{ fontSize : 16, textAlign : 'center',marginTop : 5, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(2000000 * investment.Loan.interest / 100)}</Text>
+                                        <Text style={{ fontSize : 16, textAlign : 'center',marginTop : 5, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(investment.total * investment.Loan.interest * investment.Loan.duration)}</Text>
                                     </View>
                                     <View style={{ margin : 5}}>
                                         <Text style={{ fontSize : 15, textAlign : 'center',opacity : 0.7 }}>Lãi suất</Text>
-                                        <Text style={{ fontSize : 16, textAlign : 'center',marginTop : 5, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{investment.Loan.interest}%</Text>
+                                        <Text style={{ fontSize : 16, textAlign : 'center',marginTop : 5, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{investment.Loan.interest * 100}%</Text>
                                     </View>
                                     <View style={{ margin : 5 }}>
                                         <Text style={{ fontSize : 15, textAlign : 'center',opacity : 0.7 }}>Tiền phạt</Text>
@@ -101,29 +111,39 @@ export default function InvestmentDetail({ navigation, route }) {
                             <View style={{ height : 'auto',marginBottom : 15, elevation : 5, marginHorizontal : 10, borderRadius : 10, padding : 10, backgroundColor : PRIMARY_COLOR_WHITE, paddingVertical : 15 }}>
                                 <Text style={{ fontWeight : 'bold', fontSize : 18 }}>Thông tin giao dịch</Text>  
                                 <View style={styles.line}/>
-                                <TouchableOpacity style={styles.transactionItem} onPress={() => navigation.navigate("TransactionInfo", {
-                                        transactionId : data.id
-                                    })}>
-                                    <View style={{ flex : 0.15 }}>       
-                                        {/* // <Image 
-                                        //     style={{ height : 50, width : 50, borderRadius : 50, elevation : 5 }}
-                                        //     source={{ uri : 'https://play-lh.googleusercontent.com/iQ8f5plIFy9rrY46Q2TNRwq_8nCvh9LZVwytqMBpOEcfnIU3vTkICQ6L1-RInWS93oQg' }}/>                  */}
-                                        <View style={styles.nameIcon}>
-                                            <Text>QT</Text>
+                                {
+                                    investment?.transactionId
+                                    ?
+                                    (
+                                        <TouchableOpacity style={styles.transactionItem} onPress={() => navigation.navigate("TransactionInfo", {
+                                            transactionId : data.id
+                                        })}>
+                                        <View style={{ flex : 0.15 }}>       
+                                            {/* // <Image 
+                                            //     style={{ height : 50, width : 50, borderRadius : 50, elevation : 5 }}
+                                            //     source={{ uri : 'https://play-lh.googleusercontent.com/iQ8f5plIFy9rrY46Q2TNRwq_8nCvh9LZVwytqMBpOEcfnIU3vTkICQ6L1-RInWS93oQg' }}/>                  */}
+                                            <View style={styles.nameIcon}>
+                                                <Text>QT</Text>
+                                            </View>
                                         </View>
-                                    </View>
-                                    <View style={{ flex : 0.85 }}>                  
-                                        <View style={{ flexDirection : 'row' }}>
-                                            <Text style={{ fontSize : 15 , color : SECONDARY_COLOR, flex : 0.6, fontWeight : 'bold' }}>Chuyển tiền đến Nguyễn Quốc Thái</Text>
-                                            <Text style={{ fontSize : 15, fontWeight : 'bold', color : 'red', flex : 0.4, textAlign : 'right', alignSelf : 'flex-start' }}>-{vndFormat.format(200000000)}</Text>     
+                                        <View style={{ flex : 0.85 }}>                  
+                                            <View style={{ flexDirection : 'row' }}>
+                                                <Text style={{ fontSize : 15 , color : SECONDARY_COLOR, flex : 0.6, fontWeight : 'bold' }}>Chuyển tiền đến Nguyễn Quốc Thái</Text>
+                                                <Text style={{ fontSize : 15, fontWeight : 'bold', color : 'red', flex : 0.4, textAlign : 'right', alignSelf : 'flex-start' }}>-{vndFormat.format(200000000)}</Text>     
+                                            </View>
+                                            <View style={{ flexDirection : 'row' }}>
+                                                <Text style={{ marginTop : 3, fontSize : 15, opacity : 0.6 , flex : 0.5}}>12/3/2022</Text>
+                                                <Text style={{ marginTop : 3, fontSize : 15, fontWeight : 'bold' , color : PRIMARY_COLOR_BLACK, textAlign : 'right', flex : 0.5 }}>Chuyển tiền</Text>
+                                            </View>
                                         </View>
-                                        <View style={{ flexDirection : 'row' }}>
-                                            <Text style={{ marginTop : 3, fontSize : 15, opacity : 0.6 , flex : 0.5}}>12/3/2022</Text>
-                                            <Text style={{ marginTop : 3, fontSize : 15, fontWeight : 'bold' , color : PRIMARY_COLOR_BLACK, textAlign : 'right', flex : 0.5 }}>Chuyển tiền</Text>
-                                        </View>
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
+                                    </TouchableOpacity>
+                                    )
+                                    :
+                                    (
+                                        <Text>Chưa có giao dịch nào</Text>
+                                    )
+                                }                            
+                            </View>                          
                         </ScrollView>
                     )
                     :
@@ -168,39 +188,6 @@ export default function InvestmentDetail({ navigation, route }) {
         //     }, 1000);
         //   }
 
-        const scheduleList = [
-            {
-                id : 1
-            },
-            {
-                id : 2
-            },
-            {
-                id : 3
-            },
-            {
-                id : 4
-            },
-            {
-                id : 5 
-            },
-            {
-                id : 6 
-            },
-            {
-                id : 7 
-            },
-            {
-                id : 8 
-            },
-            {
-                id : 9 
-            },
-            {
-                id : 10 
-            },
-        ]
-
         const scheduleItem = ({item}) => (
             <View style={{ marginTop : 20, backgroundColor : PRIMARY_COLOR_WHITE, elevation : 2, marginHorizontal : 20, borderLeftWidth : 4, borderLeftColor : PRIMARY_COLOR, borderRadius : 5, padding : 10 }}>       
                 <View style={{ flexDirection : 'row', justifyContent : 'space-between' }}>
@@ -224,10 +211,10 @@ export default function InvestmentDetail({ navigation, route }) {
                         
                     }
                 </View>
-                <Text style={{ marginTop: 20, fontSize : 17, fontWeight : 'bold', color : PRIMARY_COLOR }}>{vndFormat.format(item.money * investment.percent)}</Text>
+                <Text style={{ marginTop: 20, fontSize : 17, fontWeight : 'bold', color : PRIMARY_COLOR }}>{vndFormat.format(item.money * investment.percent + item.penaltyMoney * investment.percent )}</Text>
                 <View style={{ flexDirection : 'row', marginTop : 5, justifyContent : 'space-between' }}>
-                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Tiền lãi : {vndFormat.format(item.money * investment.percent * investment.Loan.interest)}</Text>
-                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Tiền phạt : {vndFormat.format(item.penaltyMoney)}</Text>
+                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Tiền lãi : {vndFormat.format(item.money * investment.percent * investment.Loan.interest * investment.Loan.duration)}</Text>
+                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Tiền phạt : {vndFormat.format(item.penaltyMoney * investment.percent )}</Text>
                 </View>           
             </View>
         )
@@ -237,7 +224,13 @@ export default function InvestmentDetail({ navigation, route }) {
                 data={loanSchedules}
                 renderItem={scheduleItem}
                 keyExtractor={(item) => item.id.toString()}     
-                contentContainerStyle={{ paddingBottom : 20 }}
+                contentContainerStyle={[
+                    investment?.status === 'PENDING'
+                    ?
+                    { paddingBottom : FULL_HEIGHT / 10 + 20 }
+                    :
+                    { paddingBottom : 20 }
+                ]} 
             />        
         )
     }
@@ -326,7 +319,7 @@ export default function InvestmentDetail({ navigation, route }) {
     }
 
     return (
-        <View style={{ height : FULL_HEIGHT, backgroundColor : PRIMARY_COLOR_WHITE}}>
+        <View style={{ height : FULL_HEIGHT, backgroundColor : PRIMARY_COLOR_WHITE, flex : 1}}>
             <View style={styles.topContainer}>
                 <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                 <TouchableOpacity
@@ -392,7 +385,46 @@ export default function InvestmentDetail({ navigation, route }) {
                     <ReportView />
                 </Animatable.View>             
             </View>
-            
+            {
+                investment?.status === 'PENDING' && (
+                <View
+                    style={styles.btnContainer}
+                    >  
+                            <Button
+                                style={styles.btnInvest}
+                                color={PRIMARY_COLOR}
+                                onPress={() => navigation.navigate("AdjustInvestment", {
+                                investmentId : investment.id,
+                                availableInvest,
+                                investingMoney : investment.total,
+                                total : investment.Loan.totalMoney
+                            })}
+                                >Điều chỉnh</Button>  
+                            <Button
+                                onPress={() => {
+                                    Alert.alert(
+                                        "Xác nhận",
+                                        `Bạn muốn hủy bỏ đầu tư ?`,
+                                        [ 
+                                        {
+                                            text: "Xác nhận",
+                                            onPress: () => cancelInvest(),
+                                        },
+                                        {
+                                            text: "Hủy",
+                                        },                
+                                        ],
+                                        {
+                                        cancelable : true
+                                        }
+                                    )
+                                    }}
+                                style={[styles.btnInvest, {borderColor : SECONDARY_COLOR}]}
+                                color={SECONDARY_COLOR}
+                                >Hủy đầu tư</Button>      
+                    </View>
+                )
+            }       
         </View>
     )
 }
@@ -462,5 +494,26 @@ const styles = StyleSheet.create({
         alignItems : 'center',
         justifyContent : 'center'
     },
-   
+    btnContainer : {
+        backgroundColor: "white",
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        padding: 10,
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right : 0,
+        elevation : 10,
+        height : FULL_HEIGHT / 10,
+        justifyContent : 'center',
+        flexDirection : 'row'
+    },
+        btnInvest : {
+        width : FULL_WIDTH / 2 - 40,
+        borderRadius : 5,
+        borderWidth : 1.2,
+        marginHorizontal : 20,
+        alignSelf : 'center',
+        borderColor : PRIMARY_COLOR,
+    },
 })

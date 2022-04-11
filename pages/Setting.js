@@ -18,47 +18,47 @@ import HeaderBar from '../components/HeaderBar';
 
 const OPTIONS = [
     {
-        option: "Profile",
+        option: "Thông tin cá nhân",
         icon: "account-circle",
         screen: "Profile",
         type : "material",
         color: PRIMARY_COLOR,
         size : 22
     },
+    // {
+    //     option: "Verify",
+    //     icon: "verified",
+    //     screen: "Verify",
+    //     type : "material",
+    //     color: "orange",
+    //     size : 22
+    // },
     {
-        option: "Verify",
-        icon: "verified",
-        screen: "Verify",
-        type : "material",
-        color: "orange",
-        size : 22
-    },
-    {
-        option: "Transaction",
+        option: "Lịch sử giao dịch",
         icon: "bank-transfer",
-        screen: "Information",
+        screen: "History",
         type : "material-community",
         color: "#4ec4f7",
         size : 20
     },
+    // {
+    //     option: "Privacy & Security",
+    //     icon: "privacy-tip",
+    //     screen: "Information",
+    //     type : "material",
+    //     color: "gray" ,
+    //     size : 21
+    // },
+    // {
+    //     option: "About",
+    //     icon: "infocirlceo",
+    //     screen: "Information",
+    //     type : "antdesign",
+    //     color: "gray",
+    //     size : 20
+    // },
     {
-        option: "Privacy & Security",
-        icon: "privacy-tip",
-        screen: "Information",
-        type : "material",
-        color: "gray" ,
-        size : 21
-    },
-    {
-        option: "About",
-        icon: "infocirlceo",
-        screen: "Information",
-        type : "antdesign",
-        color: "gray",
-        size : 20
-    },
-    {
-      option: "Logout",
+      option: "Đăng xuất",
       icon: "logout",
       type : "antdesign",
       color : 'red',

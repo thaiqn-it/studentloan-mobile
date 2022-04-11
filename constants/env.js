@@ -10,7 +10,7 @@ const ENV = {
     API_URI: `http://${localhost}:3000/api`,
   },
   prod: {
-    API_URI: "https://<PUBLIC-API-URI>",
+    API_URI: `http://${localhost}:3000/api`,
   },
 };
 

@@ -10,8 +10,8 @@ import { FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PR
 export default function OnboardingItem({ item }) {
     return (
         <View style={[styles.container, { width : FULL_WIDTH }]}>
-            <Image source={require('../assets/images.png')}
-                   style={[styles.image], { width : FULL_WIDTH, resizeMode : 'contain' }}/>
+            <Image source={{ uri : item.image }}
+                   style={[styles.image, { width : FULL_WIDTH - 20 , resizeMode : 'contain' }]}/>
             <View style={{ flex : 0.3 }}>
                 <Text style={styles.title}>{item.title}</Text>
                 <Text style={styles.description}>{item.description}</Text>
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     },
     title : {
         fontSize : 28,
-        marginTop : 40,
+        marginTop : 10,
         marginBottom : 10,
         color : PRIMARY_COLOR,
         textAlign : 'center',
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     description : {
         color : PRIMARY_COLOR_BLACK,
         textAlign : "center",
-        paddingHorizontal : 60,
+        paddingHorizontal : 20,
         fontFamily : PRIMARY_FONT,
     }
 })

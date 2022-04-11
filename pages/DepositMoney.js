@@ -169,7 +169,7 @@ export default function DepositMoney({ navigation, route }) {
                             alignSelf : 'center',
                             fontSize : 18
                         }}>
-                            Số dư ví
+                            Số dư khả dụng
                         </Text>
                         <Text style={{
                             fontWeight : 'bold',
@@ -177,7 +177,7 @@ export default function DepositMoney({ navigation, route }) {
                             alignSelf : 'center',
                             color : SECONDARY_COLOR
                         }}>
-                            {vndFormat.format(wallet.money)}
+                            {vndFormat.format(wallet?.money - wallet?.totalPending)}
                         </Text>
                     </View>
                     <View style={{ marginTop : 25, marginLeft : 25}}>
@@ -224,15 +224,15 @@ export default function DepositMoney({ navigation, route }) {
                         keyExtractor={(item) => item.id}
                         />
                     </View>
-                    <View style={{ marginLeft : 25}}>
+                    {/* <View style={{ marginLeft : 25}}>
                         <Text style={{
                             fontSize : 18,
                             color : '#b6a9ad'
                         }}>
                             Chọn thẻ
                         </Text>
-                    </View>
-                    <TouchableOpacity style={{ 
+                    </View> */}
+                    {/* <TouchableOpacity style={{ 
                         backgroundColor : PRIMARY_COLOR_WHITE,
                         borderRadius : 10,
                         marginHorizontal : 10,
@@ -245,7 +245,7 @@ export default function DepositMoney({ navigation, route }) {
                     }}>
                         <Ionicons name="md-add-circle-outline" size={25} color={SECONDARY_COLOR} />
                         <Text style={{ color : SECONDARY_COLOR, fontSize : 18, marginLeft : 5 }}>Thêm thẻ</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </KeyboardAvoidingView>
             <Modal

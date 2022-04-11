@@ -20,7 +20,6 @@ const WithdrawMoney = ({ navigation, route }) => {
     const payoutRef = useRef();
     const [isUsedLater,setUsedLater] = useState(false)
     const [money, setMoney] = useState(50000);
-    const [ receiveMoney, setReceiveMoney ] = useState(0)
     const [ fee, setFee ] = useState(0)
     const [ wallet,setWallet ] = useState(0)
     const [ email,setEmail ] = useState("sb-eqq2m14474872@personal.example.com")
@@ -56,26 +55,22 @@ const WithdrawMoney = ({ navigation, route }) => {
     const [check,setCheck] = useState(false)
 
     useEffect(() => {
-        configApi
-            .getTransactionFee()
-            .then(res => {
-                setTransactionFee(res.data.transactionFee)
-            })
-    }, [])
-
-    useEffect(() => {
-        const FEE = money*transactionFee
-        setFee(FEE)
-        setReceiveMoney(money - FEE)
-    }, [money,transactionFee])
-
-    useEffect(() => {
         walletApi
             .getByUserId()
             .then(res => {
                 setWallet(res.data)
+                configApi
+                    .getTransactionFee()
+                    .then(res => {
+                        setTransactionFee(res.data.transactionFee)
+                    })               
             })
     }, [isFocused])
+
+    useEffect(() => {
+        const FEE = money*transactionFee
+        setFee(FEE)
+    }, [money,transactionFee])
  
     const setMoneyByPressBox = (item) => {
         setMoney(item.limitMoney);
@@ -83,37 +78,47 @@ const WithdrawMoney = ({ navigation, route }) => {
 
     const transferMoney = () => {
         payoutRef.current.close()
-        paypalApi
-            .transfer(email,receiveMoney,wallet.id)
-            .then(res => {
-                const data = {
-                    money : money,
-                    type : "WITHDRAW",
-                    description : `Chuyển tiền vào ví paypal` ,
-                    status : "SUCCESS",
-                    walletId : wallet.id,
-                    paypalTransaction : res.data.payoutId,
-                    recipientName : 'Paypal',
-                    senderName : 'Ví của tôi',
-                    transactionFee : fee
-                }
-                transactionApi
-                    .create(data)
-                    .then(res => {
-                        const transactionId = res.data.id
-                        walletApi.update(-receiveMoney,wallet.id).then(res => {
-                            navigation.navigate("TransactionInfo", {
-                                transactionId
+        if (wallet?.money - wallet?.totalPending > money) {
+            paypalApi
+                .transfer(email,money,wallet.id)
+                .then(res => {
+                    const data = {
+                        money : money,
+                        type : "WITHDRAW",
+                        description : `Chuyển tiền vào ví paypal` ,
+                        status : "SUCCESS",
+                        walletId : wallet.id,
+                        paypalTransaction : res.data.payoutId,
+                        recipientName : 'Paypal',
+                        senderName : 'Ví của tôi',
+                        transactionFee : fee
+                    }
+                    transactionApi
+                        .create(data)
+                        .then(res => {
+                            const transactionId = res.data.id
+                            walletApi.update(-money,wallet.id).then(res => {
+                                navigation.navigate("TransactionInfo", {
+                                    transactionId
+                                })
+                            }).catch(err => {
+                            
                             })
                         }).catch(err => {
-                          
+                        
                         })
-                    }).catch(err => {
-                       
-                    })
-            }).catch(err => {
-                Alert.alert("Không thể thực hiện", err.response.data.error);
-            })
+                }).catch(err => {
+                    Alert.alert("Không thể thực hiện", err.response.data.error);
+                })
+        } else {
+            Alert.alert(
+                "Thất bại",
+                `Số dư ví không đủ để thực hiện.`,
+                [
+                    { text: "OK" }
+                ]
+              );
+        }
     }
     const renderItem = ({ item }) => (
         <TouchableOpacity
@@ -154,7 +159,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                             alignSelf : 'center',
                             fontSize : 18
                         }}>
-                            Số dư ví
+                            Số khả dụng
                         </Text>
                         <Text style={{
                             fontWeight : 'bold',
@@ -162,7 +167,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                             alignSelf : 'center',
                             color : SECONDARY_COLOR
                         }}>
-                            {vndFormat.format(wallet.money)}
+                            {vndFormat.format(wallet.money - wallet?.totalPending)}
                         </Text>
                     </View>
                     <View style={{ marginTop : 25, marginLeft : 25}}>
@@ -187,6 +192,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                             height={60}
                             children={<FontAwesome style={{ marginRight : 20 }} name="dollar" size={20} color="gray" />}
                             min={50000}
+                            max={wallet?.money - wallet?.totalPending}
                             step={10000}
                             value={money}
                             onChange={(value) => {
@@ -227,7 +233,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                     }}>
                         <View style={{ flexDirection : 'row', justifyContent : 'space-between' }}>
                             <Text style={{ fontSize : 16 }}>Số tiền nhận được</Text>
-                            <Text style={{ fontSize : 16, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(receiveMoney)}</Text>
+                            <Text style={{ fontSize : 16, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(money - fee)}</Text>
                         </View>     
                         <View style={{ flexDirection : 'row', justifyContent : 'space-between', marginTop : 15 }}>
                             <Text style={{ fontSize : 16 }}>Phí hệ thống</Text>

@@ -20,6 +20,7 @@ import {
 import {
   Ionicons,
   FontAwesome5,
+  AntDesign
 } from "@expo/vector-icons";
 import AppLoading from '../components/AppLoading';
 import { loanApi } from "../apis/loan";
@@ -36,6 +37,7 @@ export default function Home({ route, navigation }) {
   const newestView = useRef(null)
   const endingSoonView = useRef(null)
   const popularView = useRef(null)
+  const closeBtn = useRef(null)
   const plate = useRef(null)
   const postContainerRef = useRef(null)
   const socket = useRef(io("ws://192.168.1.19:3000",{transports: ['websocket'], upgrade: false}));
@@ -84,13 +86,12 @@ export default function Home({ route, navigation }) {
           })}
           style={styles.postStyle}>
             <View style={{ flexDirection : 'row', padding : 15}}> 
-              <View style={{ flexDirection : 'row', alignContent : 'flex-start' }}>
+              <View style={{ flexDirection : 'row', alignContent : 'flex-start', flex : 0.8 }}>
                 <Avatar
                   rounded
                   size={50}
                   source={{
-                    uri:
-                      'https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80',
+                    uri: item.Student.User.profileUrl ? item.Student.User.profileUrl : 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZmlsZXxlbnwwfHwwfHw%3D&w=1000&q=80'
                   }}
                 />
                 <View style={{ marginLeft : 10 }}>
@@ -99,9 +100,9 @@ export default function Home({ route, navigation }) {
                   <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.SchoolMajor.Major.name}</Text>
                 </View>         
               </View>
-              <View style={{ alignItems : 'flex-end', flex : 1,}}>
+              <View style={{ alignItems : 'flex-end', flex : 0.2}}>
                   <Text style={{ backgroundColor : '#dadee3', paddingLeft : 3,paddingRight : 3 , opacity : 0.8,borderRadius : 5 }}>Kết thúc</Text>
-                  <Text>trong {moment(item.postExpireAt).diff(new Date(),"days")} ngày</Text>
+                  <Text style={{ textAlign : 'right'}}>trong {moment(item.postExpireAt).diff(new Date(),"days")} ngày</Text>
               </View>
             </View>
 
@@ -125,7 +126,7 @@ export default function Home({ route, navigation }) {
                   
               </View>
               <View style={{ flex : 1 , alignItems : 'flex-end' }}>
-                <Text style={{ marginBottom : 5,fontSize : 14 }}>{item.interest}%</Text>
+                <Text style={{ marginBottom : 5,fontSize : 14 }}>{item.interest * 100}%/ tháng</Text>
                 <Text style={{ fontSize : 14 }}>{item.duration} tháng</Text>
               </View>
             </View> 
@@ -166,10 +167,14 @@ export default function Home({ route, navigation }) {
               <FlatList
                 onMomentumScrollBegin={
                   (e) => {
-                    if(e.nativeEvent.contentOffset.y <= 0)
-                      postContainerRef.current.transitionTo({ translateY : 0 },600)
-                    else if(e.nativeEvent.contentOffset.y > 10)
+                    if(e.nativeEvent.contentOffset.y <= 0){
+                      postContainerRef.current.transitionTo({ translateY : 0, height : FULL_HEIGHT * 0.8 - 5 },600),
+                      closeBtn.current.transitionTo({ opacity : 0})
+                    }
+                    else if(e.nativeEvent.contentOffset.y > 10){ 
                       postContainerRef.current.transitionTo({ translateY : - 150, height : FULL_HEIGHT - 50 },600)
+                      closeBtn.current.transitionTo({ opacity : 1})
+                    }
                   }       
                 }
                 data={data}
@@ -217,10 +222,14 @@ export default function Home({ route, navigation }) {
               <FlatList
                 onMomentumScrollBegin={
                   (e) => {
-                    if(e.nativeEvent.contentOffset.y <= 0)
-                      postContainerRef.current.transitionTo({ translateY : 0 },600)
-                    else if(e.nativeEvent.contentOffset.y > 10)
+                    if(e.nativeEvent.contentOffset.y <= 0){
+                      postContainerRef.current.transitionTo({ translateY : 0,height : FULL_HEIGHT * 0.8 - 5 },600),
+                      closeBtn.current.transitionTo({ opacity : 0})
+                    }
+                    else if(e.nativeEvent.contentOffset.y > 10){ 
                       postContainerRef.current.transitionTo({ translateY : - 150, height : FULL_HEIGHT - 50 },600)
+                      closeBtn.current.transitionTo({ opacity : 1})
+                    }
                   }       
                 }
                 data={data}
@@ -268,10 +277,14 @@ export default function Home({ route, navigation }) {
               <FlatList
                 onMomentumScrollBegin={
                   (e) => {
-                    if(e.nativeEvent.contentOffset.y <= 0)
-                      postContainerRef.current.transitionTo({ translateY : 0 },600)
-                    else if(e.nativeEvent.contentOffset.y > 10)
+                    if(e.nativeEvent.contentOffset.y <= 0){
+                      postContainerRef.current.transitionTo({ translateY : 0, height : FULL_HEIGHT * 0.8 - 5 },600),
+                      closeBtn.current.transitionTo({ opacity : 0})
+                    }
+                    else if(e.nativeEvent.contentOffset.y > 10){ 
                       postContainerRef.current.transitionTo({ translateY : - 150, height : FULL_HEIGHT - 50 },600)
+                      closeBtn.current.transitionTo({ opacity : 1})
+                    }
                   }       
                 }
                 data={data}
@@ -371,7 +384,13 @@ export default function Home({ route, navigation }) {
                 popularText.current.transitionTo({ opacity : 1 , scale : 1.1})
             }}>
                 <Animatable.Text ref={popularText} style={{ fontSize : 15, marginLeft : 20,color : PRIMARY_COLOR_BLACK,fontWeight : 'bold',opacity : 0.4  }}>Phổ biến</Animatable.Text>
-            </Pressable>             
+            </Pressable> 
+            <Animatable.View ref={closeBtn} style={{ position : 'absolute', right : 0, alignSelf : 'center', opacity : 0 }}>
+              <AntDesign onPress={() => {
+                postContainerRef.current.transitionTo({ translateY : 0,height : FULL_HEIGHT * 0.8 - 5 },600),
+                closeBtn.current.transitionTo({ opacity : 0 })
+              }} name="closecircleo" size={25} color={SECONDARY_COLOR}/>            
+            </Animatable.View>
         </View>
           <Animatable.View ref={plate} style={{ width : 15, backgroundColor : SECONDARY_COLOR, height : 5, borderRadius : 5, marginHorizontal : 50, marginBottom : 10 }}/>
           <View style={{flexDirection : 'row'}}>

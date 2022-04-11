@@ -6,7 +6,8 @@ import {
     ImageBackground,
     KeyboardAvoidingView,
     TouchableOpacity,
-    Alert
+    Alert,
+    Image
 } from 'react-native'
 import { Icon } from 'react-native-elements/dist/icons/Icon'
 import { Button,Input } from "react-native-elements";
@@ -33,6 +34,7 @@ export default function Login() {
     const [password,setPassword] = useState("123")
     const [showPassword,setShowPassword] = useState(false)
     const [isLoading,setIsLoading] = useState(false)
+    const USER_TYPE = 'INVESTOR'
 
     useEffect(() => {
         resetJWTToken().then(async (token) => {
@@ -45,13 +47,14 @@ export default function Login() {
 
     const loginHandler = async (navigation) => {
         try {
-            const res = await userApi.login(email, password);
+            const res = await userApi.login(email, password,USER_TYPE);
+
             await SecureStore.setItemAsync(JWT_TOKEN_KEY, res.data.token);
             await loadToken();
 
             navigation.navigate("HomeTab");
           } catch (err) {
-            Alert.alert("Login Status", "Wrong email or password");
+            Alert.alert("Đăng nhập thất bại", "Hãy kiểm tra lại thông tin đăng nhập của bạn");
           }
     }
 
@@ -66,6 +69,7 @@ export default function Login() {
           if (type === 'success') {
             const res = await userApi.loginByFb({
                 access_token: token,
+                type : USER_TYPE
             });
             if (res.data.isNew) {
                 navigation.navigate("Register", {
@@ -80,7 +84,7 @@ export default function Login() {
           }            
         } catch ({ message }) {
             setIsLoading(false)
-            Alert.alert("Login Status", `Fail to login with Facebook`);
+            Alert.alert("Đăng nhập thất bại", `Không thể đăng nhập bằng tài khoản này`);
         }
       };
 
@@ -94,6 +98,7 @@ export default function Login() {
             if( type === 'success' ) {
                 const res = await userApi.loginByGoogle({
                     access_token: accessToken,
+                    type : USER_TYPE
                 });
                 if (res.data.isNew) {
                     navigation.navigate("Register", {
@@ -109,7 +114,7 @@ export default function Login() {
             setIsLoading(false)
         } catch (error) {
             setIsLoading(false)
-            Alert.alert("Login Status", `Fail to login with Google`);
+            Alert.alert("Đăng nhập thất bại", `Không thể đăng nhập bằng tài khoản này`);
         }
           
     }
@@ -121,10 +126,7 @@ export default function Login() {
                                  height : FULL_HEIGHT / 2.5
                              }}>
                 <View style={styles.logo}>
-                    <Icon   name='heartbeat'
-                            type='font-awesome'
-                            color='#fff'
-                            size={100}/>
+                    <Image source={require('../assets/logo.png')} style={{ height : 100, width : 100  }}/>
                     <Text style={styles.appName}>Student Loan</Text>
                 </View>               
             </ImageBackground>   
@@ -134,12 +136,12 @@ export default function Login() {
                     <Text style={{...styles.text, fontSize : 35}}>Welcome</Text>
                     <View style={{ flexDirection : 'row', alignItems : 'center',fontSize : 15 }}>
                         <Text style={{ fontFamily : PRIMARY_FONT }}>
-                            Don't have an account ?                  
+                            Chưa có tài khoản ?                  
                         </Text>
                         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                             <Text style={{ color : 'red' , fontFamily : PRIMARY_FONT_ITALIC }}>
                                 {' '}
-                                Register now
+                                Đăng ký ngay
                             </Text>
                         </TouchableOpacity>                                     
                     </View>
@@ -157,7 +159,7 @@ export default function Login() {
                         <Input
                             secureTextEntry={!showPassword}
                             inputContainerStyle={styles.inputContainer}
-                            placeholder={"Password"}
+                            placeholder={"Mật khẩu"}
                             onChangeText={setPassword}
                             value={password}
                             rightIcon={{
@@ -175,11 +177,11 @@ export default function Login() {
                                             fontSize : 15,
                                             alignSelf : 'flex-end'
                                 }}>
-                                Forgot password
+                                Quên mật khẩu
                             </Text>
                         </TouchableOpacity>
                         <Button
-                            title={"Login"}
+                            title={"Đăng nhập"}
                             buttonStyle={styles.btnLogin}
                             titleStyle={{
                                 fontFamily: PRIMARY_FONT,
@@ -194,7 +196,7 @@ export default function Login() {
                                 fontFamily: PRIMARY_FONT,
                             }}
                             >
-                            ----- Or -----
+                            ----- Hoặc -----
                         </Text>                      
                         <View style={styles.socialLoginBtn}>
                             <TouchableOpacity onPress={loginByFb}>
