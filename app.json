@@ -1,10 +1,11 @@
 {
   "expo": {
-    "name": "student-loan-app-client",
+    "scheme" : "myapp",
+    "name": "Student Loan",
     "slug": "student-loan-app-client",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -20,8 +21,10 @@
       "supportsTablet": true
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
+      "package" : "com.company.studentloan",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#FFFFFF"
       }
     },
@@ -32,6 +35,22 @@
       "backgroundColor": "#00BFA6",
       "translucent": false,
       "barStyle":"light-content"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": ".local/assets/logo.png",
+          "color": "#ffffff"
+        }
+      ]
+    ],
+    "notification": {
+      "icon": "./assets/logo.png",
+      "color": "#311b92",
+      "iosDisplayInForeground": true,
+      "androidMode": "default",
+      "androidCollapsedTitle": "Updates from Colab.notes"
     }
   }
 }

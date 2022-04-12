@@ -29,6 +29,7 @@ import Intl from "intl";
 import 'intl/locale-data/jsonp/it-IT'
 import io from "socket.io-client";
 
+
 export default function Home({ route, navigation }) {
   const scrollY = useRef(new Animated.Value(0)).current;
   const newestText = useRef(null)
@@ -50,28 +51,30 @@ export default function Home({ route, navigation }) {
  
   }, [socket])
 
-  moment.locale('vi')
+ 
 
-  moment.updateLocale('vi', {
-    relativeTime : {
-        future: "trong %s",
-        past: "%s trước",
-        s  : 'vài giây trước',
-        ss : '%d giây',
-        m:  "1 phút",
-        mm: "%d phút",
-        h:  "1 giờ",
-        hh: "%d giờ",
-        d:  "1 ngày",
-        dd: "%d ngày",
-        w:  "1 tuần",
-        ww: "%d tuần",
-        M:  "1 tháng",
-        MM: "%d tháng",
-        y:  "1 năm",
-        yy: "%d năm"
-    }
-});
+//   moment.updateLocale('vi', {
+//     relativeTime : {
+//         future: "trong %s",
+//         past: "%s trước",
+//         s  : 'vài giây trước',
+//         ss : '%d giây',
+//         m:  "1 phút",
+//         mm: "%d phút",
+//         h:  "1 giờ",
+//         hh: "%d giờ",
+//         d:  "1 ngày",
+//         dd: "%d ngày",
+//         w:  "1 tuần",
+//         ww: "%d tuần",
+//         M:  "1 tháng",
+//         MM: "%d tháng",
+//         y:  "1 năm",
+//         yy: "%d năm"
+//     }
+// });
+
+// moment.locale('vi')
 
   const vndFormat = new Intl.NumberFormat('it-IT', {
     style: 'currency',
@@ -300,7 +303,7 @@ export default function Home({ route, navigation }) {
   }
 
   return (
-    <View>
+    <SafeAreaView style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE, marginTop : StatusBar.currentHeight }}>
         <View style={styles.topContainer}>
           <View style={{ padding : 10,flexDirection : 'row', alignItems : 'center', justifyContent : 'space-between', paddingHorizontal : 20 }}>         
             {/* <Image source={require('../assets/logo.png')} style={{ height : 50, width : 85}}/>   */}
@@ -406,7 +409,7 @@ export default function Home({ route, navigation }) {
           </View>
         </Animatable.View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

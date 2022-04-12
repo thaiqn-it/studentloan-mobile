@@ -6,6 +6,7 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import * as Progress from 'react-native-progress';
 import { FontAwesome5 } from "@expo/vector-icons";
 import { investmentApi } from '../apis/investment';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function MyInvestment({ navigation }) {
       const [items, setItems] = useState([
@@ -206,7 +207,7 @@ export default function MyInvestment({ navigation }) {
         );
       }
     return (
-        <View>
+        <SafeAreaView style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
             <View style={styles.topContainer}>
               <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                 <TouchableOpacity
@@ -233,7 +234,7 @@ export default function MyInvestment({ navigation }) {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom : 120, marginTop : 10 }}
             />
-        </View>
+        </SafeAreaView>
     )
 }
 

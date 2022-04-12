@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_COLOR_WHITE, SECONDARY_COLOR } from '../constants/styles';
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -46,7 +46,7 @@ export default function Contract({ navigation, route }) {
     )
 
   return (
-    <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
+    <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE, marginTop : StatusBar.currentHeight }}>
       <View style={styles.topContainer}>
         <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
           <TouchableOpacity

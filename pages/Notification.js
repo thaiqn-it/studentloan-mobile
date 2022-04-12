@@ -5,6 +5,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { Icon } from 'react-native-elements';
 import { notificationApi } from '../apis/notification';
 import moment from 'moment';
+import * as Linking from 'expo-linking'
 
 export default function Notification({ navigation,route }) {
     const [notifications, setNotifications] = useState([])
@@ -16,29 +17,30 @@ export default function Notification({ navigation,route }) {
     }, [])
 
     const notificationComponent = ({item}) => (
-        <View style={{ marginHorizontal : 25, borderRadius : 20, backgroundColor : '#F7F7FC', marginVertical : 10, flexDirection : 'row' }}>
-        <View style={{ flex : 0.2 }}>
-            <Icon 
-                style={{ backgroundColor : '#e3dff0', margin : 10, padding : 10, borderRadius : 10 }}
-                type='antdesign'
-                name='wallet'
-                color={PRIMARY_COLOR}
-            />
-        </View>
-        <View style={{ flex : 0.8 }}>
-            <View>
-                <Text style={{ fontWeight : 'bold', marginTop : 10, fontSize : 16, marginHorizontal : 5 }}>{item.description}</Text>   
-            </View>
-            <View style={{ alignContent : 'flex-end', marginTop : 20, marginBottom : 10, flexDirection : 'row', justifyContent : 'space-between'}}>
-                <Text style={{ fontSize : 15, marginHorizontal : 5, opacity : 0.5, alignSelf : 'center' }}>- {moment(item.createdAt).fromNow()}</Text>
-                {
-                    !item.isRead && (
-                        <View style={{ height : 6, width : 6 , backgroundColor : 'red', borderRadius : 10, alignSelf : 'center', marginRight : 20}}/>
-                    )   
-                }             
-            </View>
-        </View>
-      </View>
+        <TouchableOpacity style={{ marginHorizontal : 25, borderRadius : 20, backgroundColor : '#F7F7FC', marginVertical : 10, flexDirection : 'row' }}
+                      onPress={() => Linking.openURL('myapp://detailPost/22874fd0-4ebf-48b2-a33a-43843d0fea23')}>
+          <View style={{ flex : 0.2 }}>
+              <Icon 
+                  style={{ backgroundColor : '#e3dff0', margin : 10, padding : 10, borderRadius : 10 }}
+                  type='antdesign'
+                  name='wallet'
+                  color={PRIMARY_COLOR}
+              />
+          </View>
+          <View style={{ flex : 0.8 }}>
+              <View>
+                  <Text style={{ fontWeight : 'bold', marginTop : 10, fontSize : 16, marginHorizontal : 5 }}>{item.description}</Text>   
+              </View>
+              <View style={{ alignContent : 'flex-end', marginTop : 20, marginBottom : 10, flexDirection : 'row', justifyContent : 'space-between'}}>
+                  <Text style={{ fontSize : 15, marginHorizontal : 5, opacity : 0.5, alignSelf : 'center' }}>- {moment(item.createdAt).fromNow()}</Text>
+                  {
+                      !item.isRead && (
+                          <View style={{ height : 6, width : 6 , backgroundColor : 'red', borderRadius : 10, alignSelf : 'center', marginRight : 20}}/>
+                      )   
+                  }             
+              </View>
+          </View>
+      </TouchableOpacity>
     )
     
   return (

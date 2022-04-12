@@ -1,4 +1,4 @@
-import React,{ useState,useEffect } from 'react'
+import React,{ useState,useEffect,useRef } from 'react'
 import { 
     StyleSheet, 
     Text,
@@ -27,6 +27,9 @@ import { loadToken } from '../apis';
 import * as Facebook from "expo-facebook";
 import * as Google from 'expo-google-app-auth';
 import AppLoading from '../components/AppLoading';
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
+
 
 export default function Login() {
     const navigation = useNavigation()
@@ -35,6 +38,49 @@ export default function Login() {
     const [showPassword,setShowPassword] = useState(false)
     const [isLoading,setIsLoading] = useState(false)
     const USER_TYPE = 'INVESTOR'
+
+    const [pushToken, setPushToken] = useState('');
+    const [notification, setNotification] = useState(false);
+    const notificationListener = useRef();
+    const responseListener = useRef();
+
+    Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: false,
+          shouldSetBadge: false,
+        }),
+    });
+
+    useEffect(() => {
+        const subscription = Notifications.addNotificationReceivedListener(notification => {
+            const vonvert = JSON.stringify(notification.request.trigger.remoteMessage.data)
+            alert(vonvert);
+          });
+          return () => subscription.remove();
+    }, [])
+    
+
+    useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setPushToken(token));
+        // getLastNotification().then(result => Alert.alert("he",`${result}`))
+        
+        Notifications.setNotificationHandler(true)
+        // notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+        //   setNotification(notification);
+        //   alert(notification);
+        // });
+    
+        // responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+        //   console.log(response);
+        //   alert(response);
+        // });
+    
+        return () => {
+        //   Notifications.removeNotificationSubscription(notificationListener.current);
+        //   Notifications.removeNotificationSubscription(responseListener.current);
+        };
+      }, []);
 
     useEffect(() => {
         resetJWTToken().then(async (token) => {
@@ -45,13 +91,56 @@ export default function Login() {
         });
       }, []);
 
+    // async function getLastNotification() {
+    // let result = await Notifications.getLastNotificationResponseAsync()
+    // const url = result?.notification;
+    // return JSON.stringify(url)
+    // }
+
+    async function registerForPushNotificationsAsync() {
+    let token;
+    if (Constants.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+        return;
+        }
+        token = (await Notifications.getDevicePushTokenAsync()).data;
+
+    } else {
+        alert('Must use physical device for Push Notifications');
+    }
+    
+    if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        });
+    }
+    
+        return token;
+    }
+
+    const updatePushToken = async (token) => {
+        await userApi.update({
+            pushToken : token
+        })
+    }
+      
     const loginHandler = async (navigation) => {
         try {
             const res = await userApi.login(email, password,USER_TYPE);
 
             await SecureStore.setItemAsync(JWT_TOKEN_KEY, res.data.token);
-            await loadToken();
-
+            await loadToken();  
+            await updatePushToken(pushToken)
             navigation.navigate("HomeTab");
           } catch (err) {
             Alert.alert("Đăng nhập thất bại", "Hãy kiểm tra lại thông tin đăng nhập của bạn");
