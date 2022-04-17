@@ -48,9 +48,7 @@ const registerByGog = (data) => {
 }
 
 const register = (data) => {
-  return defaultInstance.post("/user", {
-    data
-  })
+  return defaultInstance.post("/user",data)
 }
 
 const getProfile = () => {

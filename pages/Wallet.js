@@ -23,6 +23,7 @@ import {
 import { SimpleLineIcons } from '@expo/vector-icons';
 import { walletApi } from '../apis/wallet'
 import { vndFormat } from '../utils'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Wallet({ route, navigation }) {
   const [ account,setAccount ] = useState(0)
@@ -37,7 +38,7 @@ export default function Wallet({ route, navigation }) {
   }, [isFocused])
 
   return (
-    <View style={{ height : FULL_HEIGHT,backgroundColor : PRIMARY_COLOR_WHITE }}>
+    <SafeAreaView style={{ height : FULL_HEIGHT,backgroundColor : PRIMARY_COLOR_WHITE,flex : 1 }}>
       <View style={styles.topContainer}>
         <View style={styles.profileContainer}>
           <View style={{ flexDirection : 'row' }}>
@@ -116,7 +117,7 @@ export default function Wallet({ route, navigation }) {
           borderRadius : 10,
         }}/>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

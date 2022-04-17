@@ -6,6 +6,7 @@ import { vndFormat } from "../utils/index";
 import { FlatList } from 'react-native-gesture-handler';
 import { contractApi } from '../apis/contract';
 import moment from 'moment'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Contract({ navigation, route }) {
     const [contractList,setContractList] = useState([])
@@ -46,7 +47,7 @@ export default function Contract({ navigation, route }) {
     )
 
   return (
-    <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE, marginTop : StatusBar.currentHeight }}>
+    <SafeAreaView style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
       <View style={styles.topContainer}>
         <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
           <TouchableOpacity
@@ -77,7 +78,7 @@ export default function Contract({ navigation, route }) {
         :
         <Text>Bạn không có hợp đồng nào</Text>
       }     
-    </View>
+    </SafeAreaView>
   )
 }
 

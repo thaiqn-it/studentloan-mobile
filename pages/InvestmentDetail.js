@@ -11,6 +11,7 @@ import { investmentApi } from '../apis/investment';
 import { loanScheduleApi } from '../apis/loanSchedule';
 import { Button } from 'react-native-paper';
 import moment from 'moment';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function InvestmentDetail({ navigation, route }) {
     const portfolloView = useRef(null)
@@ -35,10 +36,32 @@ export default function InvestmentDetail({ navigation, route }) {
                 })
             })
     }, [])
+    
+    const convertStatus = (status) => {
+        var result = "";
+        switch(status) {
+          case "PENDING":
+            result = "Đang chờ"
+            break;
+          case "INVESTED":
+            result = "Đã đầu tư"
+            break;
+          case "CANCEL":
+            result = "Hủy đầu tư"
+            break;
+          case "FAIL":
+            result = "Đầu tư thất bại"
+            break;
+        }
+        return result
+    }
+
 
     const cancelInvest = () => {
         investmentApi.updateById(investment.id, {
             status : 'CANCEL'
+        }).then(() => {
+            navigation.navigate("MyInvestment")
         })
     }
 
@@ -66,12 +89,35 @@ export default function InvestmentDetail({ navigation, route }) {
                                         <Text style={{ fontSize : 15, opacity : 0.6, marginTop : 5 }}>Đã đầu tư ngày {moment(investment.createdAt).format('DD/MM/YYYY')}</Text>
                                     </View>
                                     <View style={{ flex : 0.4, alignItems : 'flex-end', justifyContent : 'flex-start' }}>
-                                        <Text style={{ fontSize : 17, color : SECONDARY_COLOR }}>Đang chờ</Text>
+                                        <Text style={{ fontSize : 17, color : SECONDARY_COLOR }}>{convertStatus(investment.status)}</Text>
                                     </View>               
                                 </View>  
-                                <View style={{ margin : 15 , backgroundColor : '#e3dede', borderRadius : 5, padding : 10 }}>
-                                    <Text style={{ textAlign : 'center', opacity : 0.8, fontSize : 14 }}>Khoản vay vẫn đang được kêu gọi đầu tư, bạn có thể điều chỉnh khoản đầu tư của mình. </Text>
-                                </View>  
+                                {
+                                    investment.status === 'PENDING'
+                                    && (
+                                        <View style={{ margin : 15 , backgroundColor : '#e3dede', borderRadius : 5, padding : 10 }}>
+                                            <Text style={{ textAlign : 'center', opacity : 0.8, fontSize : 14 }}>Khoản vay vẫn đang được kêu gọi đầu tư, bạn có thể điều chỉnh khoản đầu tư của mình. </Text>
+                                        </View>
+                                    )
+                                }   
+                                {
+                                    investment.status === 'INVESTED'
+                                    && (
+                                        <View style={{ margin : 15 , backgroundColor : '#e3dede', borderRadius : 5, padding : 10 }}>
+                                            <Text style={{ textAlign : 'center', opacity : 0.8, fontSize : 14 }}>Khoản vay đã được kêu gọi thành công, bạn không thể điều chỉnh hoặc hủy mức đầu tư.</Text>
+                                        </View>
+                                    )
+                                }   
+
+                                {
+                                    investment.status === 'CANCEL' || investment.status === 'FAIL'
+                                    && (
+                                        <View style={{ margin : 15 , backgroundColor : '#e3dede', borderRadius : 5, padding : 10 }}>
+                                            <Text style={{ textAlign : 'center', opacity : 0.8, fontSize : 14 }}>Bạn đã hủy hoặc bài gọi vốn đã thất bại.</Text>
+                                        </View>
+                                    )
+                                }  
+
                                 <View style={{ flexDirection : 'row', justifyContent : 'space-between', alignItems : 'center', marginBottom : 5 }}>
                                     <Text style={{ fontSize : 16 }}>Số tiền đã đầu tư : </Text>
                                     <Text style={{ fontSize : 16 }}>{vndFormat.format(investment.total)}</Text>    
@@ -99,14 +145,39 @@ export default function InvestmentDetail({ navigation, route }) {
                                     <Text style={{ fontSize : 16 }}>Thời gian : </Text>
                                     <Text style={{ fontSize : 15, fontWeight : 'bold' }}>{investment.Loan.duration} tháng</Text>
                                 </View> 
-                                <View style={styles.rowView}>
-                                    <Text style={{ fontSize : 16 }}>Ngày bắt đầu (dự kiến) : </Text>
-                                    <Text style={{ fontSize : 15, fontWeight : 'bold' }}>{moment(investment.Loan.loanStartAt).format('DD/MM/YYYY')}</Text>
-                                </View> 
-                                <View style={styles.rowView}>
-                                    <Text style={{ fontSize : 16 }}>Ngày kết thúc (dự kiến) : </Text>
-                                    <Text style={{ fontSize : 15, fontWeight : 'bold'}}>{moment(investment.Loan.loanEndAt).format('DD/MM/YYYY')}</Text>
-                                </View>    
+                                {
+                                    investment.Loan.loanStartAt 
+                                    ?
+                                    (
+                                        <View>  
+                                            <View style={styles.rowView}>
+                                                <Text style={{ fontSize : 16 }}>Ngày bắt đầu: </Text>
+                                                <Text style={{ fontSize : 15, fontWeight : 'bold' }}>{moment(investment.Loan.loanStartAt).format('DD/MM/YYYY')}</Text>
+                                            </View> 
+                                            <View style={styles.rowView}>
+                                                <Text style={{ fontSize : 16 }}>Ngày kết thúc: </Text>
+                                                <Text style={{ fontSize : 15, fontWeight : 'bold'}}>{moment(investment.Loan.loanEndAt).format('DD/MM/YYYY')}</Text>
+                                            </View> 
+                                        </View>
+                                    )
+                                    :
+                                    (
+                                        <View>  
+                                            <View style={styles.rowView}>
+                                                <Text style={{ fontSize : 16 }}>Ngày bắt đầu (dự kiến) : </Text>
+                                                <Text style={{ fontSize : 15, fontWeight : 'bold' }}>{moment(investment.Loan.postExpireAt).format('DD/MM/YYYY')}</Text>
+                                            </View> 
+                                            <View style={styles.rowView}>
+                                                <Text style={{ fontSize : 16 }}>Ngày kết thúc (dự kiến) : </Text>
+                                                <Text style={{ fontSize : 15, fontWeight : 'bold'}}>{moment(investment.Loan.postExpireAt).add(investment.Loan.duration,'M').format('DD/MM/YYYY')}</Text>
+                                            </View> 
+                                            <View style={{ margin : 15 , backgroundColor : '#e3dede', borderRadius : 5, padding : 10 }}>
+                                                <Text style={{ textAlign : 'center', opacity : 0.8, fontSize : 14 }}>Thời gian vay phụ thuộc vào khoản vay kêu gọi vốn thành công vào lúc nào.</Text>
+                                            </View>
+                                        </View>
+                                    )
+                                }
+                                  
                             </View>
                             <View style={{ height : 'auto',marginBottom : 15, elevation : 5, marginHorizontal : 10, borderRadius : 10, padding : 10, backgroundColor : PRIMARY_COLOR_WHITE, paddingVertical : 15 }}>
                                 <Text style={{ fontWeight : 'bold', fontSize : 18 }}>Thông tin giao dịch</Text>  
@@ -116,7 +187,7 @@ export default function InvestmentDetail({ navigation, route }) {
                                     ?
                                     (
                                         <TouchableOpacity style={styles.transactionItem} onPress={() => navigation.navigate("TransactionInfo", {
-                                            transactionId : data.id
+                                            transactionId : investment.transactionId
                                         })}>
                                         <View style={{ flex : 0.15 }}>       
                                             {/* // <Image 
@@ -128,11 +199,11 @@ export default function InvestmentDetail({ navigation, route }) {
                                         </View>
                                         <View style={{ flex : 0.85 }}>                  
                                             <View style={{ flexDirection : 'row' }}>
-                                                <Text style={{ fontSize : 15 , color : SECONDARY_COLOR, flex : 0.6, fontWeight : 'bold' }}>Chuyển tiền đến Nguyễn Quốc Thái</Text>
-                                                <Text style={{ fontSize : 15, fontWeight : 'bold', color : 'red', flex : 0.4, textAlign : 'right', alignSelf : 'flex-start' }}>-{vndFormat.format(200000000)}</Text>     
+                                                <Text style={{ fontSize : 15 , color : SECONDARY_COLOR, flex : 0.6, fontWeight : 'bold' }}>{investment.Transaction.description}</Text>
+                                                <Text style={{ fontSize : 15, fontWeight : 'bold', color : 'red', flex : 0.4, textAlign : 'right', alignSelf : 'flex-start' }}>-{vndFormat.format(investment.Transaction.money)}</Text>     
                                             </View>
                                             <View style={{ flexDirection : 'row' }}>
-                                                <Text style={{ marginTop : 3, fontSize : 15, opacity : 0.6 , flex : 0.5}}>12/3/2022</Text>
+                                                <Text style={{ marginTop : 3, fontSize : 15, opacity : 0.6 , flex : 0.5}}>{moment(investment.Transaction.createdAt).format('DD/MM/YYYY')}</Text>
                                                 <Text style={{ marginTop : 3, fontSize : 15, fontWeight : 'bold' , color : PRIMARY_COLOR_BLACK, textAlign : 'right', flex : 0.5 }}>Chuyển tiền</Text>
                                             </View>
                                         </View>
@@ -213,8 +284,8 @@ export default function InvestmentDetail({ navigation, route }) {
                 </View>
                 <Text style={{ marginTop: 20, fontSize : 17, fontWeight : 'bold', color : PRIMARY_COLOR }}>{vndFormat.format(item.money * investment.percent + item.penaltyMoney * investment.percent )}</Text>
                 <View style={{ flexDirection : 'row', marginTop : 5, justifyContent : 'space-between' }}>
-                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Tiền lãi : {vndFormat.format(item.money * investment.percent * investment.Loan.interest * investment.Loan.duration)}</Text>
-                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Tiền phạt : {vndFormat.format(item.penaltyMoney * investment.percent )}</Text>
+                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Tiền lãi : {vndFormat.format((item.money * investment.percent * investment.Loan.interest * investment.Loan.duration) / (1 + investment.Loan.interest * investment.Loan.duration))}</Text>
+                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Lãi trễ hạn : {vndFormat.format(item.penaltyMoney * investment.percent )}</Text>
                 </View>           
             </View>
         )
@@ -319,7 +390,7 @@ export default function InvestmentDetail({ navigation, route }) {
     }
 
     return (
-        <View style={{ height : FULL_HEIGHT, backgroundColor : PRIMARY_COLOR_WHITE, flex : 1}}>
+        <SafeAreaView style={{ height : FULL_HEIGHT, backgroundColor : PRIMARY_COLOR_WHITE, flex : 1}}>
             <View style={styles.topContainer}>
                 <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                 <TouchableOpacity
@@ -359,7 +430,7 @@ export default function InvestmentDetail({ navigation, route }) {
                     calendarText.current.transitionTo({ opacity : 1, scale : 1.1})
                     // reportText.current.transitionTo({ opacity : 0.4, scale : 1 })
                 }}>
-                    <Animatable.Text ref={calendarText} style={{ fontSize : 15, marginLeft : 20,color : PRIMARY_COLOR_BLACK,fontWeight : 'bold',opacity : 0.4 }}>Lịch trình</Animatable.Text>
+                    <Animatable.Text ref={calendarText} style={{ fontSize : 15, marginLeft : 20,color : PRIMARY_COLOR_BLACK,fontWeight : 'bold',opacity : 0.4 }}>Kỳ hạn</Animatable.Text>
                 </Pressable>
                 {/* <Pressable onPress={() => {
                     portfolloView.current.transitionTo({ translateX : -(FULL_WIDTH) })
@@ -425,7 +496,7 @@ export default function InvestmentDetail({ navigation, route }) {
                     </View>
                 )
             }       
-        </View>
+        </SafeAreaView>
     )
 }
 

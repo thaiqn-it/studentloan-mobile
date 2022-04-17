@@ -25,6 +25,7 @@ import { AppContext } from '../contexts/App';
 import { vndFormat } from "../utils";
 import { investmentApi } from "../apis/investment";
 import { walletApi } from "../apis/wallet";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BackSelection({route, navigation}) {
   const [ wallet,setWallet ] = useState(null)
@@ -56,7 +57,7 @@ export default function BackSelection({route, navigation}) {
     },
   ]);
   const [isSelect,setSelect] = useState(null)
-  const { id,availableInvest } = route.params;
+  const { id,availableInvest, total } = route.params;
   const { user } = useContext(AppContext);
 
   const setMoneyByPressBox = (item) => {
@@ -78,15 +79,17 @@ export default function BackSelection({route, navigation}) {
       investmentApi.create({
         investorId : user.Investor.id,
         total : money,
-        loanId : id
+        loanId : id,
+        percent : parseInt(money) / parseInt(total)
       }).then(res => {
-        
-      }).finally(() => {
         Alert.alert(
           "Thành công",
           "Bạn đã đầu tư thành công",
           [
-            { text: "OK" }
+            { text: "OK", onPress : () => navigation.navigate("InvestmentDetail", {
+              investmentId : res.data.id,
+              availableInvest
+            })}
           ]
         );
       })
@@ -122,10 +125,11 @@ export default function BackSelection({route, navigation}) {
   );
 
   return (
-    <View
+    <SafeAreaView
       style={{
         height : FULL_HEIGHT,
-        backgroundColor : PRIMARY_COLOR_WHITE
+        backgroundColor : PRIMARY_COLOR_WHITE,
+        flex : 1
       }}
     > 
       <View style={styles.topContainer}>
@@ -243,7 +247,7 @@ export default function BackSelection({route, navigation}) {
           }}
             >Đầu tư</Button> 
       </View>
-    </View> 
+    </SafeAreaView> 
   );  
 }
 

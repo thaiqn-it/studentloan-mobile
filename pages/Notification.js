@@ -6,19 +6,29 @@ import { Icon } from 'react-native-elements';
 import { notificationApi } from '../apis/notification';
 import moment from 'moment';
 import * as Linking from 'expo-linking'
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from "@react-navigation/native";
 
 export default function Notification({ navigation,route }) {
     const [notifications, setNotifications] = useState([])
+    const isFocused = useIsFocused();
 
     useEffect(() => {
       notificationApi.getAllByUserId().then(res => {
           setNotifications(res.data.notifications)
       })
-    }, [])
+    }, [isFocused])
+
+    const pressHandler = (item) => {
+      Linking.openURL(item.redirectUrl)
+      notificationApi.updateById(item.id, {
+        isRead : true
+      })
+    }
 
     const notificationComponent = ({item}) => (
         <TouchableOpacity style={{ marginHorizontal : 25, borderRadius : 20, backgroundColor : '#F7F7FC', marginVertical : 10, flexDirection : 'row' }}
-                      onPress={() => Linking.openURL('myapp://detailPost/22874fd0-4ebf-48b2-a33a-43843d0fea23')}>
+                      onPress={() => pressHandler(item)}>
           <View style={{ flex : 0.2 }}>
               <Icon 
                   style={{ backgroundColor : '#e3dff0', margin : 10, padding : 10, borderRadius : 10 }}
@@ -44,7 +54,7 @@ export default function Notification({ navigation,route }) {
     )
     
   return (
-    <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
+    <SafeAreaView style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
       <View style={styles.topContainer}>
         <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
           <TouchableOpacity
@@ -73,9 +83,9 @@ export default function Notification({ navigation,route }) {
           showsVerticalScrollIndicator={false}
         />
         :
-        <Text>Bạn không có hợp đồng nào</Text>
+        <Text>Bạn không có thông báo nào</Text>
       }
-    </View>
+    </SafeAreaView>
   )
 }
 

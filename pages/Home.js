@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Animated,StyleSheet, Text, SafeAreaView, Image,View,Pressable,StatusBar, ActivityIndicator } from "react-native";
+import { Animated,StyleSheet, Text, Image,View,Pressable,StatusBar, ActivityIndicator } from "react-native";
 import * as Animatable from 'react-native-animatable';
 import HeaderBar from '../components/HeaderBar';
 import { Icon,Avatar,Badge } from "react-native-elements";
@@ -28,7 +28,11 @@ import moment from "moment";
 import Intl from "intl";
 import 'intl/locale-data/jsonp/it-IT'
 import io from "socket.io-client";
-
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { notificationApi } from '../apis/notification';
+import * as Notifications from 'expo-notifications';
+import { useIsFocused } from "@react-navigation/native";
+import 'moment/min/locales';
 
 export default function Home({ route, navigation }) {
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -42,39 +46,57 @@ export default function Home({ route, navigation }) {
   const plate = useRef(null)
   const postContainerRef = useRef(null)
   const socket = useRef(io("ws://192.168.1.19:3000",{transports: ['websocket'], upgrade: false}));
+  const [numNoti,setNumNoti] = useState(0)
+  const isFocused = useIsFocused();
 
+  var num = 0
+
+  // useEffect(() => {
+  //   socket.current.on("welcome", message => {
+      
+  //   })
+ 
+  // }, [socket])
 
   useEffect(() => {
-    socket.current.on("welcome", message => {
-      
-    })
+    notificationApi.getAllByUserId()
+      .then(res => {
+        setNumNoti(res.data.countNotRead)
+      })
+  }, [isFocused])
+  
+  useEffect(() => {  
+    const subscription = Notifications.addNotificationReceivedListener(notification => {
+      notificationApi.getAllByUserId()
+        .then(res => {
+          setNumNoti(res.data.countNotRead)
+        })
+      });
+      return () => subscription.remove();
+  }, [])
  
-  }, [socket])
+  moment.locale('vi')
 
- 
-
-//   moment.updateLocale('vi', {
-//     relativeTime : {
-//         future: "trong %s",
-//         past: "%s trước",
-//         s  : 'vài giây trước',
-//         ss : '%d giây',
-//         m:  "1 phút",
-//         mm: "%d phút",
-//         h:  "1 giờ",
-//         hh: "%d giờ",
-//         d:  "1 ngày",
-//         dd: "%d ngày",
-//         w:  "1 tuần",
-//         ww: "%d tuần",
-//         M:  "1 tháng",
-//         MM: "%d tháng",
-//         y:  "1 năm",
-//         yy: "%d năm"
-//     }
-// });
-
-// moment.locale('vi')
+  moment.updateLocale('vi', {
+    relativeTime : {
+        future: "trong %s",
+        past: "%s trước",
+        s  : 'vài giây trước',
+        ss : '%d giây',
+        m:  "1 phút",
+        mm: "%d phút",
+        h:  "1 giờ",
+        hh: "%d giờ",
+        d:  "1 ngày",
+        dd: "%d ngày",
+        w:  "1 tuần",
+        ww: "%d tuần",
+        M:  "1 tháng",
+        MM: "%d tháng",
+        y:  "1 năm",
+        yy: "%d năm"
+    }
+});
 
   const vndFormat = new Intl.NumberFormat('it-IT', {
     style: 'currency',
@@ -99,8 +121,8 @@ export default function Home({ route, navigation }) {
                 />
                 <View style={{ marginLeft : 10 }}>
                   <Text style={{ fontSize : 15 }}>{item.Student.User.lastname + ' ' + item.Student.User.firstname}</Text>
-                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.SchoolMajor.School.name}</Text>
-                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.SchoolMajor.Major.name}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.Information.SchoolMajor.School.name}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.Information.SchoolMajor.Major.name}</Text>
                 </View>         
               </View>
               <View style={{ alignItems : 'flex-end', flex : 0.2}}>
@@ -139,23 +161,34 @@ export default function Home({ route, navigation }) {
 
   const NewestView = () => {
     const [loading,setLoading] = useState(true)
-    const [data, setData] = useState(null)
+    const [loadingMore,setLoadingMore] = useState(false)
+    const [data, setData] = useState([])
     const [page,setPage] = useState(1)
+
+    const loadMore = () => {
+      if (data.length >= 5) {
+        setLoadingMore(true)
+        setPage(page + 1)
+      }   
+    }
 
     useEffect(() => {
       loanApi.search({
         page,
         sort : 'lastest'
       }).then((res) => {  
-        setData(res.data)   
+        if (res.data) {
+          setData(data.concat(res.data))   
+        }    
       }).finally(() => {
         setLoading(false);
+        setLoadingMore(false)
       });
 
       return () => {
-        setData({}); 
+        setData([]); 
       };
-    }, [])
+    }, [isFocused,page])
   
     return(
       <View>
@@ -185,6 +218,20 @@ export default function Home({ route, navigation }) {
                 keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom : 100 }}
+                ListFooterComponent={() => {
+                  return loadingMore 
+                  ? 
+                  (
+                    <View style={{ flexDirection : 'row', alignItems : 'center', justifyContent : 'center' }}>
+                      <ActivityIndicator size={'small'} color={PRIMARY_COLOR}/>
+                      <Text style={{ marginLeft : 5, fontSize : 15}}>Đang tải</Text>
+                    </View>
+                  )
+                  :
+                  null
+                }}
+                onEndReached={loadMore}
+                onEndReachedThreshold={0}
               />
             )
           }
@@ -210,7 +257,7 @@ export default function Home({ route, navigation }) {
       return () => {
         setData({}); 
       };
-    }, [])
+    }, [isFocused])
 
     return(
       <View>
@@ -265,7 +312,7 @@ export default function Home({ route, navigation }) {
       return () => {
         setData({}); 
       };
-    }, [])
+    }, [isFocused])
 
     return(
       <View>
@@ -303,7 +350,7 @@ export default function Home({ route, navigation }) {
   }
 
   return (
-    <SafeAreaView style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE, marginTop : StatusBar.currentHeight }}>
+    <SafeAreaView style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
         <View style={styles.topContainer}>
           <View style={{ padding : 10,flexDirection : 'row', alignItems : 'center', justifyContent : 'space-between', paddingHorizontal : 20 }}>         
             {/* <Image source={require('../assets/logo.png')} style={{ height : 50, width : 85}}/>   */}
@@ -319,11 +366,15 @@ export default function Home({ route, navigation }) {
                 width : 30,
                 tintColor : PRIMARY_COLOR_WHITE
               }}/>
-              <Badge
-                value={3}
-                  status={"error"}
-                  containerStyle={{ position: 'absolute', top: 0, right: 1 }}
-                />
+              {
+                numNoti > 0 && (
+                  <Badge
+                    value={numNoti}
+                    status={"error"}
+                    containerStyle={{ position: 'absolute', top: 0, right: 1 }}
+                  />
+                )
+              }    
               <Text style={{ color : PRIMARY_COLOR_WHITE, marginTop : 10 }}>Thông báo</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{ alignItems : 'center' }} onPress={() => navigation.navigate("Contract")}>

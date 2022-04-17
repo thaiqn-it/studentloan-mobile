@@ -16,6 +16,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { schoolApi } from '../apis/school';
 import { majorApi } from '../apis/major';
 import moment from 'moment';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Invest({ navigation, route }) {
     const scrollY = useRef(new Animated.Value(0)).current;
@@ -167,24 +168,23 @@ export default function Invest({ navigation, route }) {
           })}
           style={styles.container}>
             <View style={{ flexDirection : 'row', padding : 15}}> 
-              <View style={{ flexDirection : 'row', alignContent : 'flex-start' }}>
+              <View style={{ flexDirection : 'row', alignContent : 'flex-start', flex : 0.8 }}>
                 <Avatar
                   rounded
                   size={50}
                   source={{
-                    uri:
-                      'https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80',
+                    uri: item.Student.User.profileUrl ? item.Student.User.profileUrl : 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZmlsZXxlbnwwfHwwfHw%3D&w=1000&q=80'
                   }}
                 />
                 <View style={{ marginLeft : 10 }}>
                   <Text style={{ fontSize : 15 }}>{item.Student.User.lastname + ' ' + item.Student.User.firstname}</Text>
-                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.SchoolMajor.School.name}</Text>
-                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.SchoolMajor.Major.name}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item?.Student?.Information?.SchoolMajor?.School.name}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 13 }}>{item?.Student?.Information?.SchoolMajor?.Major.name}</Text>
                 </View>         
               </View>
-              <View style={{ alignItems : 'flex-end', flex : 1,}}>
+              <View style={{ alignItems : 'flex-end', flex : 0.2}}>
                   <Text style={{ backgroundColor : '#dadee3', paddingLeft : 3,paddingRight : 3 , opacity : 0.8,borderRadius : 5 }}>Kết thúc</Text>
-                  <Text>trong {moment(item.postExpireAt).diff(new Date(),"days")} ngày</Text>
+                  <Text style={{ textAlign : 'right'}}>trong {moment(item.postExpireAt).diff(new Date(),"days")} ngày</Text>
               </View>
             </View>
 
@@ -208,7 +208,7 @@ export default function Invest({ navigation, route }) {
                   
               </View>
               <View style={{ flex : 1 , alignItems : 'flex-end' }}>
-                <Text style={{ marginBottom : 5,fontSize : 14 }}>{item.interest}%</Text>
+                <Text style={{ marginBottom : 5,fontSize : 14 }}>{item.interest * 100}%</Text>
                 <Text style={{ fontSize : 14 }}>{item.duration} tháng</Text>
               </View>
             </View> 
@@ -217,8 +217,8 @@ export default function Invest({ navigation, route }) {
   }
 
   return (
-    <View
-      style={{ backgroundColor: '#F2F5FA', height : FULL_HEIGHT }}>
+    <SafeAreaView
+      style={{ backgroundColor: '#F2F5FA', height : FULL_HEIGHT, flex : 1 }}>
       <View style={styles.topContainer} ref={topContainerRef}>
         <View style={{ padding : 10,flexDirection : 'row', justifyContent : 'center',alignItems : 'center', zIndex : 200 }}>     
           <TextInput
@@ -313,7 +313,7 @@ export default function Invest({ navigation, route }) {
                       values={[multiSliderValue[0], multiSliderValue[1]]}
                       sliderLength={FULL_WIDTH - 80}
                       onValuesChange={multiSliderValuesChange}
-                      min={50000}
+                      min={5000000}
                       max={200000000}
                       step={50000}   
                       markerStyle={{ height : 20, width : 20}}
@@ -330,6 +330,8 @@ export default function Invest({ navigation, route }) {
                     showDropDowns={true}
                     onSelectedItemsChange={(selectedItems) => setSchoolFilter(selectedItems)}
                     selectedItems={schoolFilter}
+                    confirmText={'Chọn'}
+                    selectedText={'đã chọn'}
                   />
               </View>
               <View style={{ marginHorizontal : 15 }}>
@@ -342,16 +344,18 @@ export default function Invest({ navigation, route }) {
                     showDropDowns={true}
                     onSelectedItemsChange={(selectedItems) => setMajorFilter(selectedItems)}
                     selectedItems={majorFilter}
+                    confirmText={'Chọn'}
+                    selectedText={'đã chọn'}
                   />
               </View>
                 
-              <View style={{ marginTop : 20, flexDirection : 'row', justifyContent : 'space-between', marginHorizontal : 25 }}>
+              {/* <View style={{ marginTop : 20, flexDirection : 'row', justifyContent : 'space-between', marginHorizontal : 25 }}>
                 <Text style={{ fontSize : 16, fontWeight : 'bold', opacity : 0.6, flex : 0.6 }}>Thời hạn vay</Text>
                 <TouchableOpacity style={{ alignItems : 'center', flexDirection : 'row', flex : 0.4, justifyContent : 'flex-end' }}>
                   <Text style={{ fontSize : 16, marginLeft : 25, fontWeight : 'bold', marginRight : 5 }}>36 tháng</Text> 
                   <Feather name="edit" size={20} color={PRIMARY_COLOR} />
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </ScrollView>
         </RBSheet>          
 
@@ -422,7 +426,7 @@ export default function Invest({ navigation, route }) {
           <MaterialIcons name="keyboard-arrow-up" size={40} color="black" />
         </TouchableOpacity>
       </Animated.View>
-    </View>
+    </SafeAreaView>
   );
 }
 

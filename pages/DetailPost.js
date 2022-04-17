@@ -1,4 +1,4 @@
-import React, { useState,useRef,useEffect } from "react";
+import React, { useState,useRef,useEffect,useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,7 +9,8 @@ import {
   Pressable,
   TouchableOpacity,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from "react-native";
 import {
   PRIMARY_COLOR,
@@ -34,6 +35,9 @@ import { loanApi } from "../apis/loan";
 import { investmentApi } from "../apis/investment";
 import moment from "moment";
 import { Video, AVPlaybackStatus } from 'expo-av';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from "@react-navigation/native";
+import { AppContext } from '../contexts/App';
 
 const { width: windowWidth } = Dimensions.get("window");
 const SLIDER_WIDTH = Dimensions.get('window').width;
@@ -49,6 +53,8 @@ export default function DetailPost({ navigation,route }) {
   const [isInvest,setIsInvest] = useState(null)
   const [isLoading,setIsLoading] = useState(true)
   const [investmentId,setInvesmentId] = useState('')
+  const isFocused = useIsFocused();
+  const { user, setUser, getUser } = useContext(AppContext);
 
   const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
     const paddingToBottom = 50;
@@ -101,7 +107,7 @@ export default function DetailPost({ navigation,route }) {
           setIsLoading(!isLoading)
         })
       })
-    }, [])
+    }, [isFocused])
 
   const opacity = clampedScroll.interpolate({
     inputRange : [0, CONTAINER_HEIGHT - 20, CONTAINER_HEIGHT],
@@ -301,7 +307,7 @@ export default function DetailPost({ navigation,route }) {
   }) 
 
   return (
-    <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
+    <SafeAreaView style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
       <View style={styles.topContainer}>
         <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
           <TouchableOpacity
@@ -466,7 +472,7 @@ export default function DetailPost({ navigation,route }) {
                                   opacity : 0.6
                                 }}
                               >
-                                {post.loan.Student.SchoolMajor.Major.name}
+                                {post.loan.Student.Information.SchoolMajor.Major.name}
                               </Text>
                             </View>
           
@@ -494,7 +500,7 @@ export default function DetailPost({ navigation,route }) {
                                   opacity : 0.6
                                 }}
                               >
-                                {post.loan.Student.SchoolMajor.School.name}
+                                {post.loan.Student.Information.SchoolMajor.School.name}
                               </Text>
                             </View>
                           </View>
@@ -555,44 +561,7 @@ export default function DetailPost({ navigation,route }) {
                                       </ListItem>
                                   ))}
                               </View>
-
-                        {/* <View
-                          style={{
-                            flexDirection: "row",
-                            marginHorizontal: 20,
-                            marginTop : 10
-                          }}
-                        >
-                       
-                          <Text
-                            style={{
-                              fontSize: 14,
-                              opacity : 0.8,
-                              color : PRIMARY_COLOR_BLACK,
-                              fontWeight : 'bold'
-                            }}
-                          >
-                            Giấy báo học phí
-                          </Text>
-                        </View>   
-                        {
-                          post.loan.Student.Archievements.map((item,index) => (
-                            <View key={index} style={{ marginVertical : 10 }}>
-                              <Image 
-                                source={{ uri : item.imageUrl }}
-                                style={{
-                                  width : FULL_WIDTH,
-                                  height : FULL_HEIGHT / 3
-                                }}
-                              />
-                              <Text style={{
-                                padding : 10
-                              }}>{item.description}</Text>
-                            </View>
-                          ))
-                        }    */}
-                              
-                        {/* <View style={styles.line}/> */}
+               
                           <View
                             style={{
                               flexDirection: "row",
@@ -818,31 +787,7 @@ export default function DetailPost({ navigation,route }) {
                           backgroundColor :PRIMARY_COLOR_WHITE,
                           paddingBottom: 20 ,
                         }}
-                      >
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            marginHorizontal: 20,
-                            marginTop: 20,
-                          }}
-                        >
-                          <Icon
-                            name="archive"
-                            type="feather"
-                            color={SECONDARY_COLOR}
-                            size={20}
-                          />
-                          <Text
-                            style={{
-                              marginStart: 10,
-                              fontSize: 16,
-                              color : SECONDARY_COLOR,
-                              fontWeight : 'bold'
-                            }}
-                          >
-                            Video giới thiệu bản thân
-                          </Text>
-                        </View>   
+                      >               
                         {
                           post.loan.LoanMedia.map((item,index) => {
                             if (item.type === 'VIDEO') {
@@ -859,51 +804,7 @@ export default function DetailPost({ navigation,route }) {
                             }
                           }) 
                         }
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            marginHorizontal: 20,
-                            marginTop: 10,
-                          }}
-                        >
-                          <Icon
-                            name="archive"
-                            type="feather"
-                            color={SECONDARY_COLOR}
-                            size={20}
-                          />
-                          <Text
-                            style={{
-                              marginStart: 10,
-                              fontSize: 16,
-                              color : SECONDARY_COLOR,
-                              fontWeight : 'bold'
-                            }}
-                          >
-                            Giấy báo học phí
-                          </Text>
-                        </View>
-                        {
-                          post.loan.LoanMedia.map((item,index) => {
-                            if (item.type === 'DEMANDNOTE') {
-                              return (
-                                <View key={index} style={{ marginVertical : 10 }}>
-                                  <Image 
-                                    source={{ uri : item.imageUrl }}
-                                    style={{
-                                      width : FULL_WIDTH,
-                                      height : FULL_HEIGHT / 1.4
-                                    }}
-                                  />
-                                  <Text style={{
-                                    padding : 10
-                                  }}>{item.description}</Text>
-                                </View>
-                              )
-                            }
-                          }) 
-                        }
-
+                        
                         <View
                           style={{
                             flexDirection: "row",
@@ -985,17 +886,30 @@ export default function DetailPost({ navigation,route }) {
               <Button
               style={[styles.btnInvest,{opacity}]}
               color={PRIMARY_COLOR}
-              onPress={() => navigation.navigate("BackSelection", {
-                id,
-                availableInvest : post.loan.totalMoney - post.loan.AccumulatedMoney
-              })}
+              onPress={() => {
+                if (user.status === 'VERIFIED') {
+                  navigation.navigate("BackSelection", {
+                    id,
+                    availableInvest : post.loan.totalMoney - post.loan.AccumulatedMoney,
+                    total : post.loan.totalMoney
+                  })
+                } else {
+                  Alert.alert(
+                    "Thất bại",
+                    `Bạn phải xác thực tài khoản để có thể đầu tư.`,
+                    [
+                        { text: "OK" }
+                    ]
+                  );
+                }      
+              }}
                 >Đầu tư</Button> 
             ) 
           ) 
         }
     
       </Animated.View>
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -5,6 +5,7 @@ import { AntDesign,FontAwesome5 } from '@expo/vector-icons';
 import { vndFormat } from '../utils';
 import { transactionApi } from '../apis/transaction';
 import moment from "moment"
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TransactionInfo({ navigation, route}) {
     const { transactionId } = route.params
@@ -38,7 +39,7 @@ export default function TransactionInfo({ navigation, route}) {
       }
 
     return (
-        <View>
+        <SafeAreaView style={{ flex : 1 }}>
              <View style={styles.topContainer}>
                 <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                 <TouchableOpacity
@@ -62,12 +63,26 @@ export default function TransactionInfo({ navigation, route}) {
                     <Text style={{ fontSize : 17, margin : 10 }}>SỐ TIỀN</Text>
                     <Text style={{ fontSize : 20, fontWeight : 'bold', marginHorizontal : 10}}>{vndFormat.format(transaction?.money)}</Text>
                 </View>
-                <View style={{ flexDirection : 'row', backgroundColor : '#47ffb3', margin : 10, borderRadius : 10, paddingHorizontal : 10 }}>
-                    <View style={{ alignSelf : 'center', backgroundColor : '#03A678', borderRadius : 15}}>
-                        <AntDesign name="check" size={20} color="white" />
-                    </View>             
-                    <Text style={{ fontSize : 17, margin : 10, opacity : 0.6 }}>{transaction?.status}</Text>
-                </View>
+                {
+                    transaction?.status === 'FAIL' && (
+                        <View style={{ flexDirection : 'row', backgroundColor : '#fc9fa8', margin : 10, borderRadius : 10, paddingHorizontal : 10 }}>
+                            <View style={{ alignSelf : 'center', backgroundColor : '#fc5364', borderRadius : 15}}>
+                                <AntDesign name="check" size={20} color="white" />
+                            </View>           
+                            <Text style={{ fontSize : 17, margin : 10, opacity : 0.6 }}>Thất bại</Text>
+                        </View>
+                    )
+                }    
+                {
+                    transaction?.status === 'SUCCESS' && (
+                        <View style={{ flexDirection : 'row', backgroundColor : '#47ffb3', margin : 10, borderRadius : 10, paddingHorizontal : 10 }}>
+                            <View style={{ alignSelf : 'center', backgroundColor : '#03A678', borderRadius : 15}}>
+                                <AntDesign name="check" size={20} color="white" />
+                            </View>           
+                            <Text style={{ fontSize : 17, margin : 10, opacity : 0.6 }}>Thành công</Text>
+                        </View>
+                    )
+                }    
                 <View style={{ flexDirection : 'row', justifyContent : 'space-between', margin : 10}}>
                     <Text style={styles.leftText}>Giao dịch ngày</Text>
                     <Text style={styles.rightText}>{moment(transaction?.createdAt).format('DD/MM/YYYY')}</Text>
@@ -97,7 +112,7 @@ export default function TransactionInfo({ navigation, route}) {
                 <View style={styles.line}/>
                 <Text style={{ fontSize : 17, margin : 10 }}>{transaction?.description}</Text>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 

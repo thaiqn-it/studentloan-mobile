@@ -15,6 +15,7 @@ import WebView from 'react-native-webview';
 import { walletApi } from '../apis/wallet';
 import { transactionApi } from '../apis/transaction';
 import { vndFormat } from '../utils'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function DepositMoney({ navigation, route }) {
     const addCardRef = useRef();
@@ -142,7 +143,7 @@ export default function DepositMoney({ navigation, route }) {
       );
 
     return (
-        <View style={{ backgroundColor : PRIMARY_COLOR_WHITE, flex : 1 }}>
+        <SafeAreaView style={{ backgroundColor : PRIMARY_COLOR_WHITE, flex : 1 }}>
              <View style={styles.topContainer}>
                 <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                 <TouchableOpacity
@@ -273,7 +274,7 @@ export default function DepositMoney({ navigation, route }) {
                 onPress={checkOutHandler}
                     >Xác nhận</Button> 
             </View>
-        </View>
+        </SafeAreaView>
 
     )
 }

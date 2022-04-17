@@ -52,15 +52,7 @@ export default function Login() {
         }),
     });
 
-    useEffect(() => {
-        const subscription = Notifications.addNotificationReceivedListener(notification => {
-            const vonvert = JSON.stringify(notification.request.trigger.remoteMessage.data)
-            alert(vonvert);
-          });
-          return () => subscription.remove();
-    }, [])
     
-
     useEffect(() => {
         registerForPushNotificationsAsync().then(token => setPushToken(token));
         // getLastNotification().then(result => Alert.alert("he",`${result}`))
@@ -179,7 +171,7 @@ export default function Login() {
 
     const loginByGoogle = async () => {
         const config = {
-            androidClientId: `159839076180-emidldpf136iq47aivk0huhvf689c6m5.apps.googleusercontent.com`,
+            androidClientId: `761167549872-on8eml3rec49ipp2g82lbrla9opeg8nd.apps.googleusercontent.com`,
         };
         try {
             setIsLoading(true)

@@ -4,6 +4,7 @@ import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_WHITE } from '../
 import { FontAwesome5 } from "@expo/vector-icons";
 import { loanHistoryApi } from '../apis/loanHistory';
 import moment from 'moment';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoanHistory({ navigation, route }) {
     const { loanId } = route.params
@@ -16,7 +17,7 @@ export default function LoanHistory({ navigation, route }) {
     }, [])
 
     return (
-        <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
+        <SafeAreaView style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
             <View style={styles.topContainer}>
                 <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                 <TouchableOpacity
@@ -44,12 +45,12 @@ export default function LoanHistory({ navigation, route }) {
                             </View> 
                             <View style={{ flex : 0.65 }}>
                                 <Text style={{ fontSize : 15, fontWeight : 'bold' }}>{loanHistory?.description}</Text>
-                                <Text style={{ marginTop : 15, fontSize : 15, opacity : 0.6 }}>Duyệt bởi : {loanHistory?.User.firstname + ' ' + loanHistory.User.lastname}</Text>
+                                <Text style={{ marginTop : 15, fontSize : 15, opacity : 0.6 }}>Duyệt bởi : {loanHistory?.User?.firstname + ' ' + loanHistory?.User?.lastname}</Text>
                                 <Text style={{ marginTop : 5, fontSize : 15, opacity : 0.6 }}>Ngày : {moment(loanHistory?.createdAt).format('DD/MM/YYYY')}</Text>                    
                             </View>   
                         </View>
                         {
-                            loanHistory?.LoanHistoryImages.map((item,index) => (
+                            loanHistory?.LoanHistoryImages?.map((item,index) => (
                                 <View key={index} style={{ margin: 10, elevation : 5, borderRadius : 10, backgroundColor : PRIMARY_COLOR_WHITE }}>
                                     <Image 
                                     source={{ uri : item.imageUrl }}
@@ -67,7 +68,7 @@ export default function LoanHistory({ navigation, route }) {
                     </ScrollView>
                 )                
             }      
-        </View>
+        </SafeAreaView>
     )
 }
 

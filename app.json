@@ -5,7 +5,7 @@
     "slug": "student-loan-app-client",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
+    "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -24,7 +24,7 @@
       "googleServicesFile": "./google-services.json",
       "package" : "com.company.studentloan",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       }
     },
@@ -46,7 +46,7 @@
       ]
     ],
     "notification": {
-      "icon": "./assets/logo.png",
+      "icon": "./assets/icon.png",
       "color": "#311b92",
       "iosDisplayInForeground": true,
       "androidMode": "default",

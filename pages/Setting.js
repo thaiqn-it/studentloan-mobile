@@ -14,7 +14,7 @@ import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, P
 import { Feather,FontAwesome5 } from '@expo/vector-icons'
 import { Icon } from 'react-native-elements';
 import { AppContext } from '../contexts/App';
-import HeaderBar from '../components/HeaderBar';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const OPTIONS = [
     {
@@ -99,8 +99,8 @@ export default function Setting({navigation}) {
       }, []);
       
     return (
-        <View 
-            style={{ backgroundColor : PRIMARY_COLOR_WHITE }}>
+        <SafeAreaView 
+            style={{ backgroundColor : PRIMARY_COLOR_WHITE, flex : 1 }}>
             <View style={styles.topContainer}>
                 <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                 <TouchableOpacity
@@ -189,7 +189,7 @@ export default function Setting({navigation}) {
                     </ListItem>
                 ))}
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 

@@ -6,7 +6,8 @@ import {
   View,
   TouchableOpacity,
   FlatList,
-  Image
+  Image,
+  ActivityIndicator
 } from "react-native";
 import {
   PRIMARY_COLOR,
@@ -22,12 +23,13 @@ import { AppContext } from '../contexts/App';
 import { vndFormat } from '../utils'
 import { walletApi } from '../apis/wallet';
 import { transactionApi } from '../apis/transaction';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Home({ route, navigation }) {
   const { user } = useContext(AppContext);
   const [isDown,setIsDown] = useState(true)
   const [transaction,setTransaction] = useState([])
-  const [ wallet,setWallet ] = useState(0)
+  const [loading,setLoading] = useState(false)
 
   //animable
   const topContainerRef = useRef(null)
@@ -36,20 +38,20 @@ export default function Home({ route, navigation }) {
   const InvestMoneyRef = useRef(null)
 
   useEffect(() => {
+    setLoading(true)
     walletApi
         .getByUserId(user.id)
         .then(res => {
-            setWallet(res.data)
+            transactionApi
+            .getByWalletId(res.data.id)
+            .then(res => {
+                setTransaction(res.data)
+            })
+        .finally(() => {
+          setLoading(false)
+        })
         })
   }, [])
-
-  useEffect(() => {
-    transactionApi
-        .getByWalletId(wallet.id)
-        .then(res => {
-            setTransaction(res.data)
-        })
-  }, [wallet])
 
   const convertType = (type) => {
     var result = "";
@@ -71,7 +73,7 @@ export default function Home({ route, navigation }) {
   }
 
   return (
-    <View style={{ height : FULL_HEIGHT, backgroundColor : PRIMARY_COLOR_WHITE }}>
+    <SafeAreaView style={{ height : FULL_HEIGHT, backgroundColor : PRIMARY_COLOR_WHITE, flex : 1 }}>
         <Animatable.View style={styles.topContainer} ref={topContainerRef}>
           <View style={{ padding : 10,flexDirection : 'row', justifyContent : 'center',alignItems : 'center' }}>     
             <View style={{ 
@@ -210,71 +212,100 @@ export default function Home({ route, navigation }) {
             borderRadius : 10,
           }}/> 
         </Animatable.View>
-        <ScrollView 
-          style={{ marginTop : 30 }} 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: FULL_HEIGHT / 30 }}
-          onScrollBeginDrag={() => {
-            setIsDown(true)
-            topContainerRef.current.transitionTo({ height : FULL_HEIGHT * 0.5 / 3,}, 400)
-            WithdrawMoneyRef.current.transitionTo({ translateY : 0 }, 500)
-            EarnedMoneyRef.current.transitionTo({ translateY : 0 }, 400)
-            InvestMoneyRef.current.transitionTo({ translateY : 0 }, 300)
-          }}>
-            { transaction?.map(item => {
-              return(
-                <View key={item.date}>
-                  <Text style={{ fontSize : 20, fontWeight : 'bold', marginHorizontal : 15 }}>{item.date}</Text>
-                  {
-                    item.transaction.map(data =>{
-                      return(
-                        <TouchableOpacity key={data.id} style={styles.transactionItem} onPress={() => navigation.navigate("TransactionInfo", {
-                            transactionId : data.id
-                        })}>
-                          <View style={{ flex : 0.15 }}>
-                            {
-                              data.description === "Paypal" 
-                              ? (        
-                                <Image 
-                                  style={{ height : 50, width : 50, borderRadius : 50, elevation : 5 }}
-                                  source={{ uri : 'https://play-lh.googleusercontent.com/iQ8f5plIFy9rrY46Q2TNRwq_8nCvh9LZVwytqMBpOEcfnIU3vTkICQ6L1-RInWS93oQg' }}/>                 
-                              ) 
-                              :(
-                                <View style={styles.nameIcon}>
-                                  <Text>QT</Text>
+        {
+          loading
+          ?
+          (
+            <ActivityIndicator size={'large'} style={{ marginTop : 50 }} color={PRIMARY_COLOR}/>
+          )
+          :
+          (
+            <ScrollView 
+              style={{ marginTop : 30 }} 
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: FULL_HEIGHT / 30 }}
+              onScrollBeginDrag={() => {
+                setIsDown(true)
+                topContainerRef.current.transitionTo({ height : FULL_HEIGHT * 0.5 / 3,}, 400)
+                WithdrawMoneyRef.current.transitionTo({ translateY : 0 }, 500)
+                EarnedMoneyRef.current.transitionTo({ translateY : 0 }, 400)
+                InvestMoneyRef.current.transitionTo({ translateY : 0 }, 300)
+              }}>
+                { transaction?.map(item => {
+                  return(
+                    <View key={item.date}>
+                      <Text style={{ fontSize : 20, fontWeight : 'bold', marginHorizontal : 15 }}>{item.date}</Text>
+                      {
+                        item.transaction.map(data =>{
+                          return(
+                            <TouchableOpacity key={data.id} style={styles.transactionItem} onPress={() => navigation.navigate("TransactionInfo", {
+                                transactionId : data.id
+                            })}>
+                              <View style={{ flex : 0.15 }}>
+                                {
+                                  data.description === "Paypal" 
+                                  ? (        
+                                    <Image 
+                                      style={{ height : 50, width : 50, borderRadius : 50, elevation : 5 }}
+                                      source={{ uri : 'https://play-lh.googleusercontent.com/iQ8f5plIFy9rrY46Q2TNRwq_8nCvh9LZVwytqMBpOEcfnIU3vTkICQ6L1-RInWS93oQg' }}/>                 
+                                  ) 
+                                  :(
+                                    <View style={styles.nameIcon}>
+                                      <Text>QT</Text>
+                                    </View>
+                                  )
+                                }          
+                              </View>
+                              <View style={{ flex : 0.85 }}>
+                                <View style={{ flexDirection : 'row' }}>
+                                  <Text style={{ fontSize : 16, fontWeight : 'bold' , color : PRIMARY_COLOR_BLACK, flex : 0.6}}>{data.description}</Text>
+                                  {
+                                    data.type === "TOPUP"
+                                    &&
+                                    (
+                                      <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'green', flex : 0.4, textAlign : 'right' }}>+{vndFormat.format(data.money)}</Text>
+                                    )
+                                  } 
+                                  {
+                                    data.type === "RECEIVE"
+                                    &&
+                                    (
+                                      <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'green', flex : 0.4, textAlign : 'right' }}>+{vndFormat.format(data.money)}</Text>
+                                    )
+                                  }
+                                  {
+                                    data.type === "TRANSFER"
+                                    &&
+                                    (
+                                      <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'red', flex : 0.4, textAlign : 'right' }}>-{vndFormat.format(data.money)}</Text>
+                                    )
+                                  }
+                                  {
+                                    data.type === "WITHDRAW"
+                                    &&
+                                    (
+                                      <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'red', flex : 0.4, textAlign : 'right' }}>-{vndFormat.format(data.money)}</Text>
+                                    )
+                                  }
                                 </View>
-                              )
-                            }          
-                          </View>
-                          <View style={{ flex : 0.85 }}>
-                            <View style={{ flexDirection : 'row' }}>
-                              <Text style={{ fontSize : 16, fontWeight : 'bold' , color : PRIMARY_COLOR_BLACK, flex : 0.6}}>{data.description}</Text>
-                              {
-                                data.type === "TOPUP" && "TRANSFER"
-                                ?
-                                (
-                                  <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'green', flex : 0.4, textAlign : 'right' }}>+{vndFormat.format(data.money)}</Text>
-                                )
-                                :
-                                (
-                                  <Text style={{ fontSize : 16, fontWeight : 'bold', color : 'red', flex : 0.4, textAlign : 'right' }}>-{vndFormat.format(data.money)}</Text>
-                                )
-                              }
-                            </View>
-                            <View style={{ flexDirection : 'row' }}>
-                              <Text style={{ marginTop : 3, fontSize : 16, opacity : 0.6 , flex : 0.5}}>{data.date}</Text>
-                              <Text style={{ marginTop : 3, fontSize : 16,  color : PRIMARY_COLOR_BLACK, flex : 0.5, textAlign : 'right' }}>{convertType(data.type)}</Text>
-                            </View>                                                             
-                          </View>
-                        </TouchableOpacity>
-                      )
-                    })
-                  }
-                </View>
-              )
-            })}        
-        </ScrollView>
-    </View>
+                                <View style={{ flexDirection : 'row' }}>
+                                  <Text style={{ marginTop : 3, fontSize : 16, opacity : 0.6 , flex : 0.5}}>{data.date}</Text>
+                                  <Text style={{ marginTop : 3, fontSize : 16,  color : PRIMARY_COLOR_BLACK, flex : 0.5, textAlign : 'right' }}>{convertType(data.type)}</Text>
+                                </View>                                                             
+                              </View>
+                            </TouchableOpacity>
+                          )
+                        })
+                      }
+                    </View>
+                  )
+                })}        
+            </ScrollView>
+          )
+        }
+        
+        
+    </SafeAreaView>
   );
 }
 

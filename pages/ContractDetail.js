@@ -5,13 +5,14 @@ import * as Linking from 'expo-linking';
 import * as FileSystem from 'expo-file-system';
 import { FULL_HEIGHT, PRIMARY_COLOR, PRIMARY_COLOR_WHITE } from '../constants/styles';
 import { FontAwesome5 } from "@expo/vector-icons";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ContractDetail({ navigation, route }) {
     const [loading,setLoading] = useState(false)
     const { contractUrl } = route.params
     
     return (
-        <View style={{ backgroundColor : PRIMARY_COLOR_WHITE, flex : 1 }}>
+        <SafeAreaView style={{ backgroundColor : PRIMARY_COLOR_WHITE, flex : 1 }}>
             <View style={styles.topContainer}>
                 <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                     <TouchableOpacity
@@ -30,20 +31,20 @@ export default function ContractDetail({ navigation, route }) {
                 <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Hợp đồng</Text>   
             </View>
         </View>
-        {
-            loading
-            &&
-            <ActivityIndicator size={'large'} color={PRIMARY_COLOR}/>
-        }  
-        <PDFReader
-            onLoad={() => setLoading(!loading)}
-            onLoadEnd={() => setLoading(!loading)}
-    
-            source={{
-                uri: contractUrl
-            }}
-        />     
-        </View>
+            {
+                loading
+                &&
+                <ActivityIndicator size={'large'} color={PRIMARY_COLOR}/>
+            }  
+            <PDFReader
+                onLoad={() => setLoading(!loading)}
+                onLoadEnd={() => setLoading(!loading)}
+        
+                source={{
+                    uri: contractUrl
+                }}
+            />     
+        </SafeAreaView>
     )
 }
 

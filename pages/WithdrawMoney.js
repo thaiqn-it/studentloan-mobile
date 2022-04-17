@@ -15,6 +15,7 @@ import { transactionApi } from '../apis/transaction';
 import { configApi } from '../apis/systemconfig';
 import { vndFormat } from '../utils'
 import { paypalApi } from '../apis/paypal'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const WithdrawMoney = ({ navigation, route }) => {
     const payoutRef = useRef();
@@ -132,7 +133,7 @@ const WithdrawMoney = ({ navigation, route }) => {
         </TouchableOpacity>
       );
   return (
-    <View style={{ backgroundColor : PRIMARY_COLOR_WHITE, flex : 1 }}>
+    <SafeAreaView style={{ backgroundColor : PRIMARY_COLOR_WHITE, flex : 1 }}>
              <View style={styles.topContainer}>
                 <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                 <TouchableOpacity
@@ -301,7 +302,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                 onPress={() => payoutRef.current.open()}        
                     >Xác nhận</Button> 
             </View>
-        </View>
+        </SafeAreaView>
   )
 }
 

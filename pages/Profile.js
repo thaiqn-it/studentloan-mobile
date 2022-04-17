@@ -11,6 +11,7 @@ import * as ImagePicker from 'expo-image-picker';
 import getEnvVars from '../constants/env';
 import { userApi } from '../apis/user';
 import AppLoading from '../components/AppLoading'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile({ navigation }) {
     const { user, setUser, getUser } = useContext(AppContext);
@@ -173,7 +174,7 @@ export default function Profile({ navigation }) {
     }
 
     return (
-        <View style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
+        <SafeAreaView style={{ flex : 1, backgroundColor : PRIMARY_COLOR_WHITE }}>
             <View style={styles.topContainer}>
                 <View style={{ padding : 10,flexDirection : 'row', zIndex : 200, justifyContent : 'center' }}>     
                 <TouchableOpacity
@@ -296,7 +297,7 @@ export default function Profile({ navigation }) {
             <DatePicker />
             <ModalPicker />
             <AppLoading isLoading={isLoading}/>
-        </View>
+        </SafeAreaView>
     )
 }
 

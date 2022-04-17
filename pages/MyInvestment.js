@@ -1,4 +1,5 @@
 import React, { useEffect, useState,useContext } from 'react'
+import { useIsFocused } from "@react-navigation/native";
 import { StyleSheet, Text, View,FlatList,TouchableOpacity, Image } from 'react-native'
 import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, PRIMARY_FONT } from '../constants/styles';
 import { Avatar } from 'react-native-elements';
@@ -9,175 +10,37 @@ import { investmentApi } from '../apis/investment';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function MyInvestment({ navigation }) {
-      const [items, setItems] = useState([
-        // this is the parent or 'item'
-        {
-          name: 'IT',
-          id: 1,
-          // these are the children or 'sub items'
-          children: [
-            {
-              name: 'SE',
-              id: 1,
-            },
-            {
-              name: 'GD',
-              id: 2,
-            },
-            {
-              name: 'AI',
-              id: 3,
-            },
-            {
-              name: 'IoT',
-              id: 4,
-            },
-            {
-              name: 'SI',
-              id: 5,
-            },
-          ],
-        },
-        {
-          name: 'Kinh doanh',
-          id: 2,
-          children: [
-            {
-              name: 'asdasd',
-              id: 6,
-            },
-            {
-              name: 'GadD',
-              id: 7,
-            },
-            {
-              name: 'AeqweI',
-              id: 8,
-            },
-            {
-              name: 'IoTdqwe',
-              id: 9,
-            },
-            {
-              name: 'SI2312',
-              id: 10,
-            },
-          ],
-        },
-      ]);
-      const [selectedItems, setSelectedItems] = useState('');
-      
       const [dataItems, setDataItems] = useState([]);
-      const fetchData = () => {
-        setDataItems([
-          {
-            id: 1,
-            name: 'Nguyễn Trường Phi',
-            school: 'FPT University',
-            sesmester: '8',
-            major: 'Software Engineering',
-            money: '25.000.000 VNĐ',
-            status: 'active',
-            experiedDay: '09/11/2021',
-            processStatus: 100,
-          },
-          {
-            id: 2,
-            name: 'Trần Long',
-            school: 'FPT University',
-            sesmester: '8',
-            major: 'Software Engineering',
-            money: '25.000.000 VNĐ',
-            status: 'active',
-            experiedDay: '03/10/2021',
-            processStatus: 80,
-          },
-          {
-            id: 3,
-            name: 'Lương Thanh Hà',
-            school: 'FPT University',
-            sesmester: '7',
-            major: 'Software Engineering',
-            money: '25.000.000 VNĐ',
-            status: 'active',
-            experiedDay: '03/10/2021',
-            processStatus: 55,
-          },
-          {
-            id: 4,
-            name: 'Đinh Phú Cường',
-            school: 'FPT University',
-            sesmester: '8',
-            major: 'Software Engineering',
-            money: '25.000.000 VNĐ',
-            status: 'active',
-            experiedDay: '03/10/2021',
-            processStatus: 95,
-          },
-          {
-            id: 5,
-            name: 'Nguyễn Trường Phi',
-            school: 'FPT University',
-            sesmester: '8',
-            major: 'Software Engineering',
-            money: '25.000.000 VNĐ',
-            status: 'active',
-            experiedDay: '09/11/2021',
-            processStatus: 100,
-          },
+      const isFocused = useIsFocused();
 
-          {
-            id: 6,
-            name: 'Nguyễn Trường Phi',
-            school: 'FPT University',
-            sesmester: '8',
-            major: 'Software Engineering',
-            money: '25.000.000 VNĐ',
-            status: 'active',
-            experiedDay: '09/11/2021',
-            processStatus: 100,
-          },
-          {
-            id: 7,
-            name: 'Nguyễn Trường Phi',
-            school: 'FPT University',
-            sesmester: '8',
-            major: 'Software Engineering',
-            money: '25.000.000 VNĐ',
-            status: 'active',
-            experiedDay: '09/11/2021',
-            processStatus: 100,
-          },
-          {
-            id: 8,
-            name: 'Nguyễn Trường Phi',
-            school: 'FPT University',
-            sesmester: '8',
-            major: 'Software Engineering',
-            money: '25.000.000 VNĐ',
-            status: 'active',
-            experiedDay: '09/11/2021',
-            processStatus: 100,
-          },
-        ]);
-      };
       useEffect(() => {
         investmentApi
           .findAllByInvestorId()
           .then(res => {
             setDataItems(res.data)
           })
-      }, []);
+      }, [isFocused]);
 
-      const [searchValue, setSearchValue] = useState('');
 
-      const filterdData = searchValue // based on text, filter data and use filtered data
-        ? dataItems.filter(item => {
-            const itemData = item.name.toUpperCase();
-            const textData = searchValue.toUpperCase();
-            return itemData.indexOf(textData) > -1;
-          })
-        : dataItems;
+      const convertType = (type) => {
+        var result = "";
+        switch(type) {
+          case "FUNDING":
+            result = "Đang kêu gọi"
+            break;
+          case "FINISH":
+            result = "Hoàn thành"
+            break;
+          case "ONGOING":
+            result = "Đang tiến hành"
+            break;
+          case "FAIL":
+            result = "Kêu gọi thất bại"
+            break;
+        }
+        return result
+      }
+      
 
     function _renderItem({ item }) {
         const totalPaid = parseInt(item.Loan.totalMoney) + parseInt(item.Loan.totalMoney * item.Loan.interest * item.Loan.duration)
@@ -191,14 +54,17 @@ export default function MyInvestment({ navigation }) {
               id : item.Loan.id
             })}
             style={styles.container}>
+              <View style={{ position : 'absolute', top : 0, right : 0 , zIndex : 1000, backgroundColor : PRIMARY_COLOR_WHITE, borderRadius : 2, paddingHorizontal : 5}}>
+                <Text style={{ fontWeight : 'bold', fontSize : 13 }}>{convertType(item.Loan.Status)}</Text>
+              </View>
               <Image source={{ 
                 uri: item.Loan.Student.User.profileUrl ? item.Loan.Student.User.profileUrl : 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZmlsZXxlbnwwfHwwfHw%3D&w=1000&q=80'
                }}
-                     style={{ width : FULL_WIDTH / 2 - 10, height : 100, alignSelf : 'center',borderTopLeftRadius : 5, borderTopRightRadius : 5 }}/> 
+                     style={{ width : FULL_WIDTH / 2.1, height : 100, alignSelf : 'center',borderTopLeftRadius : 5, borderTopRightRadius : 5 }}/> 
               <View style={{ flexDirection : 'row', alignContent : 'flex-start', paddingVertical : 10, paddingHorizontal : 5 }}>
                 <View style={{ marginLeft : 10 }}>
                   <Text style={{ fontSize : 14 , width : FULL_WIDTH / 2 - 30}}>{item.Loan.Student.User.firstname + " " + item.Loan.Student.User.lastname}</Text>
-                  <Text style={{ opacity : 0.5,fontSize : 12,width : FULL_WIDTH / 2 - 30 }}>{item.Loan.Student.SchoolMajor.School.name}</Text>
+                  <Text style={{ opacity : 0.5,fontSize : 12,width : FULL_WIDTH / 2 - 30 }}>{item.Loan.Student.Information.SchoolMajor.School.name}</Text>
                 </View>         
               </View>
               <Progress.Bar progress={paidPercent/100} width={FULL_WIDTH / 2 - 20} style={{ alignSelf : 'center', margin : 5}} color={PRIMARY_COLOR} />  
@@ -228,7 +94,7 @@ export default function MyInvestment({ navigation }) {
             </View>
             <FlatList
                 numColumns={2}
-                data={filterdData}
+                data={dataItems}
                 renderItem={_renderItem}
                 keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
@@ -244,7 +110,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: PRIMARY_COLOR_WHITE,
         elevation : 5,
-        flex : 0.48
+        flex : 0.5
       },
       line : { 
         borderBottomWidth : 1, 

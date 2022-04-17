@@ -25,6 +25,7 @@ import { AppContext } from '../contexts/App';
 import { vndFormat } from "../utils";
 import { investmentApi } from "../apis/investment";
 import { walletApi } from "../apis/wallet";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AdjustInvestment({ navigation,route }) {
     const [money, setMoney] = useState(50000);
@@ -121,8 +122,9 @@ export default function AdjustInvestment({ navigation,route }) {
   );
 
   return (
-    <View
+    <SafeAreaView
       style={{
+        flex : 1,
         height : FULL_HEIGHT,
         backgroundColor : PRIMARY_COLOR_WHITE
       }}
@@ -242,7 +244,7 @@ export default function AdjustInvestment({ navigation,route }) {
           }}
             >Xác nhận</Button> 
       </View>
-    </View> 
+    </SafeAreaView> 
   )
 }
 
