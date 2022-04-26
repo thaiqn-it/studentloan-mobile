@@ -38,6 +38,7 @@ import { Video, AVPlaybackStatus } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from "@react-navigation/native";
 import { AppContext } from '../contexts/App';
+import YoutubePlayer from "react-native-youtube-iframe";
 
 const { width: windowWidth } = Dimensions.get("window");
 const SLIDER_WIDTH = Dimensions.get('window').width;
@@ -48,6 +49,7 @@ export default function DetailPost({ navigation,route }) {
   // const {id} = route.params;
   const scrollY = useRef(new Animated.Value(0)).current;
   const carouselRef = useRef(null);
+  const playerRef = useRef(null);
   const { id } = route.params;
   const [post,setPost] = useState(null)
   const [isInvest,setIsInvest] = useState(null)
@@ -137,6 +139,11 @@ export default function DetailPost({ navigation,route }) {
       label : "Xác nhận từ hệ thống",
       route : "LoanHistory"
     },
+    {
+      id : 3,
+      label : "Bảng điểm",
+      route : "Transcript"
+    }
   ];
 
   const DemandNoteBox = () => {
@@ -425,7 +432,7 @@ export default function DetailPost({ navigation,route }) {
                                   fontWeight: "bold",
                                 }}
                               >
-                                {post.loan.Student.User.lastname + ' ' + post.loan.Student.User.firstname}
+                                {post.loan.Student.User.firstname + ' ' + post.loan.Student.User.lastname}
                               </Text>
                             </View>
                           </View>
@@ -529,7 +536,7 @@ export default function DetailPost({ navigation,route }) {
                                   <Text style={{ marginBottom : 5,fontSize : 16 }}>{post.loan.InvestorCount}</Text>
                                   {
                                     post?.loan.Status === 'FUNDING' && (
-                                      <Text style={{ fontSize : 16 }}>trong {moment(post.loan.postExpireAt).diff(new Date(),"days")} ngày</Text>
+                                      <Text style={{ fontSize : 16 }}>{moment(post.loan.postExpireAt).diff(new Date(),"days")} ngày</Text>
                                     )
                                   }               
                               </View>
@@ -763,7 +770,7 @@ export default function DetailPost({ navigation,route }) {
                                   color : PRIMARY_COLOR_BLACK
                                 }}
                               >
-                                Lãi phạt :
+                                Lãi trả chậm:
                               </Text>
                               <Text
                                 style={{
@@ -792,13 +799,19 @@ export default function DetailPost({ navigation,route }) {
                           post.loan.LoanMedia.map((item,index) => {
                             if (item.type === 'VIDEO') {
                               return (
-                                <Video
-                                style={styles.video}
-                                source={{
-                                  uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
-                                }}
-                                useNativeControls
-                                resizeMode="contain"
+                                // <Video
+                                // style={styles.video}
+                                // source={{
+                                //   uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+                                // }}
+                                // useNativeControls
+                                // resizeMode="contain"
+                                // />
+                                <YoutubePlayer
+                                  ref={playerRef}
+                                  height={FULL_HEIGHT / 3}
+                                  width={FULL_WIDTH}
+                                  videoId={'AVAc1gYLZK0'}
                                 />
                               )
                             }
@@ -877,7 +890,7 @@ export default function DetailPost({ navigation,route }) {
               color={PRIMARY_COLOR}
               onPress={() => navigation.navigate("InvestmentDetail", {
                 investmentId,
-                availableInvest : post.loan.totalMoney - post.loan.AccumulatedMoney
+                availableInvest : post.loan.totalMoney - post.loan.AccumulatedMoney,
               })}
                 >Quản lý</Button> 
             )
@@ -898,7 +911,7 @@ export default function DetailPost({ navigation,route }) {
                     "Thất bại",
                     `Bạn phải xác thực tài khoản để có thể đầu tư.`,
                     [
-                        { text: "OK" }
+                        { text: "Xác nhận" }
                     ]
                   );
                 }      

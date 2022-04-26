@@ -59,6 +59,20 @@ const update = (data) => {
   return defaultInstance.put('/user', data)
 }
 
+const changePassword = (data) => {
+  return defaultInstance.put("/user/change-password", data)
+}
+
+const resetPassword = (data) => {
+  return defaultInstance.put("/user/reset-password", data)
+}
+
+const forgotPassword = (email) => {
+  return defaultInstance.post("/user/forgot-password", {
+    email
+  })
+}
+
 export const userApi = {
     login,
     loginByFb,
@@ -69,6 +83,9 @@ export const userApi = {
     loginByGoogle,
     registerByGog,
     getProfile,
-    update
+    update,
+    changePassword,
+    forgotPassword,
+    resetPassword
 };
   

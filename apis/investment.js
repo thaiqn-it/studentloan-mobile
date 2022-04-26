@@ -24,12 +24,22 @@ const count = () => {
     return defaultInstance.get("/investment/count")
 }
 
+const checkValidMoney = (id,money) => {
+    return defaultInstance.get(`/investment/loan/${id}/check-money`, {
+        params : {
+            loanId : id,
+            money
+        }
+    })
+}
+
 export const investmentApi = {
     findAllByInvestorId,
     create,
     checkExist,
     getOneById,
     updateById,
-    count
+    count,
+    checkValidMoney
 };
   

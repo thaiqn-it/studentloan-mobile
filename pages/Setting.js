@@ -15,6 +15,9 @@ import { Feather,FontAwesome5 } from '@expo/vector-icons'
 import { Icon } from 'react-native-elements';
 import { AppContext } from '../contexts/App';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as SecureStore from "expo-secure-store";
+import { JWT_TOKEN_KEY, resetJWTToken } from '../constants';
+import { useIsFocused } from "@react-navigation/native";
 
 const OPTIONS = [
     {
@@ -25,14 +28,14 @@ const OPTIONS = [
         color: PRIMARY_COLOR,
         size : 22
     },
-    // {
-    //     option: "Verify",
-    //     icon: "verified",
-    //     screen: "Verify",
-    //     type : "material",
-    //     color: "orange",
-    //     size : 22
-    // },
+    {
+        option: "Đổi mặt khẩu",
+        icon: "key-change",
+        screen: "ChangePassword",
+        type : "material-community",
+        color: "orange",
+        size : 22
+    },
     {
         option: "Lịch sử giao dịch",
         icon: "bank-transfer",
@@ -61,6 +64,7 @@ const OPTIONS = [
       option: "Đăng xuất",
       icon: "logout",
       type : "antdesign",
+      screen: "Login",
       color : 'red',
       size : 20
     },
@@ -73,12 +77,9 @@ export default function Setting({navigation}) {
     const [ phone, setPhone ] = useState(null);
     const [ address,setAddress ] = useState(null)
     const scrollY = useRef(new Animated.Value(0)).current;
+    const isFocused = useIsFocused();
     const optionHadleClick = (item) => {
-        item.option === "Logout" ? logout() : navigation.navigate(item.screen);
-    };
-
-    const logout = async () => {
-        
+        item.option === "Đăng xuất" ? logout() : navigation.navigate(item.screen);
     };
 
     const loadUser = () => {
@@ -91,12 +92,22 @@ export default function Setting({navigation}) {
         }
         load();
       };
-      
+
+    useEffect(() => {
+      loadUser()
+    }, [isFocused])
+    
+
+    const logout = async () => {
+        await SecureStore.deleteItemAsync(JWT_TOKEN_KEY);
+        navigation.navigate("Login");
+    };
+ 
       useEffect(() => {
         setName(user.firstName + " " + user.lastName)
         setPhone(user.phoneNumber)
         setEmail(user.email)
-      }, []);
+      }, [isFocused]);
       
     return (
         <SafeAreaView 
@@ -120,20 +131,37 @@ export default function Setting({navigation}) {
                 </View>
             </View>
             <View style={[styles.infoContainer]}>
-                <View style={{ flexDirection: "row", padding : 5 }}>           
-                    <Avatar
-                        rounded
-                        size={90}
-                        source={{
-                            uri: "https://i.pinimg.com/originals/51/f6/fb/51f6fb256629fc755b8870c801092942.png",
-                        }}
-                    />     
+                <View style={{ flexDirection: "row", padding : 5 }}>        
+                    {
+                        user.profileUrl
+                        ?
+                        (
+                            <Avatar
+                                rounded
+                                size={90}
+                                source={{
+                                    uri: user.profileUrl,
+                                }}
+                            />
+                        )
+                        :
+                        (
+                            <Avatar
+                                rounded
+                                size={90}
+                                source={{
+                                    uri: "https://i.pinimg.com/originals/51/f6/fb/51f6fb256629fc755b8870c801092942.png",
+                                }}
+                            />
+                        )
+
+                    }   
                     <View>
                         <Text style={styles.lbName}>{name}</Text>
                         <Text
                              style={{ color : PRIMARY_COLOR_BLACK, marginLeft: 20, marginTop: 5, marginRight : 70 }}
                             >
-                            Quận 9 , TP Ho Chi Minh
+                            {user.address}
                         </Text>
                     </View>
                 </View>     

@@ -1,5 +1,5 @@
 import React, {useRef,useState,useEffect,useContext} from 'react'
-import { StyleSheet, Text, View,ScrollView,TouchableOpacity, Image} from 'react-native'
+import { StyleSheet, Text, View,ScrollView,TouchableOpacity, Image,Alert } from 'react-native'
 import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_BLACK, PRIMARY_COLOR_WHITE, SECONDARY_COLOR } from '../constants/styles'
 import { Ionicons,Entypo,Fontisto,FontAwesome5,Feather  } from '@expo/vector-icons';
 import { Input,Overlay, useTheme } from 'react-native-elements';
@@ -142,6 +142,13 @@ export default function Profile({ navigation }) {
         } finally{
             loadUser()
             setIsLoading(false)
+            Alert.alert(
+                "Thành công",
+                "Bạn đã cập nhật tài khoản thành công.",
+                [
+                  { text: "Xác nhận", onPress : () => navigation.navigate("Setting")}
+                ]
+              );
         }
         
     }
@@ -234,16 +241,16 @@ export default function Profile({ navigation }) {
 
                         <Text style={styles.informationText}>Họ :</Text>
                         <Input
-                            value={lastName}
-                            onChangeText={value => setLastName(value)}
+                            value={firstName}
+                            onChangeText={value => setFirstName(value)}
                             placeholder='Nhập họ'
                             inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
                             containerStyle= {styles.input}
                         />
                         <Text style={styles.informationText}>Tên :</Text>
                         <Input
-                            value={firstName}
-                            onChangeText={value => setFirstName(value)}
+                            value={lastName}
+                            onChangeText={value => setLastName(value)}
                             placeholder='Nhập tên'
                             inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
                             containerStyle= {styles.input}

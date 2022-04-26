@@ -33,8 +33,8 @@ import * as Notifications from 'expo-notifications';
 
 export default function Login() {
     const navigation = useNavigation()
-    const [email, setEmail] = useState("qthai20102000@gmail.com");
-    const [password,setPassword] = useState("123")
+    const [email, setEmail] = useState("");
+    const [password,setPassword] = useState("")
     const [showPassword,setShowPassword] = useState(false)
     const [isLoading,setIsLoading] = useState(false)
     const USER_TYPE = 'INVESTOR'
@@ -269,7 +269,7 @@ export default function Login() {
                             }}
                             onPress={() => loginHandler(navigation)}
                         />
-                        <Text
+                        {/* <Text
                             h4
                             style={{
                                 textAlign: "center",
@@ -298,7 +298,7 @@ export default function Login() {
                                     size = {50}
                                 />
                             </TouchableOpacity>                                          
-                        </View>                   
+                        </View>                    */}
                     </KeyboardAvoidingView>
                 </View>            
             </View>  
@@ -342,6 +342,7 @@ const styles = StyleSheet.create({
         alignSelf : 'center',
         padding: 15,
         backgroundColor: PRIMARY_COLOR,
+        marginTop : 30
     },
     socialLoginBtn : {
         flexDirection : 'row',

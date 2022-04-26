@@ -91,7 +91,7 @@ export default function Home({ route, navigation }) {
           </View>
 
           <View style={{ flexDirection : 'row', paddingHorizontal : 15 }}>
-            <View>
+            {/* <View>
               <View style={{ 
                   height : 40,
                   width : FULL_WIDTH - 80,
@@ -155,8 +155,8 @@ export default function Home({ route, navigation }) {
                     <Text style={{ color : PRIMARY_COLOR_WHITE,fontSize : 16, fontWeight : 'bold'   }}>20.000đ</Text>
                   </View>
               </Animatable.View>
-            </View>
-            <TouchableOpacity style={{ zIndex : 200 }} onPress={() => {
+            </View> */}
+            {/* <TouchableOpacity style={{ zIndex : 200 }} onPress={() => {
                 if(isDown) {
                   setIsDown(false)
                   topContainerRef.current.transitionTo({ height : 250 }, 400)
@@ -189,9 +189,9 @@ export default function Home({ route, navigation }) {
                   }
                   
                 </View>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
-          <View style={{
+          {/* <View style={{
             position : 'absolute',
             bottom : -10,
             backgroundColor : PRIMARY_COLOR,
@@ -210,27 +210,28 @@ export default function Home({ route, navigation }) {
             alignSelf : 'center',
             opacity : 0.15,
             borderRadius : 10,
-          }}/> 
+          }}/>  */}
         </Animatable.View>
         {
           loading
           ?
           (
-            <ActivityIndicator size={'large'} style={{ marginTop : 50 }} color={PRIMARY_COLOR}/>
+            <ActivityIndicator size={'large'} style={{ marginTop : 40 }} color={PRIMARY_COLOR}/>
           )
           :
           (
             <ScrollView 
-              style={{ marginTop : 30 }} 
+              style={{ marginTop : 20 }} 
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: FULL_HEIGHT / 30 }}
-              onScrollBeginDrag={() => {
-                setIsDown(true)
-                topContainerRef.current.transitionTo({ height : FULL_HEIGHT * 0.5 / 3,}, 400)
-                WithdrawMoneyRef.current.transitionTo({ translateY : 0 }, 500)
-                EarnedMoneyRef.current.transitionTo({ translateY : 0 }, 400)
-                InvestMoneyRef.current.transitionTo({ translateY : 0 }, 300)
-              }}>
+              // onScrollBeginDrag={() => {
+              //   setIsDown(true)
+              //   topContainerRef.current.transitionTo({ height : FULL_HEIGHT * 0.5 / 3,}, 400)
+              //   WithdrawMoneyRef.current.transitionTo({ translateY : 0 }, 500)
+              //   EarnedMoneyRef.current.transitionTo({ translateY : 0 }, 400)
+              //   InvestMoneyRef.current.transitionTo({ translateY : 0 }, 300)
+              // }}
+              >
                 { transaction?.map(item => {
                   return(
                     <View key={item.date}>
@@ -243,17 +244,32 @@ export default function Home({ route, navigation }) {
                             })}>
                               <View style={{ flex : 0.15 }}>
                                 {
-                                  data.description === "Paypal" 
+                                  data.senderName === "Paypal" || data.recipientName === "Paypal"
                                   ? (        
                                     <Image 
                                       style={{ height : 50, width : 50, borderRadius : 50, elevation : 5 }}
                                       source={{ uri : 'https://play-lh.googleusercontent.com/iQ8f5plIFy9rrY46Q2TNRwq_8nCvh9LZVwytqMBpOEcfnIU3vTkICQ6L1-RInWS93oQg' }}/>                 
                                   ) 
-                                  :(
-                                    <View style={styles.nameIcon}>
-                                      <Text>QT</Text>
-                                    </View>
-                                  )
+                                  :
+                                    data.type === "TRANSFER"
+                                    ?
+                                    (
+                                      <Image 
+                                      style={{ height : 40, width : 40 }}
+                                      source={require('../assets/decrease.png')}/>
+                                    )
+                                    :
+                                    (
+                                      <Image 
+                                      style={{ height : 40, width : 40}}
+                                      source={require('../assets/increase.png')}/>
+                                    )
+                                  // (
+
+                                  //   <View style={styles.nameIcon}>
+                                  //     <Text>QT</Text>
+                                  //   </View>
+                                  // )
                                 }          
                               </View>
                               <View style={{ flex : 0.85 }}>
@@ -311,7 +327,8 @@ export default function Home({ route, navigation }) {
 
 const styles = StyleSheet.create({
   topContainer : {
-      height : FULL_HEIGHT * 0.5 / 3,
+      // height : FULL_HEIGHT * 0.5 / 3,
+      height : FULL_HEIGHT * 0.3 / 4,
       backgroundColor : PRIMARY_COLOR,
       borderBottomLeftRadius : 25,
       borderBottomRightRadius : 25,

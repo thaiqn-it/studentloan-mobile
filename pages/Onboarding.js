@@ -5,7 +5,8 @@ import {
     View,
     FlatList,
     Animated,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native'
 import Svg, { G,Circle } from 'react-native-svg'
 import { AntDesign } from '@expo/vector-icons'
@@ -15,6 +16,9 @@ import OnboardingItem from '../components/OnboardingItem'
 import Paginator from '../components/Paginator'
 import { PRIMARY_COLOR, PRIMARY_COLOR_WHITE } from '../constants/styles'
 import onboardingData from '../data/onboardingData'
+import * as SecureStore from "expo-secure-store";
+import { ONBOARDING_VIEW } from '../constants';
+import AppLoading from '../components/AppLoading';
 
 const NextButton = ({ percent,scrollTo }) => {
     const size = 120;
@@ -78,9 +82,23 @@ const NextButton = ({ percent,scrollTo }) => {
 
 export default function Onboarding() {
     const [ currentIndex, setCurrentIndex ] = useState(0);
+    const [ isLoading, setIsLoaing ] = useState(true);
     const scrollX = useRef(new Animated.Value(0)).current;
     const sildeRef = useRef(null)
     const navigation = useNavigation()
+
+    useEffect(() => {
+        async function load() {
+            SecureStore.getItemAsync(ONBOARDING_VIEW).then(res => {
+                if (res == 'viewed') {
+                    navigation.navigate("Login")
+                } else {
+                    setIsLoaing(false)
+                }
+            }) 
+        }
+        load()
+    }, [])
 
     const viewableItemsChanged = useRef(({ viewableItems }) => {
         setCurrentIndex(viewableItems[0].index)
@@ -88,35 +106,48 @@ export default function Onboarding() {
 
     const viewConfig = useRef({ viewAreaCoveragePercentThreshold : 50 }).current
 
-    const scrollTo = () => {
+    const scrollTo = async () => {
         if (currentIndex < onboardingData.length - 1) {
             sildeRef.current.scrollToIndex({ index : currentIndex + 1})
         } else {
+            await SecureStore.setItemAsync(ONBOARDING_VIEW, 'viewed');
             navigation.navigate("Login")
         }
     }
 
     return (
         <View style={styles.container}>
-            <View style={{ flex : 3 }}>
-                <FlatList data={onboardingData}
-                        renderItem={({ item }) => <OnboardingItem  item={item}/>}
-                        horizontal
-                        pagingEnabled
-                        showsHorizontalScrollIndicator={false}
-                        bounces={false}
-                        keyExtractor={(item) => item.id}
-                        onScroll={Animated.event([{ nativeEvent : { contentOffset : { x : scrollX }}}], {
-                            useNativeDriver : false,
-                        })}
-                        scrollEventThrottle={32}
-                        onViewableItemsChanged={viewableItemsChanged}
-                        viewabilityConfig={viewConfig}
-                        ref={sildeRef}
-                        />
-            </View>
-            <Paginator data={onboardingData} scrollX={scrollX}/>
-            <NextButton scrollTo={scrollTo} percent={(currentIndex + 1) * (100 / onboardingData.length)}/>
+            {
+                isLoading === true
+                ?
+                (
+                    <ActivityIndicator size={"large"} color={PRIMARY_COLOR}/>
+                )
+                :
+                (
+                    <View style={styles.container}>
+                        <View style={{ flex : 3 }}>
+                        <FlatList data={onboardingData}
+                                renderItem={({ item }) => <OnboardingItem  item={item}/>}
+                                horizontal
+                                pagingEnabled
+                                showsHorizontalScrollIndicator={false}
+                                bounces={false}
+                                keyExtractor={(item) => item.id}
+                                onScroll={Animated.event([{ nativeEvent : { contentOffset : { x : scrollX }}}], {
+                                    useNativeDriver : false,
+                                })}
+                                scrollEventThrottle={32}
+                                onViewableItemsChanged={viewableItemsChanged}
+                                viewabilityConfig={viewConfig}
+                                ref={sildeRef}
+                                />
+                        </View>
+                        <Paginator data={onboardingData} scrollX={scrollX}/>
+                        <NextButton scrollTo={scrollTo} percent={(currentIndex + 1) * (100 / onboardingData.length)}/>
+                    </View>
+                )
+            }           
         </View>
     )
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import Login from "../Login";
 import TabNavigator from "../navigations/TabNavigator";
@@ -29,10 +29,12 @@ import Notification from "../Notification";
 import Evidence from "../Evidence";
 import LoanHistory from "../LoanHistory";
 import AdjustInvestment from "../AdjustInvestment";
+import ResetPassword from "../ResetPassword";
+import Transcript from "../Transcript";
 
 const Stack = createStackNavigator();
 
-export default function AppStack() {
+export default function AppStack() {  
     return (
         <Stack.Navigator initialRouteName={"Onboarding"}>
             <Stack.Screen
@@ -227,6 +229,20 @@ export default function AppStack() {
               <Stack.Screen
                 name={"AdjustInvestment"}
                 component={AdjustInvestment}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name={"ResetPassword"}
+                component={ResetPassword}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name={"Transcript"}
+                component={Transcript}
                 options={{
                   headerShown: false,
                 }}

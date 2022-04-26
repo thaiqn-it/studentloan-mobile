@@ -14,7 +14,7 @@ import Wallet from "../Wallet";
 
 const TabbarArr = [
     { route: 'Trang chủ', label: 'Trang chủ', type: 'antdesign', icon: 'home',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: Home },
-    { route: 'MyInvestment', label: 'Hợp đồng', type: 'entypo', icon: 'text-document',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: MyInvestment },
+    { route: 'MyInvestment', label: 'Các khoản đầu tư', type: 'entypo', icon: 'text-document',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: MyInvestment },
     { route: 'Wallet', label: 'Ví', type: 'antdesign', icon: 'wallet',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: Wallet },
     { route: 'Setting', label: 'Cài đặt', type: 'feather', icon: 'settings',activeColor : PRIMARY_COLOR_WHITE, inActiveColor : PRIMARY_COLOR_BLACK, component: Setting },
   ];

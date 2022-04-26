@@ -9,7 +9,7 @@ import Svg, { G,Circle } from 'react-native-svg'
 import { vndFormat } from '../utils'
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function Analytic() {
+export default function Analytic({ navigation, route }) {
     const [analytics, setAnalytics] = useState(null)
 
     const chartConfig = {
@@ -86,7 +86,7 @@ export default function Analytic() {
                     <TouchableOpacity
                         style={{ flexDirection : 'row', alignSelf : 'center', position : 'absolute', left : 20, alignItems : 'center' }}
                         onPress={() => {
-                        navigation.goBack(); 
+                            navigation.goBack(); 
                         }}
                     >
                         <FontAwesome5

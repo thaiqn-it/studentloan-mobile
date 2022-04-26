@@ -85,6 +85,8 @@ export default function DepositMoney({ navigation, route }) {
             .then(res => {
                 setPaypalUrl(res.data)
                 setModalVisible(true)
+            }).catch(err => {
+                Alert.alert("Không thể thực hiện", err.response.data.error);
             })
     }
 

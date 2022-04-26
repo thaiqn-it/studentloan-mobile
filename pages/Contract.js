@@ -19,7 +19,8 @@ export default function Contract({ navigation, route }) {
     
     const contractItem = ({item}) => (
         <TouchableOpacity style={styles.item} onPress={() => navigation.navigate("ContractDetail",{
-          contractUrl : item.contractUrl
+          contractUrl : item.contractUrl,
+          investmentId : item.Investment.id
         })}>
             <View style={{ flexDirection : 'row' }}>
                 <Text style={{ fontSize : 16 }}>Số hợp đồng : </Text>

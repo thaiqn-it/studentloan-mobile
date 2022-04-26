@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Animated, FlatList,TouchableOpacity, TextInput} from 'react-native';
+import { StyleSheet, Text, View, Animated, FlatList,TouchableOpacity, TextInput, Image } from 'react-native';
 import { Avatar,CheckBox } from 'react-native-elements';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
@@ -177,7 +177,7 @@ export default function Invest({ navigation, route }) {
                   }}
                 />
                 <View style={{ marginLeft : 10 }}>
-                  <Text style={{ fontSize : 15 }}>{item.Student.User.lastname + ' ' + item.Student.User.firstname}</Text>
+                  <Text style={{ fontSize : 15 }}>{item.Student.User.firstname + ' ' + item.Student.User.lastname}</Text>
                   <Text style={{ opacity : 0.5,fontSize : 13 }}>{item?.Student?.Information?.SchoolMajor?.School.name}</Text>
                   <Text style={{ opacity : 0.5,fontSize : 13 }}>{item?.Student?.Information?.SchoolMajor?.Major.name}</Text>
                 </View>         
@@ -313,7 +313,7 @@ export default function Invest({ navigation, route }) {
                       values={[multiSliderValue[0], multiSliderValue[1]]}
                       sliderLength={FULL_WIDTH - 80}
                       onValuesChange={multiSliderValuesChange}
-                      min={5000000}
+                      min={500000}
                       max={200000000}
                       step={50000}   
                       markerStyle={{ height : 20, width : 20}}
@@ -408,24 +408,38 @@ export default function Invest({ navigation, route }) {
             </View>
         </RBSheet>        
       </View>
-     
-      <Animated.FlatList
-        onScroll={Animated.event(
-          [{ nativeEvent : { contentOffset : { y : scrollY }}}],
-          { useNativeDriver : true }
-        )}
-        data={loans}
-        renderItem={_renderItem}
-        ref={listRef}
-        keyExtractor={(item) => item.id.toString()}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ marginTop : 20 , paddingBottom : 50 }}
-      />
-      <Animated.View style={[styles.toTopBotton,{opacity},{zIndex}]}>
-        <TouchableOpacity onPress={ScrollToTop}>
-          <MaterialIcons name="keyboard-arrow-up" size={40} color="black" />
-        </TouchableOpacity>
-      </Animated.View>
+      {
+        loans.length > 0
+        ?
+          <Animated.FlatList
+            onScroll={Animated.event(
+              [{ nativeEvent : { contentOffset : { y : scrollY }}}],
+              { useNativeDriver : true }
+            )}
+            data={loans}
+            renderItem={_renderItem}
+            ref={listRef}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ marginTop : 20 , paddingBottom : 50 }}
+          />
+        :
+        <View style={{ justifyContent : 'center', flex : 1,alignItems : 'center' }}>
+            <Image source={require('../assets/no-results.png')} style={{ height : FULL_HEIGHT / 2.3, width : FULL_WIDTH / 1.2  }}/>
+            <Text style={{ fontWeight : 'bold', fontSize : 18, textAlign : 'center', marginTop : 30 }}>Không tìm thấy kết quả nào. Vui lòng thử lại</Text>
+        </View>
+      }
+      {
+        loans.length > 0
+        &&
+        (
+          <Animated.View style={[styles.toTopBotton,{opacity},{zIndex}]}>
+            <TouchableOpacity onPress={ScrollToTop}>
+              <MaterialIcons name="keyboard-arrow-up" size={40} color="black" />
+            </TouchableOpacity>
+          </Animated.View>
+        )
+      }    
     </SafeAreaView>
   );
 }

@@ -12,6 +12,7 @@ import { loanScheduleApi } from '../apis/loanSchedule';
 import { Button } from 'react-native-paper';
 import moment from 'moment';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Notifications from 'expo-notifications';
 
 export default function InvestmentDetail({ navigation, route }) {
     const portfolloView = useRef(null)
@@ -36,6 +37,20 @@ export default function InvestmentDetail({ navigation, route }) {
                 })
             })
     }, [])
+
+    useEffect(() => {  
+          const subscription = Notifications.addNotificationReceivedListener(notification => {
+            investmentApi
+                .getOneById(investmentId)
+                .then(res => {
+                    setInvestment(res.data)
+                    loanScheduleApi.getAllByLoanId(res.data.loanId).then(res => {
+                        setLoanSchedules(res.data)
+                    })
+                })
+          });
+          return () => subscription.remove();
+      }, [])
     
     const convertStatus = (status) => {
         var result = "";
@@ -74,7 +89,7 @@ export default function InvestmentDetail({ navigation, route }) {
                     (
                         <ScrollView 
                             style={[
-                                investment?.status === 'PENDING' 
+                                investment?.status === 'PENDING' || 'INVESTED'
                                 ? 
                                 { height : FULL_HEIGHT - (StatusBar.currentHeight + 40 + FULL_HEIGHT * 0.3 / 4) - FULL_HEIGHT / 10 }
                                 :
@@ -133,8 +148,8 @@ export default function InvestmentDetail({ navigation, route }) {
                                         <Text style={{ fontSize : 16, textAlign : 'center',marginTop : 5, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{investment.Loan.interest * 100}%</Text>
                                     </View>
                                     <View style={{ margin : 5 }}>
-                                        <Text style={{ fontSize : 15, textAlign : 'center',opacity : 0.7 }}>Tiền phạt</Text>
-                                        <Text style={{ fontSize : 16, textAlign : 'center',marginTop : 5, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(0)}</Text>
+                                        <Text style={{ fontSize : 15, textAlign : 'center',opacity : 0.7 }}>Lãi trả chậm</Text>
+                                        <Text style={{ fontSize : 16, textAlign : 'center',marginTop : 5, color : PRIMARY_COLOR, fontWeight : 'bold' }}>{vndFormat.format(investment.Loan.PenaltySum)}</Text>
                                     </View>
                                 </View>    
                             </View>
@@ -263,29 +278,44 @@ export default function InvestmentDetail({ navigation, route }) {
             <View style={{ marginTop : 20, backgroundColor : PRIMARY_COLOR_WHITE, elevation : 2, marginHorizontal : 20, borderLeftWidth : 4, borderLeftColor : PRIMARY_COLOR, borderRadius : 5, padding : 10 }}>       
                 <View style={{ flexDirection : 'row', justifyContent : 'space-between' }}>
                     <Text style={{ fontWeight : 'bold', fontSize : 15}}>{moment(item.startAt).format('DD/MM/YYYY')} - {moment(item.endAt).format('DD/MM/YYYY')}</Text>
-                    {
-                        item.status === 'ONGOING'
-                        ?
-                        <Image source={require('../assets/schedule-ongoing.png')} style={{ height : 20, width : 20 }}/>
-                        :
-                        (
+                    <View style={{ flexDirection : 'row', alignItems : 'center' }}>
+                        {
                             item.status === 'COMPLETED'
-                            ?
+                            &&
                             (
-                                <Image source={require('../assets/schedule-completed.png')} style={{ height : 30, width : 30 }}/>
+                                <TouchableOpacity onPress={() => {
+                                    navigation.navigate("TransactionInfo", {
+                                        transactionId : item.LoanScheduleTransactions[0].Transaction.id
+                                    })
+                                }}>
+                                    <Image source={require('../assets/transaction2.png')} style={{ height : 30, width : 30, marginRight : 10 }}/>
+                                </TouchableOpacity>
                             )
+                        }
+                        {
+                            item.status === 'ONGOING'
+                            ?
+                            <Image source={require('../assets/schedule-ongoing.png')} style={{ height : 20, width : 20 }}/>
                             :
                             (
-                                <Image source={require('../assets/schedule-incompleted.png')} style={{ height : 30, width : 30 }}/>
+                                item.status === 'COMPLETED'
+                                ?
+                                (
+                                    <Image source={require('../assets/schedule-completed.png')} style={{ height : 30, width : 30 }}/>
+                                )
+                                :
+                                (
+                                    <Image source={require('../assets/schedule-incompleted.png')} style={{ height : 30, width : 30 }}/>
+                                )
                             )
-                        )
-                        
-                    }
+                            
+                        }
+                    </View>
                 </View>
                 <Text style={{ marginTop: 20, fontSize : 17, fontWeight : 'bold', color : PRIMARY_COLOR }}>{vndFormat.format(item.money * investment.percent + item.penaltyMoney * investment.percent )}</Text>
                 <View style={{ flexDirection : 'row', marginTop : 5, justifyContent : 'space-between' }}>
                     <Text style={{ fontSize : 15, opacity : 0.5 }}>Tiền lãi : {vndFormat.format((item.money * investment.percent * investment.Loan.interest * investment.Loan.duration) / (1 + investment.Loan.interest * investment.Loan.duration))}</Text>
-                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Lãi trễ hạn : {vndFormat.format(item.penaltyMoney * investment.percent )}</Text>
+                    <Text style={{ fontSize : 15, opacity : 0.5 }}>Lãi trả chậm : {vndFormat.format(item.penaltyMoney * investment.percent )}</Text>
                 </View>           
             </View>
         )
@@ -296,7 +326,7 @@ export default function InvestmentDetail({ navigation, route }) {
                 renderItem={scheduleItem}
                 keyExtractor={(item) => item.id.toString()}     
                 contentContainerStyle={[
-                    investment?.status === 'PENDING'
+                    investment?.status === 'PENDING' || 'INVESTED'
                     ?
                     { paddingBottom : FULL_HEIGHT / 10 + 20 }
                     :
@@ -425,7 +455,7 @@ export default function InvestmentDetail({ navigation, route }) {
                     portfolloView.current.transitionTo({ translateX : -(FULL_WIDTH) })
                     calendarView.current.transitionTo({ translateX : -(FULL_WIDTH) })
                     // reportView.current.transitionTo({ translateX : 0 })
-                    plate.current.transitionTo({ translateX : 87 })
+                    plate.current.transitionTo({ translateX : 78 })
                     portfolloText.current.transitionTo({ opacity : 0.4, scale : 1})
                     calendarText.current.transitionTo({ opacity : 1, scale : 1.1})
                     // reportText.current.transitionTo({ opacity : 0.4, scale : 1 })
@@ -449,11 +479,24 @@ export default function InvestmentDetail({ navigation, route }) {
                 <Animatable.View ref={portfolloView} style={{ width : FULL_WIDTH, height : FULL_HEIGHT - (StatusBar.currentHeight + 40 + FULL_HEIGHT * 0.3 / 4) }}> 
                     <PortfolloView />
                 </Animatable.View>
-                <Animatable.View ref={calendarView} style={{ width : FULL_WIDTH, height : FULL_HEIGHT - (StatusBar.currentHeight + 40 + FULL_HEIGHT * 0.3 / 4) }}>
-                    <CalendarView />
+                <Animatable.View ref={calendarView} style={{ width : FULL_WIDTH, height : FULL_HEIGHT - (StatusBar.currentHeight + 40 + FULL_HEIGHT * 0.3 / 4) }}>               
+                    {
+                        investment?.status === 'INVESTED' || investment?.status === 'FINISH'
+                        ?
+                        (
+                            <CalendarView />
+                        )
+                        :
+                        (
+                            <View style={{ justifyContent : 'center', flex : 1,alignItems : 'center' }}>
+                                <Image source={require('../assets/no-schedules.png')} style={{ height : FULL_HEIGHT / 2.6, width : FULL_WIDTH / 1.38 }}/>
+                                <Text style={{ fontWeight : 'bold', fontSize : 18, textAlign : 'center', marginTop : 30 }}>Chưa có kỳ hạn trả vay cụ thể.</Text>
+                            </View>
+                        )
+                    }
                 </Animatable.View>
                 <Animatable.View ref={reportView} style={{ width : FULL_WIDTH, backgroundColor : PRIMARY_COLOR_WHITE }}>
-                    <ReportView />
+                    <ReportView />                
                 </Animatable.View>             
             </View>
             {
@@ -495,7 +538,23 @@ export default function InvestmentDetail({ navigation, route }) {
                                 >Hủy đầu tư</Button>      
                     </View>
                 )
-            }       
+            }   
+            {
+                investment?.status === 'INVESTED' && (
+                <View
+                    style={styles.btnContainer}
+                    >  
+                            <Button
+                                style={styles.btnViewContract}
+                                color={PRIMARY_COLOR}
+                                onPress={() => navigation.navigate("ContractDetail", {
+                                    investmentId : investment.id,
+                                    contractUrl : investment.Contract.contractUrl
+                            })}
+                                >Xem hợp đồng</Button>        
+                    </View>
+                )
+            }    
         </SafeAreaView>
     )
 }
@@ -579,8 +638,16 @@ const styles = StyleSheet.create({
         justifyContent : 'center',
         flexDirection : 'row'
     },
-        btnInvest : {
-        width : FULL_WIDTH / 2 - 40,
+    btnInvest : {
+        width : FULL_WIDTH / 2.5,
+        borderRadius : 5,
+        borderWidth : 1.2,
+        marginHorizontal : 15,
+        alignSelf : 'center',
+        borderColor : PRIMARY_COLOR,
+    },
+    btnViewContract : {
+        width : FULL_WIDTH / 1.5,
         borderRadius : 5,
         borderWidth : 1.2,
         marginHorizontal : 20,

@@ -28,28 +28,28 @@ import { walletApi } from "../apis/wallet";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AdjustInvestment({ navigation,route }) {
-    const [money, setMoney] = useState(50000);
+    const [money, setMoney] = useState(500000);
     const [ wallet,setWallet ] = useState(null)
-  const [limit, setLimit] = useState([
+    const [limit, setLimit] = useState([
     {
       id: 1,
-      limitMoney: 50000,
-    },
-    {
-      id: 2,
-      limitMoney: 100000,
-    },
-    {
-      id: 3,
-      limitMoney: 200000,
-    },
-    {
-      id: 4,
       limitMoney: 500000,
     },
     {
-      id: 5,
+      id: 2,
       limitMoney: 1000000,
+    },
+    {
+      id: 3,
+      limitMoney: 2000000,
+    },
+    {
+      id: 4,
+      limitMoney: 5000000,
+    },
+    {
+      id: 5,
+      limitMoney: 10000000,
     },
     {
       id: 6,
@@ -67,35 +67,39 @@ export default function AdjustInvestment({ navigation,route }) {
   };
 
   const confirmInvestHandler = () => {
-    if (wallet?.money > parseInt(money)){
-      if ((parseInt(money) - parseInt(investingMoney)) <= parseInt(availableInvest))  {        
-        investmentApi.updateById(investmentId,{
-            total : money,
-            percent : parseInt(money) / parseInt(total)
-        }).finally(() => {
+    if (wallet?.money - wallet?.totalPending >= parseInt(money)){    
+      investmentApi.getOneById(investmentId).then(res => {
+        investmentApi.checkValidMoney(res.data.Loan.id, money).then(res => {
+          if (res.data.status) {
+            investmentApi.updateById(investmentId,{
+              total : money,
+              percent : parseInt(money) / parseInt(total)
+            }).finally(() => {
+                Alert.alert(
+                  "Thành công",
+                  "Bạn đã điểu chỉnh mức đầu tư thành công",
+                  [
+                    { text: "Xác nhận" }
+                  ]
+                );
+              })
+          } else {
             Alert.alert(
-              "Thành công",
-              "Bạn đã điểu chỉnh mức đầu tư thành công",
+              "Thất bại",
+              `${res.data.message}`,
               [
-                { text: "OK" }
+                  { text: "Xác nhận" }
               ]
             );
-          })
-      } else {
-        Alert.alert(
-            "Thất bại",
-            `Bạn không thể đầu tư lớn hơn ${vndFormat.format(parseInt(availableInvest) + parseInt(investingMoney))}.`,
-            [
-                { text: "OK" }
-            ]
-        );
-      }           
+          }
+        })         
+      })               
     } else {
       Alert.alert(
         "Thất bại",
         `Số dư ví không đủ.`,
         [
-            { text: "OK" }
+            { text: "Xác nhận" }
         ]
     );
     }
@@ -174,7 +178,7 @@ export default function AdjustInvestment({ navigation,route }) {
                 buttonFontSize={35}
                 width={350}
                 height={60}
-                min={50000}
+                min={500000}
                 max={wallet?.money - wallet?.totalPending}
                 step={50000}
                 value={money}

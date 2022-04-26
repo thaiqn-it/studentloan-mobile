@@ -31,7 +31,7 @@ const nextBtnHandler = (navigation) => {
 }
 
 export default function Verification({ navigation, route }) {
-    const { secret,fb_access_token,phoneNumber,user,gg_access_token } = route.params;
+    const { secret,fb_access_token,phoneNumber,user,gg_access_token,type,email } = route.params;
     const [ isResend, setIsResend ] = useState(true)
     const [value, setValue] = useState('');
     const [isLoading,setIsLoading] = useState(false)
@@ -43,71 +43,80 @@ export default function Verification({ navigation, route }) {
     let userData = null
     const ConfirmBtnHandler = async () => {
         setIsLoading(true)
-        if (!isResend) {
-            
-        } else {
-            const res= await userApi.verifyOTP({
-                token : value,
-                secret : secret
-            })
-            if (res.data.isValid) {
-                if (user !== undefined) {
-                    if (fb_access_token !== undefined) {
-                        userData = await userApi.registerByFb({
-                            access_token : fb_access_token,
-                            phoneNumber : phoneNumber,
-                            type : 'INVESTOR',
-                            password : user.password
-                        })                       
-                    } else if (gg_access_token !== undefined) {
-                        userData = await userApi.registerByGog({
-                            access_token : gg_access_token,
-                            phoneNumber : phoneNumber,
-                            type : 'INVESTOR',
-                            password : user.password
-                        })  
-                    } else {
-                        userData = await userApi.register({
-                            email : user.email,
-                            phoneNumber : phoneNumber,
-                            type : 'INVESTOR',
-                            password : user.password
-                    })
-                    }
-
-                    if (userData.data.id) {
-                        await investorApi.create({                
-                            userId : userData.data.id,
-                            profileUrl : userData.data.profileUrl,
-                            firstName : user.firstName,
-                            lastName : user.lastName
-                        })
-                
-                        let tokenRes = "";
-                        if (fb_access_token !== undefined) {
-                            tokenRes = await userApi.loginByFb({
-                                access_token : fb_access_token
-                            })
-                        } else if (gg_access_token !== undefined) {
-                            tokenRes = await userApi.loginByGoogle({
-                                access_token : gg_access_token
-                            })
-                        } else {
-                            tokenRes = await userApi.login(user.email,user.password)
-                        }
-                        await SecureStore.setItemAsync(JWT_TOKEN_KEY, tokenRes.data.token);
-                        await loadToken();
-                        navigation.navigate("HomeTab")
-                    }
-                } else {
-                    navigation.navigate("Forgot")
-                }          
-            } else {
-                setIsLoading(false)
-                Alert.alert("Wrong code")
+        const res= await userApi.verifyOTP({
+            token : value,
+            secret : secret
+        })
+     
+        if (res.data.isValid) {
+            if (type === 'FORGOT_PASSWORD') {
+                navigation.navigate("ResetPassword", {
+                    email
+                })
             }
+        } else {
             setIsLoading(false)
-        }   
+            Alert.alert("Sai mã xác nhận")
+        }
+
+        // if (res.data.isValid) {
+        //     if (user !== undefined) {
+        //         if (fb_access_token !== undefined) {
+        //             userData = await userApi.registerByFb({
+        //                 access_token : fb_access_token,
+        //                 phoneNumber : phoneNumber,
+        //                 type : 'INVESTOR',
+        //                 password : user.password
+        //             })                       
+        //         } else if (gg_access_token !== undefined) {
+        //             userData = await userApi.registerByGog({
+        //                 access_token : gg_access_token,
+        //                 phoneNumber : phoneNumber,
+        //                 type : 'INVESTOR',
+        //                 password : user.password
+        //             })  
+        //         } else {
+        //             userData = await userApi.register({
+        //                 email : user.email,
+        //                 phoneNumber : phoneNumber,
+        //                 type : 'INVESTOR',
+        //                 password : user.password
+        //         })
+        //         }
+
+        //         if (userData.data.id) {
+        //             await investorApi.create({                
+        //                 userId : userData.data.id,
+        //                 profileUrl : userData.data.profileUrl,
+        //                 firstName : user.firstName,
+        //                 lastName : user.lastName
+        //             })
+            
+        //             let tokenRes = "";
+        //             if (fb_access_token !== undefined) {
+        //                 tokenRes = await userApi.loginByFb({
+        //                     access_token : fb_access_token
+        //                 })
+        //             } else if (gg_access_token !== undefined) {
+        //                 tokenRes = await userApi.loginByGoogle({
+        //                     access_token : gg_access_token
+        //                 })
+        //             } else {
+        //                 tokenRes = await userApi.login(user.email,user.password)
+        //             }
+        //             await SecureStore.setItemAsync(JWT_TOKEN_KEY, tokenRes.data.token);
+        //             await loadToken();
+        //             navigation.navigate("HomeTab")
+        //         }
+        //     } else {
+        //         navigation.navigate("Forgot")
+        //     }          
+        // } else {
+        //     setIsLoading(false)
+        //     Alert.alert("Wrong code")
+        // }
+        setIsLoading(false)
+         
     }
 
     return (
@@ -115,7 +124,7 @@ export default function Verification({ navigation, route }) {
             <View>
                 <LottieView source={LOCK_LOTTIE} style={styles.lottie} autoPlay loop/>
             </View>    
-            <Text style={styles.text}>Please enter your verification code</Text> 
+            <Text style={styles.text}>Nhập mã xác nhận</Text> 
             <KeyboardAvoidingView
                     style={{
                         marginTop: 20,
@@ -140,19 +149,9 @@ export default function Verification({ navigation, route }) {
                     </Text>
                     )}
                 />       
-                <Timer changeResend={(result) => setIsResend(result)}/>
                 <AppLoading isLoading={isLoading}/>
                 <Button
-                    disabled={isResend}
-                    title={"Resend OTP"}
-                    buttonStyle={styles.btnNext}
-                    titleStyle={{
-                        fontFamily: PRIMARY_FONT,
-                    }}
-                    onPress={() => nextBtnHandler(navigation)}
-                />
-                <Button
-                    title={"Confirm"}
+                    title={"Xác nhận"}
                     buttonStyle={styles.btnNext}
                     titleStyle={{
                         fontFamily: PRIMARY_FONT,

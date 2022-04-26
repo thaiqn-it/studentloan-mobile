@@ -23,7 +23,7 @@ const WithdrawMoney = ({ navigation, route }) => {
     const [money, setMoney] = useState(50000);
     const [ fee, setFee ] = useState(0)
     const [ wallet,setWallet ] = useState(0)
-    const [ email,setEmail ] = useState("sb-eqq2m14474872@personal.example.com")
+    const [ email,setEmail ] = useState("")
     const isFocused = useIsFocused();
     const [ transactionFee, setTransactionFee ] = useState(0)
     const [limit, setLimit] = useState([
@@ -116,7 +116,7 @@ const WithdrawMoney = ({ navigation, route }) => {
                 "Thất bại",
                 `Số dư ví không đủ để thực hiện.`,
                 [
-                    { text: "OK" }
+                    { text: "Xác nhận" }
                 ]
               );
         }

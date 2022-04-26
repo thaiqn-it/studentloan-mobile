@@ -29,7 +29,8 @@ export default function App() {
     config : {
         screens : {
           DetailPost : "detailPost/:id",
-          InvestmentDetail : "investmentDetail/:investmentId"
+          InvestmentDetail : "investmentDetail/:investmentId",
+          Verify : "verify"
        }
     },
     // getStateFromPath(path, config) {

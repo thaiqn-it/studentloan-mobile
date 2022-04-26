@@ -24,8 +24,10 @@ import { SimpleLineIcons } from '@expo/vector-icons';
 import { walletApi } from '../apis/wallet'
 import { vndFormat } from '../utils'
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppContext } from '../contexts/App';
 
 export default function Wallet({ route, navigation }) {
+  const { user } = useContext(AppContext);
   const [ account,setAccount ] = useState(0)
   const isFocused = useIsFocused();
 
@@ -42,17 +44,33 @@ export default function Wallet({ route, navigation }) {
       <View style={styles.topContainer}>
         <View style={styles.profileContainer}>
           <View style={{ flexDirection : 'row' }}>
-            <Avatar
-              rounded
-              size={55}
-              source={{
-                uri:
-                  'https://images.unsplash.com/photo-1612896488082-7271dc0ed30c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmVhdXRpZnVsJTIwZmFjZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80',
-              }}
-            />
-            <View style={{ alignSelf : 'center', marginLeft : 10}}>
-              <Text style={{ fontSize : 16 }}>Nguyen Quoc Thai</Text>
-              <Text style={{ fontSize : 16 }}>thai_dtm@yahoo.com.vn</Text>
+              {
+                user.profileUrl
+                ?
+                (
+                    <Avatar
+                        rounded
+                        size={50}
+                        source={{
+                            uri: user.profileUrl,
+                        }}
+                    />
+                )
+                :
+                (
+                    <Avatar
+                        rounded
+                        size={90}
+                        source={{
+                            uri: "https://i.pinimg.com/originals/51/f6/fb/51f6fb256629fc755b8870c801092942.png",
+                        }}
+                    />
+                )
+
+            }
+            <View style={{ alignSelf : 'center', marginLeft : 15}}>
+              <Text style={{ fontSize : 16 }}>{user.firstName + " " + user.lastName}</Text>
+              <Text style={{ fontSize : 16 }}>{user.email}</Text>
             </View>  
           </View>
         </View>

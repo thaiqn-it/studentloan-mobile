@@ -29,27 +29,27 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BackSelection({route, navigation}) {
   const [ wallet,setWallet ] = useState(null)
-  const [money, setMoney] = useState(50000);
+  const [money, setMoney] = useState(500000);
   const [limit, setLimit] = useState([
     {
       id: 1,
-      limitMoney: 50000,
-    },
-    {
-      id: 2,
-      limitMoney: 100000,
-    },
-    {
-      id: 3,
-      limitMoney: 200000,
-    },
-    {
-      id: 4,
       limitMoney: 500000,
     },
     {
-      id: 5,
+      id: 2,
       limitMoney: 1000000,
+    },
+    {
+      id: 3,
+      limitMoney: 2000000,
+    },
+    {
+      id: 4,
+      limitMoney: 5000000,
+    },
+    {
+      id: 5,
+      limitMoney: 10000000,
     },
     {
       id: 6,
@@ -66,7 +66,7 @@ export default function BackSelection({route, navigation}) {
         "Khoảng đầu tư vượt quá cho phép",
         `Số tiền đầu tư không thể vượt quá ${vndFormat.format(availableInvest)}`,
         [
-          { text: "OK" }
+          { text: "Xác nhận" }
         ]
       );
     } else {
@@ -75,30 +75,42 @@ export default function BackSelection({route, navigation}) {
   };
 
   const confirmInvestHandler = () => {
-    if (wallet?.money- wallet?.totalPending > parseInt(money)) {
-      investmentApi.create({
-        investorId : user.Investor.id,
-        total : money,
-        loanId : id,
-        percent : parseInt(money) / parseInt(total)
-      }).then(res => {
-        Alert.alert(
-          "Thành công",
-          "Bạn đã đầu tư thành công",
-          [
-            { text: "OK", onPress : () => navigation.navigate("InvestmentDetail", {
-              investmentId : res.data.id,
-              availableInvest
-            })}
-          ]
-        );
-      })
+    if (wallet?.money- wallet?.totalPending >= parseInt(money)) {
+      investmentApi.checkValidMoney(id,money).then(res => {
+        if (res.data.status) {
+          investmentApi.create({
+            investorId : user.Investor.id,
+            total : money,
+            loanId : id,
+            percent : parseInt(money) / parseInt(total)
+          }).then(res => {
+            Alert.alert(
+              "Thành công",
+              "Bạn đã đầu tư thành công",
+              [
+                { text: "Xác nhận", onPress : () => navigation.navigate("InvestmentDetail", {
+                  investmentId : res.data.id,
+                  availableInvest
+                })}
+              ]
+            );
+          })
+        } else {
+          Alert.alert(
+            "Thất bại",
+            `${res.data.message}`,
+            [
+                { text: "Xác nhận" }
+            ]
+          );
+        }
+      })     
     } else {
       Alert.alert(
         "Thất bại",
         `Số dư ví không đủ.`,
         [
-            { text: "OK" }
+            { text: "Xác nhận" }
         ]
       );
     }
@@ -177,8 +189,8 @@ export default function BackSelection({route, navigation}) {
                 buttonFontSize={35}
                 width={350}
                 height={60}
-                min={50000}
-                max={availableInvest}
+                min={500000}
+                max={wallet?.money - wallet?.totalPending}
                 step={50000}
                 value={money}
                 onChange={(value) => {
@@ -210,7 +222,7 @@ export default function BackSelection({route, navigation}) {
                 color: PRIMARY_COLOR,
               }}
             >
-              Khoảng đầu tư khả dụng : {vndFormat.format(availableInvest)}
+              Khoản đầu tư khả dụng : {vndFormat.format(availableInvest)}
             </Text>
           </View>
         <FlatList

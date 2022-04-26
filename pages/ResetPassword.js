@@ -7,48 +7,44 @@ import { Input } from 'react-native-elements';
 import { Button } from 'react-native-paper';
 import { userApi } from '../apis/user';
 
-export default function ChangePassword({ navigation }) {
-    const [ currPasw, setCurrPasw ] = useState('')
+export default function ResetPassword({ navigation, route }) {
     const [ newPasw, setNewPasw ] = useState('')
     const [ confirmPasw, setConfirmPasw ] = useState('')
 
     //error
-    const [ currPassError, setCurrPassError ] = useState('')
     const [ newPassError, setNewPassError ] = useState('')
     const [ confirmPassError, setConfirmPassError ] = useState('')
 
+    const { email } = route.params
+
     const changePassword = () => {
-        if (currPasw && newPasw && confirmPasw) {
+        if (newPasw && confirmPasw) {
             if ( newPasw === confirmPasw) {
                 const data = {
-                    password : currPasw,
-                    newPassword : newPasw
+                    newPassword : newPasw,
+                    email
                 }
-                userApi.changePassword(data).then(res => {
+                userApi.resetPassword(data).then(res => {
                     Alert.alert(
                         "Thành công",
                         "Đổi mật khẩu thành công",
                         [
-                          { text: "Xác nhận", onPress : () => navigation.navigate("HomeTab")}
+                          { text: "Xác nhận", onPress : () => navigation.navigate("Login")}
                         ]
                     );;
                 }).catch(err => {
-                    setCurrPassError("Mật khẩu hiện tại không đúng")
                     setNewPassError("")
                     setConfirmPassError("")
                 })
-                setCurrPassError("")
                 setNewPassError("")
                 setConfirmPassError("")
             } else { 
-                setCurrPassError("")
                 setNewPassError("Mật khẩu xác nhận không khớp với mật khẩu mới !")
                 setConfirmPassError("Mật khẩu xác nhận không khớp với mật khẩu mới !")         
             }
         } else {
             setNewPassError("Không thể để trống")
             setConfirmPassError("Không thể để trống") 
-            setCurrPassError("Không thể để trống")
         }
      
     }
@@ -70,20 +66,10 @@ export default function ChangePassword({ navigation }) {
                     color={"white"}
                 />     
             </TouchableOpacity>     
-            <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Đổi mật khẩu</Text>   
+            <Text style={{ fontSize : 20, color : PRIMARY_COLOR_WHITE, alignSelf : 'center'}}>Tạo mật khẩu mới</Text>   
             </View>
         </View>
         <View style={{ margin : 10, marginTop : 20 }}>
-            <Text style={styles.informationText}>Mật khẩu hiện tại :</Text>
-            <Input
-                value={currPasw}
-                onChangeText={setCurrPasw}
-                placeholder='Nhập mật khẩu hiện tại'
-                inputContainerStyle={{ borderBottomWidth : 0, height : 50 }}
-                containerStyle= {styles.input}
-                secureTextEntry={true}
-                errorMessage={currPassError}
-            />
             <Text style={styles.informationText}>Mật khẩu mới :</Text>
             <Input
                 value={newPasw}
@@ -108,7 +94,7 @@ export default function ChangePassword({ navigation }) {
                 style={[styles.btn]}
                 color={PRIMARY_COLOR}
                 onPress={() => changePassword()}
-                    >Đổi mật khẩu</Button> 
+                    >Xác nhận</Button> 
         </View>
         </SafeAreaView>
     )

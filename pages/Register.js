@@ -26,16 +26,16 @@ import { loadToken } from '../apis';
 import { JWT_TOKEN_KEY } from '../constants';
 
 export default function Register({ navigation, route }) {
-    const [email, setEmail] = useState("thai_dtm2@yahoo.com.vn");
+    const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
-    const [password,setPassword] = useState("123456")
-    const [confirmPassword,setConfirmPassword] = useState("123456")
+    const [password,setPassword] = useState("")
+    const [confirmPassword,setConfirmPassword] = useState("")
     const [showPassword,setShowPassword] = useState(false)
     const [showConfirmPassword,setShowConfirmPassword] = useState(false)
     const [isEmailDisabled,setIsEmailDisabled] = useState(false);
     const [isLoading,setIsLoading] = useState(false)
-    const [phone,setPhone] = useState("0945492733")
+    const [phone,setPhone] = useState("")
     const USER_TYPE = "INVESTOR"
 
     useEffect(() => {
@@ -54,7 +54,9 @@ export default function Register({ navigation, route }) {
             phoneNumber : phone,
             type : 'INVESTOR',
             password,
-            email
+            email,
+            firstName,
+            lastName
         })  
 
         const parent = await investorApi.create({                
@@ -119,7 +121,7 @@ export default function Register({ navigation, route }) {
                             onChangeText={setEmail}
                             value={email}
                             />
-                        {/* <Input
+                        <Input
                             style={ styles.text }
                             placeholder={"Họ"}
                             inputContainerStyle={styles.inputContainer}
@@ -132,7 +134,7 @@ export default function Register({ navigation, route }) {
                             inputContainerStyle={styles.inputContainer}
                             onChangeText={setLastName}
                             value={lastName}
-                        /> */}
+                        />
                         <Input
                             style={ styles.text }
                             secureTextEntry={!showPassword}
@@ -186,7 +188,7 @@ export default function Register({ navigation, route }) {
                                             alignSelf : 'center'
                                 }}
                                 >
-                                Back to login
+                                Trở lại trang đăng nhập
                             </Text>         
                         </TouchableOpacity>     
                     </KeyboardAvoidingView>

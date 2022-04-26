@@ -120,7 +120,7 @@ export default function Home({ route, navigation }) {
                   }}
                 />
                 <View style={{ marginLeft : 10 }}>
-                  <Text style={{ fontSize : 15 }}>{item.Student.User.lastname + ' ' + item.Student.User.firstname}</Text>
+                  <Text style={{ fontSize : 15 }}>{item.Student.User.firstname + ' ' + item.Student.User.lastname}</Text>
                   <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.Information.SchoolMajor.School.name}</Text>
                   <Text style={{ opacity : 0.5,fontSize : 13 }}>{item.Student.Information.SchoolMajor.Major.name}</Text>
                 </View>         
@@ -188,7 +188,7 @@ export default function Home({ route, navigation }) {
       return () => {
         setData([]); 
       };
-    }, [isFocused,page])
+    }, [page])
   
     return(
       <View>
