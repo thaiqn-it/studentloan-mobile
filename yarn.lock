@@ -5762,6 +5762,11 @@ react-native-country-picker-modal@^2.0.0:
     prop-types "15.7.2"
     react-async-hook "3.6.1"
 
+react-native-dialog@^9.2.1:
+  version "9.2.1"
+  resolved "https://registry.yarnpkg.com/react-native-dialog/-/react-native-dialog-9.2.1.tgz#21e12c8bf70df390963c1c4e697ce8d16055d4a4"
+  integrity sha512-UNnGFTpH0cX16cJZLFq9/TAZH1+B2vzJrQL1mUaSqZjV+sFTpUB1WvghJZxPwi52v587kJpfKN7oPfWaXAu+YQ==
+
 react-native-elements@^3.4.2:
   version "3.4.2"
   resolved "https://registry.npmjs.org/react-native-elements/-/react-native-elements-3.4.2.tgz"

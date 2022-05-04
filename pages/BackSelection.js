@@ -26,6 +26,9 @@ import { vndFormat } from "../utils";
 import { investmentApi } from "../apis/investment";
 import { walletApi } from "../apis/wallet";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Dialog from "react-native-dialog";
+import { loanApi } from "../apis/loan";
+import { notificationApi } from "../apis/notification";
 
 export default function BackSelection({route, navigation}) {
   const [ wallet,setWallet ] = useState(null)
@@ -94,6 +97,16 @@ export default function BackSelection({route, navigation}) {
                 })}
               ]
             );
+            loanApi.getById(id).then(async res => {
+              await notificationApi.create({
+                userId : res.data.loan.Student.User.id,
+                redirectUrl : `https://studentloanfpt.ddns.net/trang-chu/ho-so/xem/${res.data.loan.id}`,
+                description : "Nhà đầu tư đã đầu tư cho bạn.",
+                isRead : false,
+                type : 'LOAN',
+                status : 'ACTIVE'
+              })
+            })
           })
         } else {
           Alert.alert(

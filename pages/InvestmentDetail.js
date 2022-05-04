@@ -9,10 +9,13 @@ import { FontAwesome5,Feather,FontAwesome } from "@expo/vector-icons";
 import { vndFormat } from "../utils/index"
 import { investmentApi } from '../apis/investment';
 import { loanScheduleApi } from '../apis/loanSchedule';
+import { loanApi } from '../apis/loan';
+import { notificationApi } from '../apis/notification';
 import { Button } from 'react-native-paper';
 import moment from 'moment';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
+import { useIsFocused } from "@react-navigation/native";
 
 export default function InvestmentDetail({ navigation, route }) {
     const portfolloView = useRef(null)
@@ -22,6 +25,7 @@ export default function InvestmentDetail({ navigation, route }) {
     const calendarText= useRef(null)
     const reportText = useRef(null)
     const plate = useRef(null)
+    const isFocused = useIsFocused();
 
     const { investmentId,availableInvest } = route.params;
     const [ investment, setInvestment ] = useState(null)
@@ -36,7 +40,7 @@ export default function InvestmentDetail({ navigation, route }) {
                     setLoanSchedules(res.data)
                 })
             })
-    }, [])
+    }, [isFocused])
 
     useEffect(() => {  
           const subscription = Notifications.addNotificationReceivedListener(notification => {
@@ -75,7 +79,17 @@ export default function InvestmentDetail({ navigation, route }) {
     const cancelInvest = () => {
         investmentApi.updateById(investment.id, {
             status : 'CANCEL'
-        }).then(() => {
+        }).then(() => {     
+            loanApi.getById(investment.Loan.id).then(async res => {
+                await notificationApi.create({
+                userId : res.data.loan.Student.User.id,
+                redirectUrl : `https://studentloanfpt.ddns.net/trang-chu/ho-so/xem/${investment.Loan.id}`,
+                description : "Nhà đầu tư đã hủy đầu tư.",
+                isRead : false,
+                type : 'LOAN',
+                status : 'ACTIVE'
+                })
+            })    
             navigation.navigate("MyInvestment")
         })
     }

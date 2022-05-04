@@ -191,7 +191,6 @@ const WithdrawMoney = ({ navigation, route }) => {
                             buttonFontSize={35}
                             width={350}
                             height={60}
-                            children={<FontAwesome style={{ marginRight : 20 }} name="dollar" size={20} color="gray" />}
                             min={50000}
                             max={wallet?.money - wallet?.totalPending}
                             step={10000}

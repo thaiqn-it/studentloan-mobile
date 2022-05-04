@@ -203,7 +203,6 @@ export default function DepositMoney({ navigation, route }) {
                             buttonFontSize={35}
                             width={350}
                             height={60}
-                            children={<FontAwesome style={{ marginRight : 20 }} name="dollar" size={20} color="gray" />}
                             min={50000}
                             step={10000}
                             value={money}

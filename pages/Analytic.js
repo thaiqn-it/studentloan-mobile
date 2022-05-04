@@ -161,21 +161,21 @@ export default function Analytic({ navigation, route }) {
                         <View style={{ flexDirection : 'row', alignItems : 'center' }}>
                             <View style={{ width : 20, height : 20, borderRadius : 20, backgroundColor : PRIMARY_COLOR }}/>
                             <View style={{ marginLeft : 10 }}>
-                                <Text style={{ fontWeight : 'bold' }}>{(analytics?.loanOngoing / (analytics?.total ? analytics?.total : 0)).toFixed(4) * 100}%</Text>
+                                <Text style={{ fontWeight : 'bold' }}>{(analytics?.loanOngoing / (analytics?.total ? analytics?.total : 0)).toFixed(3) * 100}%</Text>
                                 <Text style={{ fontWeight : 'bold', opacity : 0.4 }}>Đang tiến hành</Text>
                             </View>        
                         </View>  
                         <View style={{ flexDirection : 'row', alignItems : 'center', marginTop : 15 }}>
                             <View style={{ width : 20, height : 20, borderRadius : 20, backgroundColor : SECONDARY_COLOR }}/>
                             <View style={{ marginLeft : 10 }}>
-                                <Text style={{ fontWeight : 'bold' }}>{(analytics?.loanFinish / (analytics?.total ? analytics?.total : 0)).toFixed(4) * 100}%</Text>
+                                <Text style={{ fontWeight : 'bold' }}>{(analytics?.loanFinish / (analytics?.total ? analytics?.total : 0)).toFixed(3) * 100}%</Text>
                                 <Text style={{ fontWeight : 'bold', opacity : 0.4 }}>Hoàn thành</Text>
                             </View>        
                         </View>  
                         <View style={{ flexDirection : 'row', alignItems : 'center', marginTop : 15 }}>
                             <View style={{ width : 20, height : 20, borderRadius : 20, backgroundColor : "#E6E7E8" }}/>
                             <View style={{ marginLeft : 10 }}>
-                                <Text style={{ fontWeight : 'bold' }}>{(analytics?.pending / (analytics?.total ? analytics?.total : 0)).toFixed(4) * 100}%</Text>
+                                <Text style={{ fontWeight : 'bold' }}>{(analytics?.pending / (analytics?.total ? analytics?.total : 0)).toFixed(3) * 100}%</Text>
                                 <Text  style={{ fontWeight : 'bold', opacity : 0.4 }}>Đang chờ</Text>
                             </View>        
                         </View>           

@@ -81,7 +81,7 @@ export default function Home({ route, navigation }) {
     relativeTime : {
         future: "trong %s",
         past: "%s trước",
-        s  : 'vài giây trước',
+        s  : 'vài giây',
         ss : '%d giây',
         m:  "1 phút",
         mm: "%d phút",

@@ -44,6 +44,7 @@
     "react-native-canvas": "^0.1.38",
     "react-native-chart-kit": "^6.12.0",
     "react-native-confirmation-code-field": "^7.1.0",
+    "react-native-dialog": "^9.2.1",
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-gifted-charts": "^1.0.16",

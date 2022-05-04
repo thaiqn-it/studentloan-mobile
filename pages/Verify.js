@@ -4,7 +4,7 @@ import { FULL_HEIGHT, FULL_WIDTH, PRIMARY_COLOR, PRIMARY_COLOR_WHITE,PRIMARY_COL
 import HeaderBar from '../components/HeaderBar';
 import * as Animatable from 'react-native-animatable';
 import * as ImagePicker from 'expo-image-picker';
-import { Button } from 'react-native-paper';
+import { ActivityIndicator, Button } from 'react-native-paper';
 import { Overlay,Input } from 'react-native-elements';
 import { Feather,Ionicons,FontAwesome5,Fontisto } from '@expo/vector-icons';
 import { AppContext } from '../contexts/App';
@@ -14,6 +14,9 @@ import getEnvVars from '../constants/env';
 import { investorApi } from '../apis/investor';
 import AppLoading from '../components/AppLoading'
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { notificationApi } from '../apis/notification';
+import { userApi } from '../apis/user';
+import * as Notifications from 'expo-notifications';
 
 export default function Verify({ navigation }) {
     const { user, setUser, getUser } = useContext(AppContext);
@@ -23,6 +26,8 @@ export default function Verify({ navigation }) {
     const [frontCard,setFrontCard] = useState(null)
     const [backCard,setBackCard] = useState(null)
     const [isLoading,setIsLoading] = useState(false)
+
+    const [userStatus,setUserStatus] = useState('')
 
     const view1 = useRef(null)
     const view2 = useRef(null)
@@ -34,9 +39,21 @@ export default function Verify({ navigation }) {
             type: "LOAD",
             data,
           });
-        }
+          setUserStatus(data.status)
+        }       
         load();
       };
+
+    useEffect(() => {
+      loadUser()
+    }, [])
+     
+    useEffect(() => {  
+        const subscription = Notifications.addNotificationReceivedListener(notification => {
+            loadUser()
+        });
+        return () => subscription.remove();
+    }, [])
 
     const openCamera = async () => {
         hideModal()
@@ -93,7 +110,7 @@ export default function Verify({ navigation }) {
                             frontCard !== null 
                             ? 
                             (
-                                <Image source={{ uri : frontCard.uri }} style={{ height : 180 , width : 100 }} />   
+                                <Image source={{ uri : frontCard.uri }} style={{ height : 220 , width : 310,borderRadius : 20 }} />   
                             )
                             :
                             (
@@ -111,7 +128,7 @@ export default function Verify({ navigation }) {
                             backCard !== null 
                             ? 
                             (
-                                <Image source={{ uri : backCard.uri }} style={{ height : 180 , width : 100 }} />   
+                                <Image source={{ uri : backCard.uri }} style={{ height : 220 , width : 310,borderRadius : 20  }} />   
                             )
                             :
                             (
@@ -122,7 +139,7 @@ export default function Verify({ navigation }) {
                     <Text style={{ fontSize : 15 ,alignSelf : 'center', marginTop : 5}}>Mặt sau</Text> 
                     <View style={{ alignSelf : 'flex-end', justifyContent : 'flex-end', flex : 1, margin : 10, marginBottom : 20}}>                      
                         <Button
-                            // disabled={(frontCard === null || backCard === null) ? true : false}
+                            disabled={(frontCard === null || backCard === null) ? true : false}
                             style={styles.buttonClick}
                             color={PRIMARY_COLOR}
                             onPress={() => {
@@ -136,9 +153,9 @@ export default function Verify({ navigation }) {
     }
 
     const InformationView = () => {
-        const [citizenId,setCitizedId] = useState('1111')
+        const [citizenId,setCitizedId] = useState('')
         const [citizenCardCreatedDate,setCitizenCardCreatedDate] = useState(new Date())
-        const [citizenCardCreatedPlace,setCitizenCardCreatedPlace] = useState('dddd')
+        const [citizenCardCreatedPlace,setCitizenCardCreatedPlace] = useState('')
         const [datePicker, setDatePicker] = useState(false);
 
         const hideDatePicker = () => {
@@ -222,6 +239,20 @@ export default function Verify({ navigation }) {
                     backCitizenCardImageUrl : backCard
                 }
                 await investorApi.update(data)
+
+                const adminRes = await userApi.getAllAdmin()
+                const admins = adminRes.data
+                admins.forEach(async item => {
+                    await notificationApi.create({
+                        userId : item.id,
+                        redirectUrl : `/dashboard/investor/${user.id}`,
+                        description : "Người dùng gửi thông tin xác thực.",
+                        isRead : false,
+                        type : 'USER',
+                        status : 'ACTIVE'
+                    })
+                })          
+                
             } catch (error) {
                 console.log(error);
             } finally{
@@ -299,7 +330,7 @@ export default function Verify({ navigation }) {
                                 }}
                             >Trước</Button> 
                             <Button
-                                disabled={(citizenId === null || citizenCardCreatedPlace === null) ? true : false}
+                                disabled={(citizenId === null || citizenCardCreatedPlace === null || citizenId === '' || citizenCardCreatedPlace === '') ? true : false}
                                 style={[styles.buttonClick, { margin : 10 }]}
                                 color={PRIMARY_COLOR}
                                 onPress={() => {
@@ -315,6 +346,13 @@ export default function Verify({ navigation }) {
         <View style={{ justifyContent : 'center', flex : 1,alignItems : 'center' }}>
             <Image source={require('../assets/verified.png')} style={{ height : FULL_HEIGHT / 2.5, width : FULL_WIDTH / 1.3  }}/>
             <Text style={{ fontWeight : 'bold', fontSize : 18, textAlign : 'center', marginTop : 30 }}>Thông tin của bạn đã được xác thực thành công.</Text>
+        </View>
+    )
+
+    const BanView = () => (
+        <View style={{ justifyContent : 'center', flex : 1,alignItems : 'center' }}>
+            <Image source={require('../assets/banned.png')} style={{ height : FULL_HEIGHT / 2.5, width : FULL_WIDTH / 1.3  }}/>
+            <Text style={{ fontWeight : 'bold', fontSize : 18, textAlign : 'center', marginTop : 30 }}>Tài khoản của bạn dã vị chặn. Vui lòng liên hệ với quản trị viên để biết thêm chi tiết.</Text>
         </View>
     )
 
@@ -347,7 +385,7 @@ export default function Verify({ navigation }) {
                 </View>
                 <ModalPicker />
             {
-                user.status === 'UNVERIFIED'
+                userStatus === 'UNVERIFIED'
                 ?
                 (
                     <View style={{ flexDirection : 'row' }}>         
@@ -357,15 +395,31 @@ export default function Verify({ navigation }) {
                 )
                 :
                 (    
-                    user.status === 'PENDING'
+                    userStatus === 'PENDING'
                     ?
                     (
                         <PendingView />
                     )
-                    :          
+                    :
                     (
-                        <VerifyView />
-                    )  
+                        userStatus === "BAN"
+                        ?
+                        (
+                            <BanView />
+                        )
+                        :
+                        (
+                            userStatus === "VERIFIED"
+                            ?
+                            (
+                                <VerifyView />
+                            )
+                            :
+                            (
+                                <ActivityIndicator color={PRIMARY_COLOR} size="large"/>
+                            )               
+                        )  
+                    )                       
                 )
             }            
         </SafeAreaView>

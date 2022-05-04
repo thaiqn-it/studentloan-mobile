@@ -811,7 +811,7 @@ export default function DetailPost({ navigation,route }) {
                                   ref={playerRef}
                                   height={FULL_HEIGHT / 3}
                                   width={FULL_WIDTH}
-                                  videoId={'AVAc1gYLZK0'}
+                                  videoId={item.imageUrl}
                                 />
                               )
                             }
@@ -907,13 +907,23 @@ export default function DetailPost({ navigation,route }) {
                     total : post.loan.totalMoney
                   })
                 } else {
-                  Alert.alert(
-                    "Thất bại",
-                    `Bạn phải xác thực tài khoản để có thể đầu tư.`,
-                    [
-                        { text: "Xác nhận" }
-                    ]
-                  );
+                  if (user.status === 'BAN') {
+                    Alert.alert(
+                      "Thất bại",
+                      `Tài khoản của bạn đã bị chặn. Xin vui lòng liên hệ với người quản trị.`,
+                      [
+                          { text: "Xác nhận" }
+                      ]
+                    );
+                  } else {
+                    Alert.alert(
+                      "Thất bại",
+                      `Bạn phải xác thực tài khoản để có thể đầu tư.`,
+                      [
+                          { text: "Xác nhận" }
+                      ]
+                    );
+                  }             
                 }      
               }}
                 >Đầu tư</Button> 

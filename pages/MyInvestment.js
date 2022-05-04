@@ -98,7 +98,7 @@ export default function MyInvestment({ navigation }) {
                 renderItem={_renderItem}
                 keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom : 120, marginTop : 10 }}
+                contentContainerStyle={{ paddingBottom : 30, marginTop : 10 }}
             />
         </SafeAreaView>
     )

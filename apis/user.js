@@ -55,6 +55,10 @@ const getProfile = () => {
   return defaultInstance.get('/user/investor/me')
 }
 
+const getAllAdmin = () => {
+  return defaultInstance.get('/user/admin/all')
+}
+
 const update = (data) => {
   return defaultInstance.put('/user', data)
 }
@@ -86,6 +90,7 @@ export const userApi = {
     update,
     changePassword,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    getAllAdmin
 };
   

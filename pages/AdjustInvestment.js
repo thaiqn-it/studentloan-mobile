@@ -26,6 +26,8 @@ import { vndFormat } from "../utils";
 import { investmentApi } from "../apis/investment";
 import { walletApi } from "../apis/wallet";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { loanApi } from "../apis/loan";
+import { notificationApi } from "../apis/notification";
 
 export default function AdjustInvestment({ navigation,route }) {
     const [money, setMoney] = useState(500000);
@@ -82,6 +84,18 @@ export default function AdjustInvestment({ navigation,route }) {
                     { text: "Xác nhận" }
                   ]
                 );
+                investmentApi.getOneById(investmentId).then(res => {     
+                  loanApi.getById(res.data.Loan.id).then(async res => {
+                    await notificationApi.create({
+                      userId : res.data.loan.Student.User.id,
+                      redirectUrl : `https://studentloanfpt.ddns.net/trang-chu/ho-so/xem/${res.data.loan.id}`,
+                      description : "Nhà đầu tư đã chỉnh sửa mức đầu tư.",
+                      isRead : false,
+                      type : 'LOAN',
+                      status : 'ACTIVE'
+                    })
+                  })
+                })               
               })
           } else {
             Alert.alert(
